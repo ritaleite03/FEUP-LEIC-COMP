@@ -27,9 +27,6 @@ RBRACKETS: ']';
 
 // Words
 CLASS: 'class';
-INT: 'int';
-BOOLEAN: 'boolean';
-STRING: 'String';
 PUBLIC: 'public';
 RETURN: 'return';
 IMPORT: 'import';
@@ -49,25 +46,20 @@ program: (importDecl)* classDecl EOF;
 importDecl: IMPORT ID (POINT ID)* SEMI # Import;
 
 classDecl:
-	CLASS name = ID (EXTENDS ID)? LCURLY varDecl* methodDecl* RCURLY;
+	CLASS name = ID (EXTENDS superr=ID)? LCURLY varDecl* methodDecl* RCURLY;
 
 varDecl: type name = ID SEMI;
 
-type:
-	name = INT
-	| INT LBRACKETS RBRACKETS
-	| INT '...'
-	| BOOLEAN
-	| STRING
-	| ID;
+type
+    locals[boolean isArray=false]:
+	name = ID (LBRACKETS RBRACKETS {$isArray=true;})?
+	| name = ID '...';
 
 methodDecl
 	locals[boolean isPublic=false]:
-	(PUBLIC {$isPublic=true;})? type name = ID LPAREN (
+	(PUBLIC {$isPublic=true;})? 'static'? type name = ID LPAREN (
 		param (COL param)*
-	)? RPAREN LCURLY varDecl* stmt* RCURLY
-	| (PUBLIC {$isPublic=true;})? 'static' 'void' 'main' LPAREN STRING LBRACKETS RBRACKETS ID RPAREN
-		LCURLY varDecl* stmt* RCURLY;
+	)? RPAREN LCURLY varDecl* stmt* RCURLY;
 
 param: type name = ID;
 
@@ -79,7 +71,7 @@ expr:
 	| expr LBRACKETS expr RBRACKETS						# ArrayDeclExpr
 	| expr POINT LENGTH									# FuncExpr
 	| expr POINT ID LPAREN (expr (COL expr)*)? RPAREN	# FuncExpr
-	| NEW INT LBRACKETS expr RBRACKETS					# AssignExpr
+	| NEW ID LBRACKETS expr RBRACKETS					# AssignExpr
 	| NEW ID LPAREN RPAREN								# FuncExpr
 	| LPAREN expr RPAREN								# Array
 	| LBRACKETS (expr (COL expr)*)? RBRACKETS			# Array
