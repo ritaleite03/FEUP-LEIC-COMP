@@ -41,17 +41,15 @@ ELSE: 'else';
 NEW: 'new';
 
 INTEGER: [0-9]+;
-ALNUM: [a-zA-Z0-9_];
-ID: [a-zA-Z_] ALNUM*;
-CLASS_NAME: [A-Z]ALNUM*;
+ID: [a-zA-Z]+ [0-9]*;
 WS: [ \t\n\r\f]+ -> skip;
 
 program: (importDecl)* classDecl EOF;
 
-importDecl: IMPORT ID (POINT ID)* SEMI # Import;
+importDecl: IMPORT ID (POINT ID)* # Import;
 
 classDecl:
-	CLASS name = CLASS_NAME (EXTENDS CLASS_NAME)? LCURLY varDecl* methodDecl* RCURLY;
+	CLASS name = ID (EXTENDS ID)? LCURLY varDecl* methodDecl* RCURLY;
 
 varDecl: type name = ID SEMI;
 
@@ -74,7 +72,7 @@ methodDecl
 param: type name = ID;
 
 expr:
-	op = NEG expr										# UnaryExpr
+	op = NEG expr										# BinaryExpr
 	| expr op = (DIV | MUL) expr						# BinaryExpr
 	| expr op = (SUB | ADD) expr						# BinaryExpr
 	| expr op = (LOGICAL | RELACIONAL) expr				# BinaryExpr
