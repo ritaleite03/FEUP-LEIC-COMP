@@ -9,6 +9,7 @@ import java.util.Set;
 public enum Kind {
     PROGRAM,
     CLASS_DECL,
+    IMPORT,
     VAR_DECL,
     TYPE,
     METHOD_DECL,
