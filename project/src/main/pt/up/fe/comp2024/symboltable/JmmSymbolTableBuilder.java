@@ -8,10 +8,7 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
@@ -19,8 +16,18 @@ public class JmmSymbolTableBuilder {
 
     public static JmmSymbolTable build(JmmNode root) {
 
-        var classDecl = root.getChildren(Kind.CLASS_DECL).get(0);
-        SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
+        List<String> importsList = new ArrayList<>();
+        JmmNode classDecl = root.getJmmChild(0);;
+
+        for (JmmNode child : root.getChildren()) {
+            if (Kind.IMPORT.check(child)) {
+                importsList.add(child.get("name"));
+            } else if (Kind.CLASS_DECL.check(child)) {
+                classDecl = child;
+                break;
+            }
+        }
+
         String className = classDecl.get("name");
 
         var methods = buildMethods(classDecl);
@@ -29,7 +36,7 @@ public class JmmSymbolTableBuilder {
         var locals = buildLocals(classDecl);
         var fields = buildFields(classDecl);
 
-        return new JmmSymbolTable(className, classDecl.getOptional("superr").orElse(null), methods, returnTypes, params, locals, fields);
+        return new JmmSymbolTable(importsList,className, classDecl.getOptional("superr").orElse(null), methods, returnTypes, params, locals, fields);
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
