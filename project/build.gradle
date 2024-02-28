@@ -48,6 +48,7 @@ sourceSets {
     main {
         java {
             srcDir 'src/main'
+            srcDir 'build/generated-src/antlr'
         }
     }
 
@@ -71,4 +72,8 @@ application {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+generateGrammarSource {
+    outputDirectory = new File("${project.buildDir}/generated-src/antlr/pt/up/fe".toString())
 }

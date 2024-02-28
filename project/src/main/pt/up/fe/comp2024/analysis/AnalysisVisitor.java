@@ -28,7 +28,6 @@ public abstract class AnalysisVisitor extends PreorderJmmVisitor<SymbolTable, Vo
         return reports;
     }
 
-
     @Override
     public List<Report> analyze(JmmNode root, SymbolTable table) {
         // Visit the node

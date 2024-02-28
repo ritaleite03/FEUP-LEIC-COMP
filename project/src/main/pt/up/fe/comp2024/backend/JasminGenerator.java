@@ -64,7 +64,6 @@ public class JasminGenerator {
         return code;
     }
 
-
     private String generateClassUnit(ClassUnit classUnit) {
 
         var code = new StringBuilder();
@@ -103,7 +102,6 @@ public class JasminGenerator {
         return code.toString();
     }
 
-
     private String generateMethod(Method method) {
 
         // set method
@@ -112,9 +110,9 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         // calculate modifier
-        var modifier = method.getMethodAccessModifier() != AccessModifier.DEFAULT ?
-                method.getMethodAccessModifier().name().toLowerCase() + " " :
-                "";
+        var modifier = method.getMethodAccessModifier() != AccessModifier.DEFAULT
+                ? method.getMethodAccessModifier().name().toLowerCase() + " "
+                : "";
 
         var methodName = method.getMethodName();
 

@@ -18,17 +18,14 @@ import pt.up.fe.comp.TestUtils;
 
 public class GrammarTest {
 
-
     private static final String INSTANCE_METHOD = "methodDecl";
     private static final String STATEMENT = "stmt";
     private static final String EXPRESSION = "expr";
-
 
     @Test
     public void testClass() {
         TestUtils.parseVerbose("class Foo {}");
     }
-
 
     @Test
     public void testInstanceMethodEmpty() {
@@ -56,7 +53,6 @@ public class GrammarTest {
         TestUtils.parseVerbose("2 * 3", EXPRESSION);
     }
 
-
     @Test
     public void testExprMultAddChain() {
         TestUtils.parseVerbose("1 * 2 + 3 * 4", EXPRESSION);
@@ -66,6 +62,5 @@ public class GrammarTest {
     public void testExprAdd() {
         TestUtils.parseVerbose("2 + 3", EXPRESSION);
     }
-
 
 }

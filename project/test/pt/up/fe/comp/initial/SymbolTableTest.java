@@ -13,42 +13,38 @@ import static org.junit.Assert.assertEquals;
 public class SymbolTableTest {
 
     static JmmSemanticsResult getSemanticsResult(String filename) {
-        return TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/initial/symboltable/"+filename));
+        return TestUtils.analyse(SpecsIo.getResource("pt/up/fe/comp/initial/symboltable/" + filename));
     }
-    
-    static JmmSemanticsResult test(String filename, boolean fail) {
-    	var semantics = getSemanticsResult(filename);
-    	if(fail) {
-    		TestUtils.mustFail(semantics.getReports());
-    	}else 	{
-       	 	TestUtils.noErrors(semantics.getReports());
-    	}
-    	return semantics;
-    }
-    
 
-    
+    static JmmSemanticsResult test(String filename, boolean fail) {
+        var semantics = getSemanticsResult(filename);
+        if (fail) {
+            TestUtils.mustFail(semantics.getReports());
+        } else {
+            TestUtils.noErrors(semantics.getReports());
+        }
+        return semantics;
+    }
+
     @Test
     public void Class() {
-    	var semantics = test("Class.jmm",false);
-    	assertEquals("Class", semantics.getSymbolTable().getClassName());
+        var semantics = test("Class.jmm", false);
+        assertEquals("Class", semantics.getSymbolTable().getClassName());
     }
-    
 
-    
     @Test
-    public void Methods() {		
-    	var semantics = test("Methods.jmm",false);
-    	var st = semantics.getSymbolTable();
-    	var methods = st.getMethods();
-    	assertEquals(1, methods.size());
+    public void Methods() {
+        var semantics = test("Methods.jmm", false);
+        var st = semantics.getSymbolTable();
+        var methods = st.getMethods();
+        assertEquals(1, methods.size());
 
-		var method = methods.get(0);
-		var ret = st.getReturnType(method);
-		assertEquals("Method with return type int", "int", ret.getName());
+        var method = methods.get(0);
+        var ret = st.getReturnType(method);
+        assertEquals("Method with return type int", "int", ret.getName());
 
-		var numParameters = st.getParameters(method).size();
-		assertEquals("Method "+method+" parameters",1,numParameters);
+        var numParameters = st.getParameters(method).size();
+        assertEquals("Method " + method + " parameters", 1, numParameters);
     }
 
 }

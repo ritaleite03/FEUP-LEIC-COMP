@@ -42,16 +42,14 @@ public class TypeUtils {
         return switch (operator) {
             case "+", "*" -> new Type(INT_TYPE_NAME, false);
             default ->
-                    throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
+                throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
         };
     }
-
 
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
         // TODO: Simple implementation that needs to be expanded
         return new Type(INT_TYPE_NAME, false);
     }
-
 
     /**
      * @param sourceType

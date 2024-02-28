@@ -15,7 +15,6 @@ import java.util.List;
 
 public class JmmAnalysisImpl implements JmmAnalysis {
 
-
     private final List<AnalysisPass> analysisPasses;
 
     public JmmAnalysisImpl() {
@@ -43,8 +42,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                         -1,
                         -1,
                         "Problem while executing analysis pass '" + analysisPass.getClass() + "'",
-                        e)
-                );
+                        e));
             }
 
         }
