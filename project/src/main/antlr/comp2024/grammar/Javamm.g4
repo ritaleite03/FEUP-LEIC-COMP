@@ -72,7 +72,7 @@ mainDecl: (PUBLIC)? 'static' 'void' 'main' LPAREN STRING LBRACKETS RBRACKETS ID 
 param: type name = ID;
 
 expr:
-	op = NEG expr										# BinaryExpr
+	op = NEG expr										# UnaryExpr
 	| expr op = (DIV | MUL) expr						# BinaryExpr
 	| expr op = (SUB | ADD) expr						# BinaryExpr
 	| expr op = (LOGICAL | RELACIONAL) expr				# BinaryExpr
