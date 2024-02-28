@@ -41,15 +41,17 @@ ELSE: 'else';
 NEW: 'new';
 
 INTEGER: [0-9]+;
-ID: [a-zA-Z]+ [0-9]*;
+ALNUM: [a-zA-Z0-9_];
+ID: [a-zA-Z_] ALNUM*;
+CLASS_NAME: [A-Z]ALNUM*;
 WS: [ \t\n\r\f]+ -> skip;
 
-program: classDecl EOF;
+program: (importDecl)* classDecl EOF;
 
-importDecl: IMPORT ID # Import;
+importDecl: IMPORT ID (POINT ID)* SEMI # Import;
 
 classDecl:
-	CLASS name = ID (EXTENDS ID)? LCURLY varDecl* methodDecl* RCURLY;
+	CLASS name = CLASS_NAME (EXTENDS CLASS_NAME)? LCURLY varDecl* methodDecl* RCURLY;
 
 varDecl: type name = ID SEMI;
 
@@ -62,12 +64,12 @@ type:
 	| ID;
 
 methodDecl
-	locals[boolean isPublic=false]: (PUBLIC {$isPublic=true;})? type name = ID LPAREN (
+	locals[boolean isPublic=false]:
+	(PUBLIC {$isPublic=true;})? type name = ID LPAREN (
 		param (COL param)*
-	)? RPAREN LCURLY varDecl* stmt* RCURLY;
-
-mainDecl: (PUBLIC)? 'static' 'void' 'main' LPAREN STRING LBRACKETS RBRACKETS ID RPAREN LCURLY
-		varDecl* stmt* RCURLY;
+	)? RPAREN LCURLY varDecl* stmt* RCURLY
+	| (PUBLIC {$isPublic=true;})? 'static' 'void' 'main' LPAREN STRING LBRACKETS RBRACKETS ID RPAREN
+		LCURLY varDecl* stmt* RCURLY;
 
 param: type name = ID;
 
