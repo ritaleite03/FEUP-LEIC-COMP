@@ -46,7 +46,7 @@ WS: [ \t\n\r\f]+ -> skip;
 
 program: (importDecl)* classDecl EOF;
 
-importDecl: IMPORT ID (POINT ID)* # Import;
+importDecl: IMPORT ID (POINT ID)* SEMI # Import;
 
 classDecl:
 	CLASS name = ID (EXTENDS ID)? LCURLY varDecl* methodDecl* RCURLY;
