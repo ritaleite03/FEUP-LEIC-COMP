@@ -14,15 +14,16 @@ public class JmmSymbolTable implements SymbolTable {
 
     private final String className;
     private final List<String> methods;
+    @SuppressWarnings("unused")
     private final Map<String, Type> returnTypes;
     private final Map<String, List<Symbol>> params;
     private final Map<String, List<Symbol>> locals;
 
     public JmmSymbolTable(String className,
-                          List<String> methods,
-                          Map<String, Type> returnTypes,
-                          Map<String, List<Symbol>> params,
-                          Map<String, List<Symbol>> locals) {
+            List<String> methods,
+            Map<String, Type> returnTypes,
+            Map<String, List<Symbol>> params,
+            Map<String, List<Symbol>> locals) {
         this.className = className;
         this.methods = methods;
         this.returnTypes = returnTypes;
@@ -32,7 +33,7 @@ public class JmmSymbolTable implements SymbolTable {
 
     @Override
     public List<String> getImports() {
-        throw new NotImplementedException();
+        throw new NotImplementedException(this);
     }
 
     @Override
@@ -42,12 +43,12 @@ public class JmmSymbolTable implements SymbolTable {
 
     @Override
     public String getSuper() {
-        throw new NotImplementedException();
+        throw new NotImplementedException(this);
     }
 
     @Override
     public List<Symbol> getFields() {
-        throw new NotImplementedException();
+        throw new NotImplementedException(this);
     }
 
     @Override

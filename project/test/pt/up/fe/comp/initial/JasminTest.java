@@ -20,7 +20,6 @@ public class JasminTest {
         testOllirToJasmin("pt/up/fe/comp/initial/jasmin/OllirToJasminArithmetics.ollir");
     }
 
-
     public static void testOllirToJasmin(String resource, String expectedOutput) {
         // If AstToJasmin pipeline, do not execute test
         if (TestUtils.hasAstToJasminClass()) {

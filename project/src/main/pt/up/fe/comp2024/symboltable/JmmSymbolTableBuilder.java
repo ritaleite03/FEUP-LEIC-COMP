@@ -17,7 +17,6 @@ import static pt.up.fe.comp2024.ast.Kind.VAR_DECL;
 
 public class JmmSymbolTableBuilder {
 
-
     public static JmmSymbolTable build(JmmNode root) {
 
         var classDecl = root.getJmmChild(0);
@@ -51,7 +50,8 @@ public class JmmSymbolTableBuilder {
         var intType = new Type(TypeUtils.getIntTypeName(), false);
 
         classDecl.getChildren(METHOD_DECL).stream()
-                .forEach(method -> map.put(method.get("name"), Arrays.asList(new Symbol(intType, method.getJmmChild(1).get("name")))));
+                .forEach(method -> map.put(method.get("name"),
+                        Arrays.asList(new Symbol(intType, method.getJmmChild(1).get("name")))));
 
         return map;
     }
@@ -60,7 +60,6 @@ public class JmmSymbolTableBuilder {
         // TODO: Simple implementation that needs to be expanded
 
         Map<String, List<Symbol>> map = new HashMap<>();
-
 
         classDecl.getChildren(METHOD_DECL).stream()
                 .forEach(method -> map.put(method.get("name"), getLocalsList(method)));
@@ -74,7 +73,6 @@ public class JmmSymbolTableBuilder {
                 .map(method -> method.get("name"))
                 .toList();
     }
-
 
     private static List<Symbol> getLocalsList(JmmNode methodDecl) {
         // TODO: Simple implementation that needs to be expanded

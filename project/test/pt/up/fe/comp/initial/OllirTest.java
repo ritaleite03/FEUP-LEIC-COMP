@@ -12,7 +12,6 @@ import static org.junit.Assert.*;
 
 public class OllirTest {
 
-
     @Test
     public void compileBasic() {
         testJmmCompilation("pt/up/fe/comp/initial/ollir/CompileBasic.jmm", this::compileBasic);
@@ -121,7 +120,6 @@ public class OllirTest {
         assertTrue("Could not find a return instruction in method " + methodName, retInst.isPresent());
 
     }
-
 
     public void compileAssignment(ClassUnit classUnit) {
         // Test name of the class

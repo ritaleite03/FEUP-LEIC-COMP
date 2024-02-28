@@ -21,7 +21,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final String L_BRACKET = " {\n";
     private final String R_BRACKET = "}\n";
 
-
     private final SymbolTable table;
 
     private final OllirExprGeneratorVisitor exprVisitor;
@@ -30,7 +29,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         this.table = table;
         exprVisitor = new OllirExprGeneratorVisitor(table);
     }
-
 
     @Override
     protected void buildVisitor() {
@@ -44,7 +42,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         setDefaultVisit(this::defaultVisit);
     }
-
 
     private String visitAssignStmt(JmmNode node, Void unused) {
 
@@ -62,7 +59,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         Type thisType = TypeUtils.getExprType(node.getJmmChild(0), table);
         String typeString = OptUtils.toOllirType(thisType);
 
-
         code.append(lhs.getCode());
         code.append(SPACE);
 
@@ -76,7 +72,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         return code.toString();
     }
-
 
     private String visitReturn(JmmNode node, Void unused) {
 
@@ -103,7 +98,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
-
     private String visitParam(JmmNode node, Void unused) {
 
         var typeCode = OptUtils.toOllirType(node.getJmmChild(0));
@@ -113,7 +107,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         return code;
     }
-
 
     private String visitMethodDecl(JmmNode node, Void unused) {
 
@@ -138,7 +131,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(retType);
         code.append(L_BRACKET);
 
-
         // rest of its children stmts
         var afterParam = 2;
         for (int i = afterParam; i < node.getNumChildren(); i++) {
@@ -152,7 +144,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         return code.toString();
     }
-
 
     private String visitClass(JmmNode node, Void unused) {
 
@@ -187,7 +178,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 "invokespecial(this, \"<init>\").V;\n" +
                 "}\n";
     }
-
 
     private String visitProgram(JmmNode node, Void unused) {
 

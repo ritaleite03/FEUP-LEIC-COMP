@@ -7,7 +7,6 @@ import pt.up.fe.specs.util.SpecsIo;
 
 import static org.junit.Assert.assertEquals;
 
-
 public class SemanticAnalysisTest {
 
     @Test
@@ -19,6 +18,5 @@ public class SemanticAnalysisTest {
 
         System.out.println(result.getReports());
     }
-
 
 }

@@ -24,5 +24,4 @@ public class NodeUtils {
         return Boolean.parseBoolean(line);
     }
 
-
 }

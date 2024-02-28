@@ -20,7 +20,7 @@ public class JmmOptimizationImpl implements JmmOptimization {
     @Override
     public OllirResult optimize(OllirResult ollirResult) {
 
-        //TODO: Do your OLLIR-based optimizations here
+        // TODO: Do your OLLIR-based optimizations here
 
         return ollirResult;
     }

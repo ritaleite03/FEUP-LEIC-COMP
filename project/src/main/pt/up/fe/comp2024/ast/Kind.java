@@ -19,7 +19,6 @@ public enum Kind {
     INTEGER_LITERAL,
     VAR_REF_EXPR;
 
-
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);
     private static final Set<Kind> EXPRESSIONS = Set.of(BINARY_EXPR, INTEGER_LITERAL, VAR_REF_EXPR);
 
@@ -89,7 +88,8 @@ public enum Kind {
     }
 
     /**
-     * Performs a check on all kinds to test and returns false if none matches. Otherwise, returns true.
+     * Performs a check on all kinds to test and returns false if none matches.
+     * Otherwise, returns true.
      *
      * @param node
      * @param kindsToTest
@@ -110,7 +110,8 @@ public enum Kind {
     }
 
     /**
-     * Performs a check an all kinds to test and throws if none matches. Otherwise, does nothing.
+     * Performs a check an all kinds to test and throws if none matches. Otherwise,
+     * does nothing.
      *
      * @param node
      * @param kindsToTest

@@ -1,6 +1,8 @@
 /bin/
 .gradle/
 .idea/
+.vscode/
+**/*.antlr
 /build/
 /.settings/
 /generated/

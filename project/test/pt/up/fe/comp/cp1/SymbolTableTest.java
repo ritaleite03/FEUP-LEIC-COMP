@@ -26,7 +26,6 @@ public class SymbolTableTest {
         return semantics;
     }
 
-
     /**
      * Test if fields are not being accessed from static methods.
      */
@@ -113,7 +112,6 @@ public class SymbolTableTest {
         assertEquals("Method with return type boolean", 1, checkBool);
         assertEquals("Method with return type object", 1, checkObj);
         assertEquals("Method with three arguments", 1, checkAll);
-
 
     }
 

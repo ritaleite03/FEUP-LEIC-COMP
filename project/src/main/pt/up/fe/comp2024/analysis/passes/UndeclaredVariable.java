@@ -10,7 +10,8 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
 /**
- * Checks if the type of the expression in a return statement is compatible with the method return type.
+ * Checks if the type of the expression in a return statement is compatible with
+ * the method return type.
  *
  * @author JBispo
  */
@@ -32,7 +33,8 @@ public class UndeclaredVariable extends AnalysisVisitor {
     private Void visitVarRefExpr(JmmNode varRefExpr, SymbolTable table) {
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
-        // Check if exists a parameter or variable declaration with the same name as the variable reference
+        // Check if exists a parameter or variable declaration with the same name as the
+        // variable reference
         var varRefName = varRefExpr.get("name");
 
         // Var is a field, return
@@ -60,11 +62,9 @@ public class UndeclaredVariable extends AnalysisVisitor {
                 NodeUtils.getLine(varRefExpr),
                 NodeUtils.getColumn(varRefExpr),
                 message,
-                null)
-        );
+                null));
 
         return null;
     }
-
 
 }

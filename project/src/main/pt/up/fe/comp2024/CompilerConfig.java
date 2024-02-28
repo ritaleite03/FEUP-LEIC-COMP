@@ -11,7 +11,6 @@ public class CompilerConfig {
     private static final String OPTIMIZE = "optimize";
     private static final String REGISTER = "registerAllocation";
 
-
     static Map<String, String> shortToLong = new HashMap<>();
 
     static {
@@ -20,10 +19,8 @@ public class CompilerConfig {
         shortToLong.put("r", CompilerConfig.REGISTER);
     }
 
-
     public static Optional<File> getInputFile(Map<String, String> config) {
         var inputFile = config.get(INPUT_FILE);
-
 
         if (inputFile == null) {
             return Optional.empty();
@@ -40,13 +37,13 @@ public class CompilerConfig {
         return Integer.parseInt(config.getOrDefault(REGISTER, "-1"));
     }
 
-
     public static Map<String, String> getDefault() {
 
         var config = new HashMap<String, String>();
 
         config.put(CompilerConfig.OPTIMIZE, "false");
         config.put(CompilerConfig.REGISTER, "-1");
+        config.put(CompilerConfig.INPUT_FILE, "test/pt/up/fe/comp/initial/apps/App1.jmm");
 
         return config;
     }
@@ -109,6 +106,5 @@ public class CompilerConfig {
 
         return config;
     }
-
 
 }
