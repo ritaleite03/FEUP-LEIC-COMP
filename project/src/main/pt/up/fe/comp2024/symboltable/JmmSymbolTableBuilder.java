@@ -4,10 +4,7 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.Kind;
-import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
-import pt.up.fe.specs.util.SpecsCheck;
-
 import java.util.*;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
@@ -17,15 +14,10 @@ public class JmmSymbolTableBuilder {
     public static JmmSymbolTable build(JmmNode root) {
 
         List<String> importsList = new ArrayList<>();
-        JmmNode classDecl = root.getJmmChild(0);;
+        var classDecl = root.getChildren(Kind.CLASS_DECL).get(0);
 
-        for (JmmNode child : root.getChildren()) {
-            if (Kind.IMPORT.check(child)) {
-                importsList.add(child.get("name"));
-            } else if (Kind.CLASS_DECL.check(child)) {
-                classDecl = child;
-                break;
-            }
+        for (JmmNode child : root.getChildren(Kind.IMPORT)) {
+            importsList.add(child.get("name"));
         }
 
         String className = classDecl.get("name");
@@ -36,7 +28,8 @@ public class JmmSymbolTableBuilder {
         var locals = buildLocals(classDecl);
         var fields = buildFields(classDecl);
 
-        return new JmmSymbolTable(importsList,className, classDecl.getOptional("superr").orElse(null), methods, returnTypes, params, locals, fields);
+        return new JmmSymbolTable(importsList, className, classDecl.getOptional("superr").orElse(null), methods,
+                returnTypes, params, locals, fields);
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
@@ -49,7 +42,7 @@ public class JmmSymbolTableBuilder {
                         method -> {
                             var typ = method.getChild(0);
                             map.put(method.get("name"),
-                                    new Type(typ.get("name"),typ.getObject("isArray",Boolean.class)));
+                                    new Type(typ.get("name"), typ.getObject("isArray", Boolean.class)));
                         });
 
         return map;
@@ -62,13 +55,13 @@ public class JmmSymbolTableBuilder {
 
         classDecl.getChildren(METHOD_DECL).stream()
                 .forEach(method -> map.put(method.get("name"),
-                    method.getChildren(PARAM).stream().map(
-                            param->{
-                                var typ = param.getChild(0);
-                                return new Symbol(new Type(typ.get("name"),typ.getObject("isArray",Boolean.class)),param.get("name"));
-                            }
-                    ).toList()
-                ));
+                        method.getChildren(PARAM).stream().map(
+                                param -> {
+                                    var typ = param.getChild(0);
+                                    return new Symbol(
+                                            new Type(typ.get("name"), typ.getObject("isArray", Boolean.class)),
+                                            param.get("name"));
+                                }).toList()));
 
         return map;
     }
@@ -104,11 +97,11 @@ public class JmmSymbolTableBuilder {
     private static List<Symbol> buildFields(JmmNode classDecl) {
         // TODO: Simple implementation that needs to be expanded
 
-
         return classDecl.getChildren(VAR_DECL).stream()
                 .map(varDecl -> {
                     var typ = varDecl.getChild(0);
-                    return new Symbol(new Type(typ.get("name"),typ.getObject("isArray",Boolean.class)), varDecl.get("name"));
+                    return new Symbol(new Type(typ.get("name"), typ.getObject("isArray", Boolean.class)),
+                            varDecl.get("name"));
                 })
                 .toList();
     }
