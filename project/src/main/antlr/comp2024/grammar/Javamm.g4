@@ -38,7 +38,7 @@ ELSE: 'else';
 NEW: 'new';
 
 INTEGER: '0' | [1-9][0-9]*;
-ID: [_a-zA-Z]+ [_a-zA-Z0-9]*;
+ID: [_$a-zA-Z]+ [_$a-zA-Z0-9]*;
 WS: [ \t\n\r\f]+ -> skip;
 COMMENT: '/*' .*? '*/' -> skip;
 LINE_COMMENT: '//' ~[\r\n]* -> skip;
