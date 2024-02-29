@@ -37,8 +37,8 @@ IF: 'if';
 ELSE: 'else';
 NEW: 'new';
 
-INTEGER: [0-9]+;
-ID: [a-zA-Z]+ [0-9]*;
+INTEGER: '0' | [1-9][0-9]*;
+ID: [a-zA-Z]+ [a-zA-Z0-9]*;
 WS: [ \t\n\r\f]+ -> skip;
 COMMENT: '/*' .*? '*/' -> skip;
 LINE_COMMENT: '//' ~[\r\n]* -> skip;
