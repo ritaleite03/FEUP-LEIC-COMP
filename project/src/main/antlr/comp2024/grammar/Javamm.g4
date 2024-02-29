@@ -40,18 +40,20 @@ NEW: 'new';
 INTEGER: [0-9]+;
 ID: [a-zA-Z]+ [0-9]*;
 WS: [ \t\n\r\f]+ -> skip;
+COMMENT: '/*' .*? '*/' -> skip;
+LINE_COMMENT: '//' ~[\r\n]* -> skip;
 
 program: (importDecl)* classDecl EOF;
 
 importDecl: IMPORT name = ID (POINT ID)* SEMI # Import;
 
 classDecl:
-	CLASS name = ID (EXTENDS superr=ID)? LCURLY varDecl* methodDecl* RCURLY;
+	CLASS name = ID (EXTENDS superr = ID)? LCURLY varDecl* methodDecl* RCURLY;
 
 varDecl: type name = ID SEMI;
 
 type
-    locals[boolean isArray=false]:
+	locals[boolean isArray=false]:
 	name = ID (LBRACKETS RBRACKETS {$isArray=true;})?
 	| name = ID '...';
 
