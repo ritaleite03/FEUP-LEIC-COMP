@@ -31,7 +31,6 @@ PUBLIC: 'public';
 RETURN: 'return';
 IMPORT: 'import';
 EXTENDS: 'extends';
-LENGTH: 'length';
 WHILE: 'while';
 IF: 'if';
 ELSE: 'else';
@@ -66,19 +65,18 @@ methodDecl
 param: type name = ID;
 
 expr:
-	op = NEG expr										# BinaryExpr
-	| expr op = (DIV | MUL) expr						# BinaryExpr
-	| expr op = (SUB | ADD) expr						# BinaryExpr
-	| expr op = (LOGICAL | RELACIONAL) expr				# BinaryExpr
-	| expr LBRACKETS expr RBRACKETS						# ArrayDeclExpr
-	| expr POINT LENGTH									# FuncExpr
-	| expr POINT ID LPAREN (expr (COL expr)*)? RPAREN	# FuncExpr
-	| NEW ID LBRACKETS expr RBRACKETS					# AssignExpr
-	| NEW ID LPAREN RPAREN								# FuncExpr
-	| LPAREN expr RPAREN								# Array
-	| LBRACKETS (expr (COL expr)*)? RBRACKETS			# Array
-	| value = INTEGER									# IntegerLiteral
-	| name = ID											# VarRefExpr;
+	op = NEG expr											# BinaryExpr
+	| expr op = (DIV | MUL) expr							# BinaryExpr
+	| expr op = (SUB | ADD) expr							# BinaryExpr
+	| expr op = (LOGICAL | RELACIONAL) expr					# BinaryExpr
+	| expr LBRACKETS expr RBRACKETS							# ArrayDeclExpr
+	| expr POINT ID (LPAREN (expr (COL expr)*)? RPAREN)?	# FuncExpr
+	| NEW ID LBRACKETS expr RBRACKETS						# NewArrayExpr
+	| NEW ID LPAREN RPAREN									# NewExpr
+	| LPAREN expr RPAREN									# ParenExpr
+	| LBRACKETS (expr (COL expr)*)? RBRACKETS				# ArrayExpr
+	| value = INTEGER										# IntegerLiteral
+	| name = ID												# VarRefExpr;
 
 stmt:
 	LCURLY (stmt)* RCURLY								# MultiStmt
