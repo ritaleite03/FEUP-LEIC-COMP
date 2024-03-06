@@ -3,10 +3,6 @@ package pt.up.fe.comp2024.symboltable;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
-import pt.up.fe.comp2024.ast.TypeUtils;
-import pt.up.fe.specs.util.exceptions.NotImplementedException;
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,13 +19,16 @@ public class JmmSymbolTable implements SymbolTable {
 
     private final List<Symbol> fields;
     private final String superr;
-    public JmmSymbolTable(List<String> imports,String className,
+
+    public JmmSymbolTable(
+            List<String> imports,
+            String className,
             String superr,
             List<String> methods,
             Map<String, Type> returnTypes,
             Map<String, List<Symbol>> params,
             Map<String, List<Symbol>> locals,
-                          List<Symbol> fields) {
+            List<Symbol> fields) {
         this.imports = imports;
         this.className = className;
         this.superr = superr;
@@ -42,7 +41,7 @@ public class JmmSymbolTable implements SymbolTable {
 
     @Override
     public List<String> getImports() {
-        return imports;
+        return Collections.unmodifiableList(imports);
     }
 
     @Override
