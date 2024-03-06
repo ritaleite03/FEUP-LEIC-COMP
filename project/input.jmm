@@ -1,3 +1,7 @@
+
+import a.b.c;
+
 class T {
+    int [] test(){}
 
 }

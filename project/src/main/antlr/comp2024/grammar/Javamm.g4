@@ -44,7 +44,7 @@ LINE_COMMENT: '//' ~[\r\n]* -> skip;
 
 program: (importDecl)* classDecl EOF;
 
-importDecl: IMPORT name = ID (POINT ID)* SEMI # Import;
+importDecl: IMPORT name += ID (POINT name += ID)* SEMI # Import;
 
 classDecl:
 	CLASS name = ID (EXTENDS superr = ID)? LCURLY varDecl* methodDecl* RCURLY;
@@ -54,7 +54,7 @@ varDecl: type name = ID SEMI;
 type
 	locals[boolean isArray=false]:
 	name = ID (LBRACKETS RBRACKETS {$isArray=true;})?
-	| name = ID '...';
+	| name = ID ('...' {$isArray=true;});
 
 methodDecl
 	locals[boolean isPublic=false]:
