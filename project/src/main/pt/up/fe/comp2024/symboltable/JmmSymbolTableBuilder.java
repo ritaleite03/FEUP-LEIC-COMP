@@ -18,7 +18,7 @@ public class JmmSymbolTableBuilder {
         var classDecl = root.getChildren(Kind.CLASS_DECL).get(0);
 
         for (JmmNode child : root.getChildren(Kind.IMPORT)) {
-            importsList.add(child.get("name"));
+            importsList.add(String.join(".",child.getObjectAsList("name", String.class)));
         }
 
         String className = classDecl.get("name");
