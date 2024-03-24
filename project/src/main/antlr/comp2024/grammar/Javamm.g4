@@ -36,7 +36,6 @@ IF: 'if';
 ELSE: 'else';
 NEW: 'new';
 
-
 INTEGER: '0' | [1-9][0-9]*;
 ID: [_$a-zA-Z]+ [_$a-zA-Z0-9]*;
 WS: [ \t\n\r\f]+ -> skip;
@@ -73,7 +72,7 @@ expr:
 	| expr LBRACKETS expr RBRACKETS							# ArrayDeclExpr
 	| expr POINT ID (LPAREN (expr (COL expr)*)? RPAREN)?	# FuncExpr
 	| NEW ID LBRACKETS expr RBRACKETS						# NewArrayExpr
-	| NEW ID LPAREN RPAREN									# NewExpr
+	| NEW name=ID LPAREN RPAREN							    # NewExpr
 	| LPAREN expr RPAREN									# ParenExpr
 	| LBRACKETS (expr (COL expr)*)? RBRACKETS				# ArrayExpr
 	| value = INTEGER										# IntegerLiteral
@@ -85,5 +84,5 @@ stmt:
 	| WHILE LPAREN expr RPAREN stmt						# WhileStmt
 	| expr SEMI											# VarStmt
 	| expr EQUALS expr SEMI								# AssignStmt
-	| expr LBRACKETS expr RBRACKETS EQUALS expr SEMI	# AssignStmt
+	| expr LBRACKETS expr RBRACKETS EQUALS expr SEMI	# AssignStmtArray
 	| RETURN expr SEMI									# ReturnStmt;

@@ -90,8 +90,12 @@ public class JmmSymbolTableBuilder {
         var intType = new Type(TypeUtils.getIntTypeName(), false);
 
         return methodDecl.getChildren(VAR_DECL).stream()
-                .map(varDecl -> new Symbol(intType, varDecl.get("name")))
-                .toList();
+                .map(varDecl -> {
+                    var typ = varDecl.getChild(0);
+                    return new Symbol(new Type(typ.get("name"), typ.getObject("isArray", Boolean.class)),
+                            varDecl.get("name"));
+                })
+                        .toList();
     }
 
     private static List<Symbol> buildFields(JmmNode classDecl) {
