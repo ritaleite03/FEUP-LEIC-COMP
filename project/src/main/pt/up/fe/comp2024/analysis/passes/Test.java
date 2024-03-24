@@ -57,9 +57,10 @@ public class Test implements AnalysisPass {
 
     protected Type visitAssignStatement(JmmNode expr, SymbolTable table){
 
-        var left = visitExpression(expr.getChild(0), table);
-        var right = visitExpression(expr.getChild(1), table);
+        var left = visitVariableReferenceExpression(expr.get("name"), table);
+        var right = visitExpression(expr.getChild(0), table);
 
+        System.out.println("out");
         if(!left.isArray() && !left.equals(right)){
 
             // deal with imports
@@ -70,7 +71,8 @@ public class Test implements AnalysisPass {
             addNewReport("AssignStmt : Assignment of not array variable wrong",expr);
         }
         else if(left.isArray() && right==null){
-            expr.getChild(1).getChildren().forEach((child)->{
+            System.out.println("aqui");
+            expr.getChild(0).getChildren().forEach((child)->{
                 if(!visitExpression(child,table).getName().equals(left.getName())){
                     addNewReport("AssignStmt : Assignment of array variable wrong",expr);
                 }
@@ -108,8 +110,7 @@ public class Test implements AnalysisPass {
 
         return null;
     }
-    protected Type visitVariableReferenceExpression(JmmNode expr,SymbolTable table){
-        String name = expr.get("name");
+    protected Type visitVariableReferenceExpression(String name,SymbolTable table){
 
         List<Symbol> symbols = new ArrayList<>();
         symbols.addAll(table.getLocalVariables(currentMethod));
@@ -122,9 +123,11 @@ public class Test implements AnalysisPass {
         return symbol.map(Symbol::getType).orElse(null);
     }
     protected Type visitExpression(JmmNode expr, SymbolTable table){
+        System.out.println("olaaaaa");
+        System.out.println(expr.getChildren());
         return switch (expr.getKind()) {
             case "IntegerLiteral" -> new Type("int", false);
-            case "VarRefExpr" -> visitVariableReferenceExpression(expr, table);
+            case "VarRefExpr" -> visitVariableReferenceExpression(expr.get("name"), table);
             case "NewExpr" -> new Type(expr.get("name"), false);
             case "NewArrayExpr" -> new Type("int", true);
             case "BinaryExpr" -> visitBinaryExpression(expr, table, false);

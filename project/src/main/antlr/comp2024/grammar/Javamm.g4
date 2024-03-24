@@ -9,7 +9,7 @@ DIV: '/';
 MUL: '*';
 ADD: '+';
 SUB: '-';
-NEG: '!';
+NOT: '!';
 LOGICAL: '&&';
 EQUALS: '=';
 RELACIONAL: '<';
@@ -17,7 +17,7 @@ RELACIONAL: '<';
 // Pontuation
 SEMI: ';';
 COL: ',';
-POINT: '.';
+DOT: '.';
 LCURLY: '{';
 RCURLY: '}';
 LPAREN: '(';
@@ -44,10 +44,10 @@ LINE_COMMENT: '//' ~[\r\n]* -> skip;
 
 program: (importDecl)* classDecl EOF;
 
-importDecl: IMPORT name += ID (POINT name += ID)* SEMI # Import;
+importDecl: IMPORT name += ID (DOT name += ID)* SEMI # Import;
 
 classDecl:
-	CLASS name = ID (EXTENDS superr = ID)? LCURLY varDecl* methodDecl* RCURLY;
+	CLASS name = ID (EXTENDS superClass = ID)? LCURLY varDecl* methodDecl* RCURLY;
 
 varDecl: type name = ID SEMI;
 
@@ -65,24 +65,24 @@ methodDecl
 param: type name = ID;
 
 expr:
-	op = NEG expr											# BinaryExpr
-	| expr op = (DIV | MUL) expr							# BinaryExpr
-	| expr op = (SUB | ADD) expr							# BinaryExpr
-	| expr op = (LOGICAL | RELACIONAL) expr					# BinaryExpr
-	| expr LBRACKETS expr RBRACKETS							# ArrayDeclExpr
-	| expr POINT functionName = ID (LPAREN (expr (COL expr)*)? RPAREN)?	# FuncExpr
-	| NEW ID LBRACKETS expr RBRACKETS						# NewArrayExpr
-	| NEW name=ID LPAREN RPAREN							    # NewExpr
-	| LPAREN expr RPAREN									# ParenExpr
-	| LBRACKETS (expr (COL expr)*)? RBRACKETS				# ArrayExpr
-	| value = INTEGER										# IntegerLiteral
-	| name = ID												# VarRefExpr;
+	op = NOT expr											            # BinaryExpr
+	| expr op = (DIV | MUL) expr							            # BinaryExpr
+	| expr op = (SUB | ADD) expr							            # BinaryExpr
+	| expr op = (LOGICAL | RELACIONAL) expr					            # BinaryExpr
+	| expr LBRACKETS expr RBRACKETS							            # ArrayDeclExpr
+	| expr DOT functionName = ID (LPAREN (expr (COL expr)*)? RPAREN)?	# FuncExpr
+	| NEW ID LBRACKETS expr RBRACKETS						            # NewArrayExpr
+	| NEW name=ID LPAREN RPAREN							                # NewExpr
+	| LPAREN expr RPAREN									            # ParenExpr
+	| LBRACKETS (expr (COL expr)*)? RBRACKETS				            # ArrayExpr
+	| value = INTEGER										            # IntegerLiteral
+	| name = ID												            # VarRefExpr;
 
 stmt:
 	LCURLY (stmt)* RCURLY								# MultiStmt
 	| IF LPAREN expr RPAREN stmt ELSE stmt				# IfStmt
 	| WHILE LPAREN expr RPAREN stmt						# WhileStmt
 	| expr SEMI											# VarStmt
-	| expr EQUALS expr SEMI								# AssignStmt
+	| name = ID EQUALS expr SEMI						# AssignStmt
 	| expr LBRACKETS expr RBRACKETS EQUALS expr SEMI	# AssignStmtArray
 	| RETURN expr SEMI									# ReturnStmt;

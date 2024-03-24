@@ -29,7 +29,7 @@ public class JmmSymbolTableBuilder {
         var locals = buildLocals(classDecl);
         var fields = buildFields(classDecl);
 
-        return new JmmSymbolTable(importsList, className, classDecl.getOptional("superr").orElse(null), methods,
+        return new JmmSymbolTable(importsList, className, classDecl.getOptional("superClass").orElse(null), methods,
                 returnTypes, params, locals, fields);
     }
 
