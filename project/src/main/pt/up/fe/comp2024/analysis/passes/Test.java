@@ -104,11 +104,23 @@ public class Test implements AnalysisPass {
         return null;
     }
     protected Type visitFunctionExpression(JmmNode expr, SymbolTable table){
-        var child = visitExpression(expr.getChild(0), table);
-        System.out.println("entrou");
-        System.out.println(expr.getChildren());
-        // method declared in class
-        if (table.getClassName().equals(child.getName()) && table.getMethods().contains(expr.getObject("functionName").toString())) {
+        String functionName = expr.get("functionName");
+        Type child = visitExpression(expr.getChild(0), table);
+        // class object and function declared
+        if(table.getClassName().equals(child.getName()) && table.getMethods().contains(functionName)){
+            // different number of parameters
+            List<Symbol> parametersMethod = table.getParameters(functionName);
+            if((expr.getChildren().size() - 1) != parametersMethod.size()){
+                addNewReport("Function Expression : wrong number of parameters",expr);
+                return null;
+            }
+            for(int i = 0; i < parametersMethod.size(); i++){
+                Type parameter = visitExpression(expr.getChild(i+1),table);
+                if(!parameter.equals(parametersMethod.get(i).getType())){
+                    addNewReport("Function Expression : parameter with wrong type",expr);
+                    return null;
+                }
+            }
             Optional<Type> returnTypeOptional = table.getReturnTypeTry(expr.get("functionName"));
             return returnTypeOptional.orElse(null);
         }
