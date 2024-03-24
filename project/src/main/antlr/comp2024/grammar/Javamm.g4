@@ -70,7 +70,7 @@ expr:
 	| expr op = (SUB | ADD) expr							# BinaryExpr
 	| expr op = (LOGICAL | RELACIONAL) expr					# BinaryExpr
 	| expr LBRACKETS expr RBRACKETS							# ArrayDeclExpr
-	| expr POINT ID (LPAREN (expr (COL expr)*)? RPAREN)?	# FuncExpr
+	| expr POINT functionName = ID (LPAREN (expr (COL expr)*)? RPAREN)?	# FuncExpr
 	| NEW ID LBRACKETS expr RBRACKETS						# NewArrayExpr
 	| NEW name=ID LPAREN RPAREN							    # NewExpr
 	| LPAREN expr RPAREN									# ParenExpr
