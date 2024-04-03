@@ -39,6 +39,9 @@ public class Launcher {
         // Semantic Analysis stage
         JmmAnalysisImpl sema = new JmmAnalysisImpl();
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
+        for (var report : semanticsResult.getReports()) {
+            System.out.println(report);
+        }
         TestUtils.noErrors(semanticsResult.getReports());
 
         // Optimization stage

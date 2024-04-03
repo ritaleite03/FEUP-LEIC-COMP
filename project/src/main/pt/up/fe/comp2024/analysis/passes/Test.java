@@ -41,6 +41,10 @@ public class Test implements AnalysisPass {
         var left = visitExpression(expr.getChild(0), table);
         var right = visitExpression(expr.getChild(1), table);
 
+        if (left == null || right == null) {
+            return null;
+        }
+
         System.out.print("arithmetic expression ");
         System.out.println(expr);
         System.out.println(left);
