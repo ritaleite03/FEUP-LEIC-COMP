@@ -53,8 +53,12 @@ varDecl: type name = ID SEMI;
 
 type
 	locals[boolean isArray=false]:
+	name = ID (LBRACKETS RBRACKETS {$isArray=true;})?;
+
+typeOrVargs
+	locals[boolean isArray=false,boolean isVarArgs=false]:
 	name = ID (LBRACKETS RBRACKETS {$isArray=true;})?
-	| name = ID ('...' {$isArray=true;});
+	| name = ID ('...' {$isArray=true;$isVarArgs=true;});
 
 methodDecl
 	locals[boolean isPublic=false]:
@@ -62,21 +66,23 @@ methodDecl
 		param (COL param)*
 	)? RPAREN LCURLY varDecl* stmt* RCURLY;
 
-param: type name = ID;
+param: typeOrVargs name = ID;
 
 expr:
-	op = NOT expr											            # BinaryExpr
-	| expr op = (DIV | MUL) expr							            # BinaryExpr
-	| expr op = (SUB | ADD) expr							            # BinaryExpr
-	| expr op = (LOGICAL | RELACIONAL) expr					            # BinaryExpr
-	| expr LBRACKETS expr RBRACKETS							            # ArrayDeclExpr
-	| expr DOT functionName = ID (LPAREN (expr (COL expr)*)? RPAREN)?	# FuncExpr
-	| NEW ID LBRACKETS expr RBRACKETS						            # NewArrayExpr
-	| NEW name=ID LPAREN RPAREN							                # NewExpr
-	| LPAREN expr RPAREN									            # ParenExpr
-	| LBRACKETS (expr (COL expr)*)? RBRACKETS				            # ArrayExpr
-	| value = INTEGER										            # IntegerLiteral
-	| name = ID												            # VarRefExpr;
+	op = NOT expr													# BinaryExpr
+	| LPAREN expr RPAREN											# ParenExpr
+	| expr DOT field = ID											# FieldAccessExpr
+	| expr DOT functionName = ID LPAREN (expr (COL expr)*)? RPAREN	# FuncExpr
+	| functionName = ID (LPAREN (expr (COL expr)*)? RPAREN)			# SelfFuncExpr
+	| expr op = (DIV | MUL) expr									# BinaryExpr
+	| expr op = (SUB | ADD) expr									# BinaryExpr
+	| expr op = (LOGICAL | RELACIONAL) expr							# BinaryExpr
+	| expr LBRACKETS expr RBRACKETS									# ArrayDeclExpr
+	| NEW ID LBRACKETS expr RBRACKETS								# NewArrayExpr
+	| NEW name = ID LPAREN RPAREN									# NewExpr
+	| LBRACKETS (expr (COL expr)*)? RBRACKETS						# ArrayExpr
+	| value = INTEGER												# IntegerLiteral
+	| name = ID														# VarRefExpr;
 
 stmt:
 	LCURLY (stmt)* RCURLY								# MultiStmt

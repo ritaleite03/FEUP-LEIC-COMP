@@ -12,7 +12,6 @@ public class JmmSymbolTable implements SymbolTable {
     private final List<String> imports;
     private final String className;
     private final List<String> methods;
-    @SuppressWarnings("unused")
     private final Map<String, Type> returnTypes;
     private final Map<String, List<Symbol>> params;
     private final Map<String, List<Symbol>> locals;

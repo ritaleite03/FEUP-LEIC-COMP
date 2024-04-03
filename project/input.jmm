@@ -1,7 +1,13 @@
 
-import a.b.c;
+import C;
 
 class T {
-    int [] test(){}
+    T a;
+    int test(){
+        T b;
+        int c;
+        c = b.a.a.a.test();
+        return 0;
+    }
 
 }

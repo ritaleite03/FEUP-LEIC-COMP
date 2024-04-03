@@ -60,4 +60,13 @@ public class TypeUtils {
         // TODO: Simple implementation that needs to be expanded
         return sourceType.getName().equals(destinationType.getName());
     }
+
+    public static boolean isVarArgs(Type type) {
+        return type.getObject("isVarArg", Boolean.class);
+    }
+
+    public static void setVarArgs(Type type, Boolean value) {
+        type.putObject("isVarArg", value);
+    }
+
 }
