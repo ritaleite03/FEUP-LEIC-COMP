@@ -114,7 +114,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitMethodDecl(JmmNode node, Void unused) {
-
         StringBuilder code = new StringBuilder(".method ");
 
         boolean isPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
@@ -126,6 +125,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         // name
         var name = node.get("name");
         code.append(name);
+        TypeUtils.currentMethod = name;
 
         // param
         int paramsSize = 0;

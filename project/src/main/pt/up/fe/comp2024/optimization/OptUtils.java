@@ -5,7 +5,6 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
 import static pt.up.fe.comp2024.ast.Kind.TYPE;
-import static pt.up.fe.comp2024.ast.Kind.TYPE_OR_VARGS;
 
 public class OptUtils {
     private static int tempNumber = -1;
