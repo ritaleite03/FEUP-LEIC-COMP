@@ -5,6 +5,7 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
 import static pt.up.fe.comp2024.ast.Kind.TYPE;
+import static pt.up.fe.comp2024.ast.Kind.TYPE_OR_VARGS;
 
 public class OptUtils {
     private static int tempNumber = -1;
@@ -27,7 +28,9 @@ public class OptUtils {
 
     public static String toOllirType(JmmNode typeNode) {
 
-        TYPE.checkOrThrow(typeNode);
+        if (!typeNode.getKind().startsWith("Type")) {
+            TYPE.checkOrThrow(typeNode);
+        }
 
         String typeName = typeNode.get("name");
 
@@ -42,6 +45,9 @@ public class OptUtils {
 
         String type = "." + switch (typeName) {
             case "int" -> "i32";
+            case "boolean" -> "bool";
+            case "String" -> "String";
+            case "void" -> "V";
             default -> throw new NotImplementedException(typeName);
         };
 

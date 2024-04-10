@@ -12,6 +12,7 @@ public enum Kind {
     IMPORT,
     VAR_DECL,
     TYPE,
+    TYPE_OR_VARGS,
     METHOD_DECL,
     PARAM,
     ASSIGN_STMT,

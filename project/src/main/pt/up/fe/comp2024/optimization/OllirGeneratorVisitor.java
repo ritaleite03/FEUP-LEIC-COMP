@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.optimization;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
@@ -8,6 +9,9 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Generates OLLIR code from JmmNodes that are not expressions.
@@ -34,6 +38,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     protected void buildVisitor() {
 
         addVisit(PROGRAM, this::visitProgram);
+        addVisit(IMPORT, this::visitImport);
         addVisit(CLASS_DECL, this::visitClass);
         addVisit(METHOD_DECL, this::visitMethodDecl);
         addVisit(PARAM, this::visitParam);
@@ -123,8 +128,18 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(name);
 
         // param
-        var paramCode = visit(node.getJmmChild(1));
-        code.append("(" + paramCode + ")");
+        int paramsSize = 0;
+        List<String> params = new ArrayList<>();
+        while (true) {
+            if (paramsSize + 1 == node.getNumChildren())
+                break;
+            var paramNode = node.getJmmChild(paramsSize + 1);
+            if (!paramNode.getKind().equals("Param"))
+                break;
+            params.add(visit(paramNode));
+            paramsSize++;
+        }
+        code.append("(" + String.join(",", params) + ")");
 
         // type
         var retType = OptUtils.toOllirType(node.getJmmChild(0));
@@ -132,7 +147,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(L_BRACKET);
 
         // rest of its children stmts
-        var afterParam = 2;
+        var afterParam = paramsSize + 1;
         for (int i = afterParam; i < node.getNumChildren(); i++) {
             var child = node.getJmmChild(i);
             var childCode = visit(child);
@@ -150,9 +165,21 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
 
         code.append(table.getClassName());
+        if (table.getSuper() != null) {
+            code.append(" extends ");
+            code.append(table.getSuper());
+        }
         code.append(L_BRACKET);
 
         code.append(NL);
+
+        for (Symbol field : table.getFields()) {
+            code.append(".field public ");
+            code.append(field.getName());
+            code.append(OptUtils.toOllirType(field.getType()));
+            code.append(";\n");
+        }
+
         var needNl = true;
 
         for (var child : node.getChildren()) {
@@ -188,6 +215,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 .forEach(code::append);
 
         return code.toString();
+    }
+
+    private String visitImport(JmmNode node, Void unused) {
+        return "import " + String.join(".", node.getObjectAsList("name", String.class)) + ";\n";
     }
 
     /**
