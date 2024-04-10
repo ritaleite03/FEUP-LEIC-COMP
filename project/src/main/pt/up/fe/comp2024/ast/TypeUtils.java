@@ -41,7 +41,7 @@ public class TypeUtils {
         return null;
     }
 
-    protected static Type visitBinaryExpression(JmmNode expr, SymbolTable table, boolean is_boolean) {
+    protected static Type visitBinaryExpression(JmmNode expr, SymbolTable table) {
 
         var left = getExprType(expr.getChild(0), table);
         var right = getExprType(expr.getChild(1), table);
@@ -54,12 +54,11 @@ public class TypeUtils {
         System.out.println(expr);
         System.out.println(left);
         System.out.println(right);
-        System.out.println(is_boolean);
         switch (expr.get("op")) {
             case "+", "-", "*", "/":
                 // if it is INT and the expression does not need to be boolean (for loops and
                 // ifs conditions)
-                if (left.getName().equals("int") && !left.isArray() && left.equals(right) && !is_boolean) {
+                if (left.getName().equals("int") && !left.isArray() && left.equals(right)) {
                     return new Type("int", false);
                 }
             case "<", "==":
@@ -225,9 +224,8 @@ public class TypeUtils {
             case "ArrayExpr" -> visitArrayExpr(expr, table);
             case "NewArrayExpr" -> new Type("int", true);
             case "UnaryExpr" -> visitUnaryExpression(expr, table);
-            case "BinaryExpr" -> visitBinaryExpression(expr, table, false);
+            case "BinaryExpr" -> visitBinaryExpression(expr, table);
             case "ArrayDeclExpr" -> visitArrayDeclarationExpression(expr, table);
-            case "IfStmt", "WhileStmt" -> visitBinaryExpression(expr.getChild(0), table, true);
             case "FuncExpr", "SelfFuncExpr" -> visitFunctionExpression(expr, table);
             default -> null;
         };

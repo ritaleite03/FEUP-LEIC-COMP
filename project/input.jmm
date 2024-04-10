@@ -2,11 +2,13 @@
 import C;
 
 class T {
-    T a;
     int test(){
-        T b;
-        int c;
-        c = b.a.a.a.test();
+        int a;
+        if(true){
+            a = true;
+        }else{
+            a = true;
+        }
         return 0;
     }
 
