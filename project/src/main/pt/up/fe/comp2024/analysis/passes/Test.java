@@ -11,6 +11,7 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.List;
 import java.util.Optional;
 
@@ -136,6 +137,16 @@ public class Test implements AnalysisPass {
         currentMethod = method.get("name");
         TypeUtils.currentMethod = currentMethod;
         var params = table.getParameters(currentMethod);
+        Set<String> paramsSet = Set.copyOf(params.stream().map(field -> field.getName()).toList());
+        if (paramsSet.size() != params.size()) {
+            addNewReport("Duplicate param names in method declaration", method);
+        }
+        var locals = table.getLocalVariables(currentMethod);
+        Set<String> localsSet = Set
+                .copyOf(locals.stream().map(field -> field.getName()).toList());
+        if (localsSet.size() != locals.size()) {
+            addNewReport("Duplicate local variable names in method declaration", method);
+        }
         for (int i = 0; i < params.size() - 1; i++) {
             if (TypeUtils.isVarArgs(params.get(i).getType())) {
                 addNewReport("VarArgs : VarArgs are only valid as the last argument",
@@ -148,6 +159,10 @@ public class Test implements AnalysisPass {
     @Override
     public List<Report> analyze(JmmNode root, SymbolTable table) {
         TypeUtils.reports = this.reports;
+        Set<String> fieldsSet = Set.copyOf(table.getFields().stream().map(field -> field.getName()).toList());
+        if (fieldsSet.size() != table.getFields().size()) {
+            addNewReport("Duplicate field names in class declaration", root);
+        }
         root.getChildren(Kind.CLASS_DECL).get(0).getChildren(Kind.METHOD_DECL).stream()
                 .forEach(method -> visitMethods(method, table));
         return reports;
