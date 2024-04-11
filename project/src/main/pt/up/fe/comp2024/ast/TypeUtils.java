@@ -62,11 +62,11 @@ public class TypeUtils {
                     return new Type("int", false);
                 }
             case "<", "==":
-                if (left.getName().equals("int") && !left.isArray() && left == right) {
+                if (left.getName().equals("int") && !left.isArray() && left.equals(right)) {
                     return new Type("boolean", false);
                 }
             case "&&":
-                if (left.getName().equals("boolean") && !left.isArray() && left == right) {
+                if (left.getName().equals("boolean") && !left.isArray() && left.equals(right)) {
                     return new Type("boolean", false);
                 }
         }
