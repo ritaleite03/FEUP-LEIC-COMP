@@ -1,17 +1,29 @@
 
 import C;
 
-class T {
+class T extends C{
+    T abc;
+    int[] ola(){
+        return [];
+    }
     int test(){
         float a;
         int a;
         int[] b;
+        C c;
+        c = new T();
+        c.ola;
+        abc.ola;
+        a = b[0];
+        a = b.length;
+        a = C;
         if(true){
             a = true;
         }else{
             a = true;
         }
         b[a] = 1;
+        ola()[0] = 1;
         return 0;
     }
 

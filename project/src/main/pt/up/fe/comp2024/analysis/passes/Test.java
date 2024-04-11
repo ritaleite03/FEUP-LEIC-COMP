@@ -32,6 +32,8 @@ public class Test implements AnalysisPass {
 
         var left = TypeUtils.visitVariableReferenceExpression(stmt.get("name"), table, stmt);
         var right = TypeUtils.getExprType(stmt.getChild(0), table);
+        if (left == null)
+            return;
         if (right == null)
             return;
 
@@ -44,21 +46,16 @@ public class Test implements AnalysisPass {
         }
 
         boolean leftIsImport = table.getImports().contains(left.getName());
-        boolean leftIsMain = table.getClassName().equals(left.getName());
+        // boolean leftIsMain = table.getClassName().equals(left.getName());
         boolean leftIsSuper = table.getSuper() != null && table.getSuper().equals(left.getName());
-        boolean rightIsImport = table.getImports().contains(right.getName());
+        // boolean rightIsImport = table.getImports().contains(right.getName());
         boolean rightIsMain = table.getClassName().equals(right.getName());
-        boolean rightIsSuper = table.getSuper() != null && table.getSuper().equals(right.getName());
-        // deal with imports
-        if (leftIsImport && !rightIsMain) {
+        // boolean rightIsSuper = table.getSuper() != null &&
+        // table.getSuper().equals(right.getName());
+
+        if (leftIsSuper && rightIsMain)
             return;
-        }
-        if (leftIsImport && rightIsImport)
-            return;
-        // deal with extends
-        if (rightIsMain && leftIsSuper)
-            return;
-        if (leftIsMain && rightIsSuper)
+        if (leftIsImport && !rightIsMain)
             return;
 
         addNewReport("Assign Statement : Assignment of not array variable wrong", stmt);
@@ -113,6 +110,8 @@ public class Test implements AnalysisPass {
                         table.getClassName().equals(value.getName())) {
                     return;
                 }
+                if (table.getImports().contains(array.getName()) && !table.getClassName().equals(value.getName()))
+                    return;
                 if (!array.getName().equals(value.getName())) {
                     addNewReport("Array assignment value must be of the same tipe as array", stmt.getChild(2));
                     return;

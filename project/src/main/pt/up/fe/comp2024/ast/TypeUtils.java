@@ -172,6 +172,9 @@ public class TypeUtils {
         if (table.getImports().contains(name)) {
             return null;
         }
+        if (table.getSuper() != null) {
+            return null;
+        }
         addNewReport("Variable Reference Expression : variable not declared", expr);
 
         return null;
@@ -184,11 +187,14 @@ public class TypeUtils {
             return null;
         }
         String field = expr.get("field");
-        if (rigth.isArray() && field.equals("legth")) {
+        if (rigth.isArray() && field.equals("length")) {
             return new Type("int", false);
         }
-        if (rigth.isArray() || !rigth.getName().equals(table.getClassName())) {
-            addNewReport(currentMethod, expr);
+        if (rigth.isArray()) {
+            addNewReport("Not .length on array", expr);
+            return null;
+        }
+        if (table.getImports().contains(rigth.getName())) {
             return null;
         }
 
@@ -198,7 +204,9 @@ public class TypeUtils {
         if (symbol.isPresent()) {
             return symbol.get().getType();
         }
-        addNewReport("Field Access Expression : field not declared", expr);
+
+        if (table.getSuper() == null)
+            addNewReport("Field Access Expression : field not declared", expr);
 
         return null;
     }
