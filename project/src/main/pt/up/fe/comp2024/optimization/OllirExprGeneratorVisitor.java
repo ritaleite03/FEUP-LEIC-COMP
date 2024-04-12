@@ -28,6 +28,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
+        addVisit(UNARY_EXPR, this::visitUnaryExpr);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -66,16 +67,48 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         return new OllirExprResult(code, computation);
     }
 
+    private  OllirExprResult visitUnaryExpr(JmmNode node, Void unused) {
+
+        var s = visit(node.getJmmChild(0));
+
+        StringBuilder computation = new StringBuilder();
+
+        // code to compute the children
+        computation.append(s.getComputation());
+
+        // code to compute self
+        Type resType = TypeUtils.getExprType(node, table);
+        String resOllirType = OptUtils.toOllirType(resType);
+        String code = OptUtils.getTemp() + resOllirType;
+
+        computation.append(code).append(SPACE)
+                .append(ASSIGN).append(resOllirType).append(SPACE);
+
+        Type type = TypeUtils.getExprType(node, table);
+        computation.append(node.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
+                .append(s.getCode()).append(END_STMT);
+
+        return new OllirExprResult(code, computation);
+    }
     private OllirExprResult visitVarRef(JmmNode node, Void unused) {
 
         var id = node.get("name");
         Type type = TypeUtils.getExprType(node, table);
         String ollirType = OptUtils.toOllirType(type);
 
-        String code = id + ollirType;
-
+        String code;
+        if(id.equals("true")){
+           code = "1" + ollirType;
+        }
+        else if(id.equals("false")){
+            code = "0" + ollirType;
+        }
+        else {
+            code = id + ollirType;
+        }
         return new OllirExprResult(code);
     }
+
 
     /**
      * Default visitor. Visits every child node and return an empty result.

@@ -70,7 +70,7 @@ methodDecl
 param: typeOrVargs name = ID;
 
 expr:
-	op = NOT expr													# BinaryExpr
+	op = NOT expr													# UnaryExpr
 	| LPAREN expr RPAREN											# ParenExpr
 	| expr DOT field = ID											# FieldAccessExpr
 	| expr DOT functionName = ID LPAREN (expr (COL expr)*)? RPAREN	# FuncExpr
