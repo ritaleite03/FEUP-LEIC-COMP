@@ -29,6 +29,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final SymbolTable table;
 
     private final OllirExprGeneratorVisitor exprVisitor;
+    private String currentMethod;
 
     public OllirGeneratorVisitor(SymbolTable table) {
         this.table = table;
@@ -64,6 +65,24 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // code to compute the children
         code.append(rhs.getComputation());
+
+        var isLocalList = table.getLocalVariables(currentMethod).stream().filter(local -> local.getName().equals(
+                lhs))
+                .toList();
+        var isParamList = table.getParameters(currentMethod).stream().filter(param -> param.getName().equals(
+                lhs))
+                .toList();
+        var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(lhs)).toList();
+
+        if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
+            code.append("putfield(this, ");
+            code.append(lhs);
+            code.append(typeString);
+            code.append(", ");
+            code.append(rhs.getCode());
+            code.append(").V;\n");
+            return code.toString();
+        }
 
         // code to compute self
         // statement has type of lhs
@@ -136,9 +155,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append("static ");
         }
         // name
-        var name = node.get("name");
-        code.append(name);
-        TypeUtils.currentMethod = name;
+        currentMethod = node.get("name");
+        code.append(currentMethod);
+        exprVisitor.currentMethod = currentMethod;
+        TypeUtils.currentMethod = currentMethod;
         TypeUtils.isStatic = NodeUtils.getBooleanAttribute(node, "isStatic", "false");
 
         // param

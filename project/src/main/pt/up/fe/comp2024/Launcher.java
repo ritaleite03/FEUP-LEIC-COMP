@@ -52,14 +52,16 @@ public class Launcher {
         System.out.println("====OLIR======================");
         // Print OLLIR code
         System.out.println(ollirResult.getOllirCode());
+        System.out.println("====END=======================");
 
-        // // Code generation stage
-        // JasminBackendImpl jasminGen = new JasminBackendImpl();
-        // JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
-        // TestUtils.noErrors(jasminResult.getReports());
+        // Code generation stage
+        JasminBackendImpl jasminGen = new JasminBackendImpl();
+        JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
+        TestUtils.noErrors(jasminResult.getReports());
 
+        System.out.println("====JASMIN====================");
         // Print Jasmin code
-        // System.out.println(jasminResult.getJasminCode());
+        System.out.println(jasminResult.getJasminCode());
     }
 
 }

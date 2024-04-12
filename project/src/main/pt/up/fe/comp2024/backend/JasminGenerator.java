@@ -47,7 +47,10 @@ public class JasminGenerator {
         generators.put(LiteralElement.class, this::generateLiteral);
         generators.put(Operand.class, this::generateOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
+        generators.put(CallInstruction.class, this::generateCall);
         generators.put(ReturnInstruction.class, this::generateReturn);
+        generators.put(GetFieldInstruction.class, this::generateGetField);
+        generators.put(PutFieldInstruction.class, this::generatePutField);
     }
 
     public List<Report> getReports() {
@@ -119,7 +122,7 @@ public class JasminGenerator {
         // TODO: Hardcoded param types and return type, needs to be expanded
 
         // Add params
-        for(int i = 0; i < method.getParams().size(); i++){
+        for (int i = 0; i < method.getParams().size(); i++) {
             code.append(this.typeJasmin(method.getParams().get(i).getType()));
         }
 
@@ -165,7 +168,10 @@ public class JasminGenerator {
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
         // TODO: Hardcoded for int type, needs to be expanded
-        code.append("istore ").append(reg).append(NL);
+        if (operand.getType() instanceof ClassType)
+            code.append("astore ").append(reg).append(NL);
+        else
+            code.append("istore ").append(reg).append(NL);
 
         return code.toString();
     }
@@ -181,6 +187,8 @@ public class JasminGenerator {
     private String generateOperand(Operand operand) {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+        if (operand.getType() instanceof ClassType)
+            return "aload " + reg + NL;
         return "iload " + reg + NL;
     }
 
@@ -203,10 +211,51 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    private String generateCall(CallInstruction callInst) {
+        System.out.println(callInst.toTree());
+        var code = new StringBuilder();
+        switch (callInst.getInvocationType()) {
+            case NEW:
+                code.append("new ");
+                code.append(((ClassType) callInst.getCaller().getType()).getName());
+                break;
+            case arraylength:
+                break;
+            case invokeinterface:
+                break;
+            case invokespecial:
+                var operand = (Operand) callInst.getOperands().get(0);
+                var className = ((ClassType) ((Operand) callInst.getOperands().get(0)).getType()).getName();
+                var methodName = ((LiteralElement) callInst.getOperands().get(1)).getLiteral();
+                if (methodName.charAt(0) == '"') {
+                    methodName = methodName.substring(1, methodName.length() - 1);
+                }
+                code.append(generateOperand(operand));
+
+                code.append("invokespecial ");
+                code.append(className);
+                code.append("/");
+                code.append(methodName);
+                code.append("()V");
+                break;
+            case invokestatic:
+                break;
+            case invokevirtual:
+                break;
+            case ldc:
+                break;
+            default:
+                break;
+
+        }
+        code.append("\n");
+        return code.toString();
+    }
+
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
         // TODO: Hardcoded to int return type, needs to be expanded
-        if(returnInst.getReturnType().getTypeOfElement().equals(ElementType.VOID)){
+        if (returnInst.getReturnType().getTypeOfElement().equals(ElementType.VOID)) {
             code.append("return").append(NL);
             return code.toString();
         }
@@ -215,22 +264,49 @@ public class JasminGenerator {
         return code.toString();
     }
 
-    private String typeJasmin(Type type){
+    private String generateGetField(GetFieldInstruction getFieldInst) {
+        var code = new StringBuilder();
+        code.append("aload 0 ; push this\n");
+        code.append("getfield ");
+        code.append(ollirResult.getOllirClass().getClassName());
+        code.append("/");
+        code.append(getFieldInst.getField().getName());
+        code.append(" ");
+        code.append(typeJasmin(getFieldInst.getFieldType()));
+        code.append("\n");
+        return code.toString();
+    }
+
+    private String generatePutField(PutFieldInstruction putFieldInst) {
+        var code = new StringBuilder();
+        code.append("aload 0 ; push this\n");
+        code.append(generators.apply(putFieldInst.getValue()));
+        code.append("putfield ");
+        code.append(ollirResult.getOllirClass().getClassName());
+        code.append("/");
+        code.append(putFieldInst.getField().getName());
+        code.append(" ");
+        code.append(typeJasmin(putFieldInst.getValue().getType()));
+        code.append("\n");
+        return code.toString();
+    }
+
+    private String typeJasmin(Type type) {
         var ret = "";
         var typeString = type.toString();
-        if(type.getTypeOfElement().equals(ElementType.ARRAYREF)){
+        if (type.getTypeOfElement().equals(ElementType.ARRAYREF)) {
             ret = "[";
             typeString = typeString.substring(0, typeString.length() - 2);
         }
-        switch (typeString){
+        switch (typeString) {
             case "INT32":
                 return ret + "I";
             case "BOOLEAN":
-                return ret +"Z";
+                return ret + "Z";
             case "STRING":
-                return ret +"Ljava/lang/String;";
+                return ret + "Ljava/lang/String;";
             case "VOID":
-                return ret +"V";
+                return ret + "V";
         }
         return "";
     }

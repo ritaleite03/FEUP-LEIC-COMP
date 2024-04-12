@@ -6,6 +6,7 @@ class T {
     public int foo() {
         int a;
         a = 1;
+        abc = this;
         abc.abc.foo();
         return 0;
     }

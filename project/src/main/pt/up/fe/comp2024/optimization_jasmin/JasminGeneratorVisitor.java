@@ -32,7 +32,6 @@ public class JasminGeneratorVisitor extends AJmmVisitor<Void, String> {
         currentRegisters = null;
     }
 
-
     @Override
     protected void buildVisitor() {
         // Using strings to avoid compilation problems in projects that
@@ -44,12 +43,12 @@ public class JasminGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit("ReturnStmt", this::visitReturnStmt);
     }
 
-
     private String visitProgram(JmmNode program, Void unused) {
 
         // Get class decl node
         var classDecl = program.getChild(0);
-        SpecsCheck.checkArgument(classDecl.isInstance("ClassDecl"), () -> "Expected a node of type 'ClassDecl', but instead got '" + classDecl.getKind() + "'");
+        SpecsCheck.checkArgument(classDecl.isInstance("ClassDecl"),
+                () -> "Expected a node of type 'ClassDecl', but instead got '" + classDecl.getKind() + "'");
 
         return visit(classDecl);
     }
@@ -85,8 +84,6 @@ public class JasminGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitMethodDecl(JmmNode methodDecl, Void unused) {
         var methodName = methodDecl.get("name");
-
-
         // set method
         currentMethod = methodName;
 
@@ -109,7 +106,6 @@ public class JasminGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // calculate modifier
         var modifier = methodDecl.getObject("isPublic", Boolean.class) ? "public " : "";
-
 
         // TODO: Hardcoded param types and return type, needs to be expanded
         code.append("\n.method ").append(modifier).append(methodName).append("(I)I").append(NL);
@@ -145,7 +141,8 @@ public class JasminGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // store value in top of the stack in destination
         var lhs = assignStmt.getChild(0);
-        SpecsCheck.checkArgument(lhs.isInstance("VarRefExpr"), () -> "Expected a node of type 'VarRefExpr', but instead got '" + lhs.getKind() + "'");
+        SpecsCheck.checkArgument(lhs.isInstance("VarRefExpr"),
+                () -> "Expected a node of type 'VarRefExpr', but instead got '" + lhs.getKind() + "'");
 
         var destName = lhs.get("name");
 

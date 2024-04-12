@@ -19,6 +19,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
     private final String END_STMT = ";\n";
 
     private final SymbolTable table;
+    public String currentMethod;
 
     public OllirExprGeneratorVisitor(SymbolTable table) {
         this.table = table;
@@ -121,10 +122,14 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         if (type == null)
             return new OllirExprResult(id);
 
+        var isLocalList = table.getLocalVariables(currentMethod).stream().filter(local -> local.getName().equals(id))
+                .toList();
+        var isParamList = table.getParameters(currentMethod).stream().filter(param -> param.getName().equals(id))
+                .toList();
         var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(id)).toList();
         String ollirType = OptUtils.toOllirType(type);
 
-        if (!isFieldList.isEmpty()) {
+        if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
             var code = OptUtils.getTemp() + ollirType;
             var computation = new StringBuilder();
             computation.append(code);
