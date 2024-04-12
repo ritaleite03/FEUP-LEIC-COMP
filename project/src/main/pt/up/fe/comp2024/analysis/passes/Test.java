@@ -227,7 +227,7 @@ public class Test implements AnalysisPass {
             importSet.add(splitImport[splitImport.length - 1]);
         }
 
-        if (importSet.size() != table.getImports().size()) {
+        if (importSet.size() != imports.size() + 1) {
             addNewReport("Error: Duplicated Imports", root);
         }
 
