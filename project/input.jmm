@@ -9,11 +9,13 @@ class T extends C {
     }
     public int foo() {
         C c;
+        String b;
         int a;
         c = new C();
         a = 1;
         abc = this;
         abc.abc.foo();
+        b=c.foo();
         return 0;
     }
 }
