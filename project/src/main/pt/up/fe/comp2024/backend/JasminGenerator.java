@@ -186,6 +186,7 @@ public class JasminGenerator {
 
     private String generateOperand(Operand operand) {
         // get register
+        // System.out.println("Getting " + operand.getName());
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         if (operand.getType() instanceof ClassType)
             return "aload " + reg + NL;
@@ -212,7 +213,6 @@ public class JasminGenerator {
     }
 
     private String generateCall(CallInstruction callInst) {
-        System.out.println(callInst.toTree());
         var code = new StringBuilder();
         switch (callInst.getInvocationType()) {
             case NEW:
@@ -222,25 +222,16 @@ public class JasminGenerator {
             case arraylength:
                 break;
             case invokeinterface:
+                invokeMethod(code, callInst, "invokeinterface");
                 break;
             case invokespecial:
-                var operand = (Operand) callInst.getOperands().get(0);
-                var className = ((ClassType) ((Operand) callInst.getOperands().get(0)).getType()).getName();
-                var methodName = ((LiteralElement) callInst.getOperands().get(1)).getLiteral();
-                if (methodName.charAt(0) == '"') {
-                    methodName = methodName.substring(1, methodName.length() - 1);
-                }
-                code.append(generateOperand(operand));
-
-                code.append("invokespecial ");
-                code.append(className);
-                code.append("/");
-                code.append(methodName);
-                code.append("()V");
+                invokeMethod(code, callInst, "invokespecial");
                 break;
             case invokestatic:
+                invokeMethod(code, callInst, "invokestatic");
                 break;
             case invokevirtual:
+                invokeMethod(code, callInst, "invokevirtual");
                 break;
             case ldc:
                 break;
@@ -250,6 +241,35 @@ public class JasminGenerator {
         }
         code.append("\n");
         return code.toString();
+    }
+
+    private void invokeMethod(StringBuilder code, CallInstruction callInst, String callType) {
+        System.out.println(callInst.toTree());
+        var operand = (Operand) callInst.getOperands().get(0);
+        var className = ((ClassType) ((Operand) callInst.getOperands().get(0)).getType()).getName();
+        var methodName = ((LiteralElement) callInst.getOperands().get(1)).getLiteral();
+        if (methodName.charAt(0) == '"') {
+            methodName = methodName.substring(1, methodName.length() - 1);
+        }
+        if (!callType.equals("invokestatic"))
+            code.append(generateOperand(operand));
+        else
+            className = operand.getName();
+        for (var param : callInst.getOperands().stream().skip(2).toList()) {
+            code.append(generators.apply(param));
+        }
+
+        code.append(callType);
+        code.append(" ");
+        code.append(className);
+        code.append("/");
+        code.append(methodName);
+        code.append("(");
+        for (int i = 0; i < callInst.getArguments().size(); i++) {
+            code.append(this.typeJasmin(callInst.getArguments().get(i).getType()));
+        }
+        code.append(")");
+        code.append(this.typeJasmin(callInst.getReturnType()));
     }
 
     private String generateReturn(ReturnInstruction returnInst) {
