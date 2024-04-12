@@ -77,7 +77,12 @@ public class JasminGenerator {
 
         // TODO: Hardcoded to Object, needs to be expanded
         code.append(".super java/lang/Object").append(NL);
-
+        for (var field : classUnit.getFields()) {
+            code.append(".field private ");
+            code.append(field.getFieldName());
+            code.append(typeJasmin(field.getFieldType()));
+            code.append(NL);
+        }
         // generate a single constructor method
         var defaultConstructor = """
                 ;default constructor
