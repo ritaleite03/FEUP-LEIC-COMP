@@ -60,6 +60,13 @@ public class Test implements AnalysisPass {
     }
 
     protected void visitStatement(JmmNode stmt, SymbolTable table) {
+        for(int i = 0; i < stmt.getChildren().size(); i++){
+            var stmtChild = stmt.getChild(i);
+            if(stmtChild.getKind().equals("ReturnStmt") && i < stmt.getChildren().size()-1){
+                addNewReport("Error : Return not the last stmt on block", stmt);
+            }
+        }
+
         switch (stmt.getKind()) {
             case ("MultiStmt"):
                 stmt.getChildren().forEach(stm -> visitStatement(stm, table));
@@ -175,7 +182,14 @@ public class Test implements AnalysisPass {
                         method);
             }
         }
-        method.getChildren("Stmt").forEach(stmt -> visitStatement(stmt, table));
+        for(int i = 0; i < method.getChildren().size(); i++){
+            var stmt = method.getChild(i);
+            if(stmt.getKind().equals("ReturnStmt") && i < method.getChildren().size()-1){
+                addNewReport("Error : Return not the last stmt", method);
+            }
+            visitStatement(stmt,table);
+        }
+       // method.getChildren("Stmt").forEach(stmt -> visitStatement(stmt, table));
     }
 
     @Override
