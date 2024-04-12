@@ -1,30 +1,12 @@
-
-import C;
-
-class T extends C{
+import io;
+class T {
     T abc;
-    int ola(){
-        return 1;
+    public static void main(String[] args) {
     }
-    int test(){
-        // float a;
+    public int foo() {
         int a;
-        // int[] b;
-        C c;
-        // c = new T();
-        c.ola;
-        abc.ola();
-        // a = b[0];
-        // a = b.length;
-        // a = C;
-        // if(true){
-        //     a = true;
-        // }else{
-        //     a = true;
-        // }
-        // b[a] = 1;
-        ola();
+        a = 1;
+        abc.abc.foo();
         return 0;
     }
-
 }
