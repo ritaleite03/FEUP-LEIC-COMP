@@ -9,6 +9,7 @@ import pt.up.fe.comp2024.analysis.AnalysisPass;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
+import pt.up.fe.comp2024.utils.ReservedWords;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -135,13 +136,24 @@ public class Test implements AnalysisPass {
         TypeUtils.currentMethod = currentMethod;
         TypeUtils.isStatic = NodeUtils.getBooleanAttribute(method, "isStatic", "false");
         var params = table.getParameters(currentMethod);
-        Set<String> paramsSet = Set.copyOf(params.stream().map(field -> field.getName()).toList());
+        
+        Set<String> paramsSet = Set.copyOf(params.stream().map(field -> {
+            String name = field.getName();
+            if(ReservedWords.isReservedWord(name)){
+                addNewReport("Error: The word '" + name + "' is a reserved word and cannot be used as an identifier", method);
+            }
+            return name;}).toList());
+
         if (paramsSet.size() != params.size()) {
             addNewReport("Duplicate param names in method declaration", method);
         }
         var locals = table.getLocalVariables(currentMethod);
-        Set<String> localsSet = Set
-                .copyOf(locals.stream().map(field -> field.getName()).toList());
+        Set<String> localsSet = Set.copyOf(locals.stream().map(field -> {
+            String name = field.getName();
+            if(ReservedWords.isReservedWord(name)){
+                addNewReport("Error: The word '" + name + "' is a reserved word and cannot be used as an identifier", method);
+            }
+            return name;}).toList());
         if (localsSet.size() != locals.size()) {
             addNewReport("Duplicate local variable names in method declaration", method);
         }
@@ -157,7 +169,12 @@ public class Test implements AnalysisPass {
     @Override
     public List<Report> analyze(JmmNode root, SymbolTable table) {
         TypeUtils.reports = this.reports;
-        Set<String> fieldsSet = Set.copyOf(table.getFields().stream().map(field -> field.getName()).toList());
+        Set<String> fieldsSet = Set.copyOf(table.getFields().stream().map(field -> {
+            String name = field.getName();
+            if(ReservedWords.isReservedWord(name)){
+                addNewReport("Error: The word '" + name + "' is a reserved word and cannot be used as an identifier", root);
+            }
+            return name;}).toList());
         if (fieldsSet.size() != table.getFields().size()) {
             addNewReport("Duplicate field names in class declaration", root);
         }
