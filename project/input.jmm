@@ -1,10 +1,13 @@
 import io;
-class T {
+import test.C;
+class T extends C {
     T abc;
     public static void main(String[] args) {
     }
     public int foo() {
+        C c;
         int a;
+        c = new C();
         a = 1;
         abc = this;
         abc.abc.foo();
