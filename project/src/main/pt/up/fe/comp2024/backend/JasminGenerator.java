@@ -119,8 +119,6 @@ public class JasminGenerator {
         var methodName = method.getMethodName();
         code.append("\n.method ").append(modifier).append(isStatic).append(methodName).append("(");
 
-        // TODO: Hardcoded param types and return type, needs to be expanded
-
         // Add params
         for (int i = 0; i < method.getParams().size(); i++) {
             code.append(this.typeJasmin(method.getParams().get(i).getType()));
@@ -204,7 +202,9 @@ public class JasminGenerator {
         var op = switch (binaryOp.getOperation().getOpType()) {
             case ADD -> "iadd";
             case MUL -> "imul";
-            default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
+            case DIV -> "idiv";
+            case SUB -> "isub";
+            default -> throw new IllegalArgumentException("Unexpected value: " + binaryOp.getOperation().getOpType());
         };
 
         code.append(op).append(NL);
