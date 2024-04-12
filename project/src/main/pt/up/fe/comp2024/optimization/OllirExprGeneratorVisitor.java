@@ -28,6 +28,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
     protected void buildVisitor() {
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(BINARY_EXPR, this::visitBinExpr);
+        addVisit(UNARY_EXPR, this::visitUnaryExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit("FuncExpr", this::visitFunctionCall);
         addVisit("SelfFuncExpr", this::visitSelfFunctionCall);
@@ -85,6 +86,30 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         Type type = TypeUtils.getExprType(node, table);
         computation.append(node.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
                 .append(rhs.getCode()).append(END_STMT);
+
+        return new OllirExprResult(code, computation);
+    }
+
+    private OllirExprResult visitUnaryExpr(JmmNode node, Type expected) {
+
+        var s = visit(node.getJmmChild(0));
+
+        StringBuilder computation = new StringBuilder();
+
+        // code to compute the children
+        computation.append(s.getComputation());
+
+        // code to compute self
+        Type resType = TypeUtils.getExprType(node, table);
+        String resOllirType = OptUtils.toOllirType(resType);
+        String code = OptUtils.getTemp() + resOllirType;
+
+        computation.append(code).append(SPACE)
+                .append(ASSIGN).append(resOllirType).append(SPACE);
+
+        Type type = TypeUtils.getExprType(node, table);
+        computation.append(node.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
+                .append(s.getCode()).append(END_STMT);
 
         return new OllirExprResult(code, computation);
     }
@@ -228,7 +253,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
      * Default visitor. Visits every child node and return an empty result.
      *
      * @param node
-     * @param unused
+     * @param expected
      * @return
      */
     private OllirExprResult defaultVisit(JmmNode node, Type expected) {
