@@ -11,10 +11,7 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.comp2024.utils.ReservedWords;
 
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class Test implements AnalysisPass {
     private String currentMethod;
@@ -178,6 +175,25 @@ public class Test implements AnalysisPass {
         if (fieldsSet.size() != table.getFields().size()) {
             addNewReport("Duplicate field names in class declaration", root);
         }
+
+        Set<String> importSet = new HashSet<>();
+        for(int i = 0; i < table.getImports().size(); i++){
+            importSet.add(table.getImports().get(i));
+        }
+
+        if(importSet.size()!=table.getImports().size()){
+            addNewReport("Error: Duplicated Imports", root);
+        }
+
+        Set<String> methodSet = new HashSet<>();
+        for(int i = 0; i < table.getMethods().size(); i++){
+            methodSet.add(table.getMethods().get(i));
+        }
+
+        if(methodSet.size()!=table.getMethods().size()){
+            addNewReport("Error: Duplicated Methods", root);
+        }
+
         root.getChildren(Kind.CLASS_DECL).get(0).getChildren(Kind.METHOD_DECL).stream()
                 .forEach(method -> visitMethods(method, table));
         return reports;
