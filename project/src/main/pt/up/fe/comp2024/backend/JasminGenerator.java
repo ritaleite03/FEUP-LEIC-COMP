@@ -267,7 +267,7 @@ public class JasminGenerator {
     private void invokeMethod(StringBuilder code, CallInstruction callInst, String callType) {
         System.out.println(callInst.toTree());
         var operand = (Operand) callInst.getOperands().get(0);
-        var className = typeJasmin(((Operand) callInst.getOperands().get(0)).getType());
+        var className = handleImports(((Operand) callInst.getOperands().get(0)).getType());
         var methodName = ((LiteralElement) callInst.getOperands().get(1)).getLiteral();
         if (methodName.charAt(0) == '"') {
             methodName = methodName.substring(1, methodName.length() - 1);
@@ -348,8 +348,22 @@ public class JasminGenerator {
                 return ret + "V";
         }
         if (typeString.equals(classUnit.getClassName())) {
-            return typeString;
+            return "L" + typeString;
         }
+        if (classUnit.isImportedClass(typeString)) {
+            for (var importedClass : classUnit.getImports()) {
+                if (importedClass.endsWith("." + typeString)) {
+                    return "L" + importedClass.replace(".", "/");
+                }
+            }
+        }
+        System.out.println("Invalid type");
+        System.out.println(typeString);
+        return "";
+    }
+
+    private String handleImports(Type type) {
+        var typeString = ((ClassType) type).getName();
         if (classUnit.isImportedClass(typeString)) {
             for (var importedClass : classUnit.getImports()) {
                 if (importedClass.endsWith("." + typeString)) {
@@ -357,9 +371,7 @@ public class JasminGenerator {
                 }
             }
         }
-        System.out.println("Invalid type");
-        System.out.println(typeString);
-        return "";
+        return typeString;
     }
 
     private String typeJasmin(Type type) {
