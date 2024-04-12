@@ -103,10 +103,8 @@ public class JasminGenerator {
     }
 
     private String generateMethod(Method method) {
-
         // set method
         currentMethod = method;
-
         var code = new StringBuilder();
 
         // calculate modifier
@@ -114,19 +112,29 @@ public class JasminGenerator {
                 ? method.getMethodAccessModifier().name().toLowerCase() + " "
                 : "";
 
+        var isStatic = method.isStaticMethod() ? "static " : "";
         var methodName = method.getMethodName();
+        code.append("\n.method ").append(modifier).append(isStatic).append(methodName).append("(");
 
         // TODO: Hardcoded param types and return type, needs to be expanded
-        code.append("\n.method ").append(modifier).append(methodName).append("(I)I").append(NL);
+
+        // Add params
+        for(int i = 0; i < method.getParams().size(); i++){
+            code.append(this.typeJasmin(method.getParams().get(i).getType()));
+        }
+
+        // Add return
+        var returnType = method.getReturnType();
+        code.append(")").append(this.typeJasmin(returnType)).append(NL);
 
         // Add limits
         code.append(TAB).append(".limit stack 99").append(NL);
         code.append(TAB).append(".limit locals 99").append(NL);
 
         for (var inst : method.getInstructions()) {
+
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
-
             code.append(instCode);
         }
 
@@ -197,13 +205,34 @@ public class JasminGenerator {
 
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
-
         // TODO: Hardcoded to int return type, needs to be expanded
-
+        if(returnInst.getReturnType().getTypeOfElement().equals(ElementType.VOID)){
+            code.append("return").append(NL);
+            return code.toString();
+        }
         code.append(generators.apply(returnInst.getOperand()));
         code.append("ireturn").append(NL);
-
         return code.toString();
+    }
+
+    private String typeJasmin(Type type){
+        var ret = "";
+        var typeString = type.toString();
+        if(type.getTypeOfElement().equals(ElementType.ARRAYREF)){
+            ret = "[";
+            typeString = typeString.substring(0, typeString.length() - 2);
+        }
+        switch (typeString){
+            case "INT32":
+                return ret + "I";
+            case "BOOLEAN":
+                return ret +"Z";
+            case "STRING":
+                return ret +"Ljava/lang/String;";
+            case "VOID":
+                return ret +"V";
+        }
+        return "";
     }
 
 }

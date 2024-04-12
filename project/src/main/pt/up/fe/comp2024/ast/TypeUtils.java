@@ -49,11 +49,6 @@ public class TypeUtils {
         if (left == null || right == null) {
             return null;
         }
-
-        System.out.print("arithmetic expression ");
-        System.out.println(expr);
-        System.out.println(left);
-        System.out.println(right);
         switch (expr.get("op")) {
             case "+", "-", "*", "/":
                 // if it is INT and the expression does not need to be boolean (for loops and
@@ -102,10 +97,6 @@ public class TypeUtils {
             child = getExprType(expr.getChild(0), table);
             arguments = arguments.stream().skip(1).toList();
         }
-        System.out.print("child: ");
-        System.out.print(isMainClass);
-        System.out.print(" ");
-        System.out.println(child);
         isMainClass = isMainClass || (child != null && table.getClassName().equals(child.getName()));
         // class object and function declared
         if (!isMainClass)
@@ -182,7 +173,6 @@ public class TypeUtils {
 
     protected static Type visitFieldAccessExpression(JmmNode expr, SymbolTable table) {
         Type rigth = getExprType(expr.getChild(0), table);
-        System.out.println("expr");
         if (rigth == null) {
             return null;
         }
@@ -223,7 +213,6 @@ public class TypeUtils {
     }
 
     public static Type getExprType(JmmNode expr, SymbolTable table) {
-        System.out.println(expr.getKind());
         var a = switch (expr.getKind()) {
             case "IntegerLiteral" -> new Type("int", false);
             case "VarRefExpr" -> visitVariableReferenceExpression(expr.get("name"), table, expr);

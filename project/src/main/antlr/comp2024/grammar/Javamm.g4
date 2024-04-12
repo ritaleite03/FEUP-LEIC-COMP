@@ -28,6 +28,7 @@ RBRACKETS: ']';
 // Words
 CLASS: 'class';
 PUBLIC: 'public';
+STATIC : 'static';
 RETURN: 'return';
 IMPORT: 'import';
 EXTENDS: 'extends';
@@ -61,8 +62,8 @@ typeOrVargs
 	| name = ID ('...' {$isArray=true;$isVarArgs=true;});
 
 methodDecl
-	locals[boolean isPublic=false]:
-	(PUBLIC {$isPublic=true;})? 'static'? type name = ID LPAREN (
+	locals[boolean isPublic=false,boolean isStatic=false]:
+	(PUBLIC {$isPublic=true;})? (STATIC {$isStatic=true;})?? type name = ID LPAREN (
 		param (COL param)*
 	)? RPAREN LCURLY varDecl* stmt* RCURLY;
 

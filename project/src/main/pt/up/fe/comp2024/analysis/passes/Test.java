@@ -119,8 +119,6 @@ public class Test implements AnalysisPass {
                 break;
             }
             case ("ReturnStmt"): {
-                System.out.println("oi");
-                System.out.println(stmt.getChild(0));
                 Type typeExpr = TypeUtils.getExprType(stmt.getChild(0), table);
                 Optional<Type> typeReturn = table.getReturnTypeTry(currentMethod);
                 if (typeReturn.isPresent()) {
