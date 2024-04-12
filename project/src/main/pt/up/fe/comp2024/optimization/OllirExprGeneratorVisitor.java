@@ -32,6 +32,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         addVisit("FuncExpr", this::visitFunctionCall);
         addVisit("SelfFuncExpr", this::visitSelfFunctionCall);
         addVisit("NewExpr", this::visitNewExpr);
+        addVisit("FieldAccessExpr", this::visitFieldAccessExpr);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -95,11 +96,61 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         if (type == null)
             return new OllirExprResult(id);
 
+        var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(id)).toList();
         String ollirType = OptUtils.toOllirType(type);
+
+        if (!isFieldList.isEmpty()) {
+            var code = OptUtils.getTemp() + ollirType;
+            var computation = new StringBuilder();
+            computation.append(code);
+            computation.append(SPACE)
+                    .append(ASSIGN)
+                    .append(ollirType);
+            computation.append(SPACE);
+            computation.append("getfield");
+            computation.append("(this, ");
+            computation.append(id);
+            computation.append(ollirType);
+            computation.append(")");
+            computation.append(ollirType);
+            computation.append(";\n");
+            return new OllirExprResult(code, computation);
+        }
 
         String code = id + ollirType;
 
         return new OllirExprResult(code);
+    }
+
+    private OllirExprResult visitFieldAccessExpr(JmmNode node, Type expected) {
+        var lhs = visit(node.getChild(0));
+        var lhsType = typeOrExpected(TypeUtils.getExprType(node.getChild(0), table), new Type("V", false));
+        var fieldName = node.get("field");
+        var ollirType = ".V";
+        if (!lhsType.isArray() && lhsType.getName().equals(table.getClassName())) {
+            ollirType = OptUtils.toOllirType(table.getFields().stream()
+                    .filter(field -> field.getName().equals(fieldName)).findFirst().get().getType());
+        }
+        var code = OptUtils.getTemp() + ollirType;
+        var computation = new StringBuilder();
+        computation.append(lhs.getComputation());
+        computation.append(code);
+        computation.append(SPACE)
+                .append(ASSIGN)
+                .append(ollirType);
+        computation.append(SPACE);
+        computation.append("getfield");
+        computation.append("(");
+        computation.append(lhs.getCode());
+        if (!lhs.getCode().contains("."))
+            computation.append(OptUtils.toOllirType(lhsType));
+        computation.append(", ");
+        computation.append(fieldName);
+        computation.append(ollirType);
+        computation.append(")");
+        computation.append(ollirType);
+        computation.append(";\n");
+        return new OllirExprResult(code, computation);
     }
 
     private OllirExprResult visitFunctionCall(JmmNode node, Type expected) {
@@ -115,25 +166,14 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
             callType = "invokestatic";
         }
 
-        if(node.getKind().toString().equals("FuncExpr")){
-            var fieldName = node.getChild(0).get("name");
-            var isFieldList = table.getFields().stream().filter(field->field.getName().equals(fieldName)).toList();
-
-            if(!isFieldList.isEmpty()){
-                return generateFunction(object.getCode(), callType, object.getComputation(), node, 1, functionName, type,fieldName,true);
-            }
-
-        }
-
-        return generateFunction(object.getCode(), callType, object.getComputation(), node, 1, functionName, type,"",false);
+        return generateFunction(object.getCode(), callType, object.getComputation(), node, 1, functionName, type);
     }
 
     private OllirExprResult visitSelfFunctionCall(JmmNode node, Type expected) {
-        System.out.println("oiii");
         var functionName = node.get("functionName");
         var type = typeOrExpected(TypeUtils.getExprType(node, table), expected);
         return generateFunction("this." + table.getClassName(), "invokevirtual", "", node, 0,
-                functionName, type,"",false);
+                functionName, type);
     }
 
     private OllirExprResult generateFunction(
@@ -143,30 +183,17 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
             JmmNode node,
             int start,
             String functionName,
-            Type type,
-            String fieldName,
-            Boolean getfield) {
+            Type type) {
 
         var computation = new StringBuilder();
         String res;
 
-        if(getfield){
-            var fieldType = table.getFields().stream().filter(field->field.getName().equals(fieldName)).toList().get(0).getType();
-            res = OptUtils.getTemp() + OptUtils.toOllirType(fieldType);
-            computation.append(res);
-            computation.append(SPACE)
-                    .append(ASSIGN)
-                    .append(OptUtils.toOllirType(fieldType));
-            computation.append(SPACE);
-            computation.append("getfield");
-            computation.append("(this, ");
-            computation.append(fieldName);
-            computation.append("."+fieldType.getName());
-            computation.append(")."+fieldType.getName());
-            computation.append(";\n");
-
-            object = res;
+        var args = node.getChildren().stream().skip(start).map(arg -> visit(arg)).toList();
+        for (var arg : args) {
+            computation.append(arg.getComputation());
+            computation.append("\n");
         }
+
         if (type == null) {
             res = "";
         } else {
@@ -184,12 +211,9 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         computation.append(",\"");
         computation.append(functionName);
         computation.append("\"");
-        for (int i = start; i < node.getChildren().size(); i++) {
-           var arg = visit(node.getJmmChild(i));
-           computation.append(", " + arg.getCode());
+        for (var arg : args) {
+            computation.append(", " + arg.getCode());
         }
-
-
         computation.append(")");
         if (type == null) {
             computation.append(".V");
