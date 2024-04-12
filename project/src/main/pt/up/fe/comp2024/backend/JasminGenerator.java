@@ -203,6 +203,9 @@ public class JasminGenerator {
     private String generateOperand(Operand operand) {
         // get register
         // System.out.println("Getting " + operand.getName());
+        if (operand.getName().equals("this")) {
+            return "aload 0\n";
+        }
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         if (operand.getType() instanceof ClassType)
             return "aload " + reg + NL;
