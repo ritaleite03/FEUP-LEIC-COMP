@@ -4,13 +4,18 @@ class T extends C {
     T abc;
     public static void main(String[] args) {
     }
+    public T bar() {
+        return this;
+    }
     public int foo() {
         C c;
+        String b;
         int a;
         c = new C();
         a = 1;
         abc = this;
         abc.abc.foo();
+        b=c.foo();
         return 0;
     }
 }
