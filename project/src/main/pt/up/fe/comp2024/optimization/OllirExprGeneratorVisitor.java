@@ -11,7 +11,7 @@ import static pt.up.fe.comp2024.ast.Kind.*;
 /**
  * Generates OLLIR code from JmmNodes that are expressions.
  */
-public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExprResult> {
+public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExprResult> {
 
     private static final String SPACE = " ";
     private static final String ASSIGN = ":=";
@@ -27,20 +27,42 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     protected void buildVisitor() {
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(BINARY_EXPR, this::visitBinExpr);
-        addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(UNARY_EXPR, this::visitUnaryExpr);
+        addVisit(INTEGER_LITERAL, this::visitInteger);
+        addVisit("FuncExpr", this::visitFunctionCall);
+        addVisit("SelfFuncExpr", this::visitSelfFunctionCall);
+        addVisit("NewExpr", this::visitNewExpr);
+
 
         setDefaultVisit(this::defaultVisit);
     }
 
-    private OllirExprResult visitInteger(JmmNode node, Void unused) {
+    private OllirExprResult visitInteger(JmmNode node, Type expected) {
         var intType = new Type(TypeUtils.getIntTypeName(), false);
         String ollirIntType = OptUtils.toOllirType(intType);
         String code = node.get("value") + ollirIntType;
         return new OllirExprResult(code);
     }
 
-    private OllirExprResult visitBinExpr(JmmNode node, Void unused) {
+    private OllirExprResult visitNewExpr(JmmNode node, Type expected) {
+        var name = node.get("name");
+        var tmp = OptUtils.getTemp();
+        var code = tmp + "." + name;
+        var computation = new StringBuilder();
+        computation.append(code);
+        computation.append(" :=.");
+        computation.append(name);
+        computation.append(" new(");
+        computation.append(name);
+        computation.append(").");
+        computation.append(name);
+        computation.append(";\ninvokespecial(");
+        computation.append(code);
+        computation.append(",\"<init>\").V;\n");
+        return new OllirExprResult(code, computation);
+    }
+
+    private OllirExprResult visitBinExpr(JmmNode node, Type expected) {
 
         var lhs = visit(node.getJmmChild(0));
         var rhs = visit(node.getJmmChild(1));
@@ -67,7 +89,8 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         return new OllirExprResult(code, computation);
     }
 
-    private  OllirExprResult visitUnaryExpr(JmmNode node, Void unused) {
+
+    private  OllirExprResult visitUnaryExpr(JmmNode node, Type expected) {
 
         var s = visit(node.getJmmChild(0));
 
@@ -90,10 +113,14 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         return new OllirExprResult(code, computation);
     }
-    private OllirExprResult visitVarRef(JmmNode node, Void unused) {
+
+    private OllirExprResult visitVarRef(JmmNode node, Type expected) {
 
         var id = node.get("name");
-        Type type = TypeUtils.getExprType(node, table);
+        Type type = typeOrExpected(TypeUtils.getExprType(node, table), expected);
+        if (type == null)
+            return new OllirExprResult(id);
+
         String ollirType = OptUtils.toOllirType(type);
 
         String code;
@@ -109,21 +136,86 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         return new OllirExprResult(code);
     }
 
+    private OllirExprResult visitFunctionCall(JmmNode node, Type expected) {
+        var type = typeOrExpected(TypeUtils.getExprType(node, table), expected);
+        var object = visit(node.getChild(0));
+        var functionName = node.get("functionName");
+        String callType;
+        if (object.getCode().contains(".")) {
+            callType = "invokevirtual";
+        } else {
+            callType = "invokestatic";
+        }
+        return generateFunction(object.getCode(), callType, object.getComputation(), node, 1, functionName, type);
+    }
+
+    private OllirExprResult visitSelfFunctionCall(JmmNode node, Type expected) {
+        var functionName = node.get("functionName");
+        var type = typeOrExpected(TypeUtils.getExprType(node, table), expected);
+        return generateFunction("this." + table.getClassName(), "invokevirtual", "", node, 0,
+                functionName, type);
+    }
+
+    private OllirExprResult generateFunction(
+            String object,
+            String callType,
+            String preComputation,
+            JmmNode node,
+            int start,
+            String functionName,
+            Type type) {
+        var computation = new StringBuilder();
+        String res;
+        if (type == null) {
+            res = "";
+        } else {
+            res = OptUtils.getTemp() + OptUtils.toOllirType(type);
+            computation.append(res);
+            computation.append(SPACE)
+                    .append(ASSIGN)
+                    .append(OptUtils.toOllirType(type));
+            computation.append(SPACE);
+        }
+        computation.append(callType);
+        computation.append("(");
+        computation.append(object);
+        computation.append(",\"");
+        computation.append(functionName);
+        computation.append("\"");
+        for (int i = start; i < node.getChildren().size(); i++) {
+            var arg = visit(node.getJmmChild(i));
+            computation.append(", " + arg.getCode());
+        }
+        computation.append(")");
+        if (type == null) {
+            computation.append(".V");
+        } else {
+            computation.append(OptUtils.toOllirType(type));
+        }
+        computation.append(";\n");
+        return new OllirExprResult(res, preComputation + computation.toString());
+    }
 
     /**
      * Default visitor. Visits every child node and return an empty result.
      *
      * @param node
-     * @param unused
+     * @param expected
      * @return
      */
-    private OllirExprResult defaultVisit(JmmNode node, Void unused) {
+    private OllirExprResult defaultVisit(JmmNode node, Type expected) {
 
         for (var child : node.getChildren()) {
             visit(child);
         }
 
         return OllirExprResult.EMPTY;
+    }
+
+    private Type typeOrExpected(Type type, Type expected) {
+        if (type != null)
+            return type;
+        return expected;
     }
 
 }

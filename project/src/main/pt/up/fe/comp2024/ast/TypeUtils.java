@@ -21,6 +21,7 @@ public class TypeUtils {
 
     public static List<Report> reports;
     public static String currentMethod;
+    public static boolean isStatic;
 
     protected static void addNewReport(String message, JmmNode expr) {
         if (reports == null)
@@ -141,18 +142,23 @@ public class TypeUtils {
     }
 
     public static Type visitVariableReferenceExpression(String name, SymbolTable table, JmmNode expr) {
+
         if (name.equals("true") || name.equals("false")) {
             return new Type("boolean", false);
         }
 
-        if (name.equals("this")) {
-            return new Type(table.getClassName(), false);
+        if (!isStatic) {
+            if (name.equals("this")) {
+                return new Type(table.getClassName(), false);
+            }
         }
 
         List<Symbol> symbols = new ArrayList<>();
         symbols.addAll(table.getLocalVariables(currentMethod));
         symbols.addAll(table.getParameters(currentMethod));
-        symbols.addAll(table.getFields());
+        if (!isStatic) {
+            symbols.addAll(table.getFields());
+        }
 
         var symbol = symbols.stream()
                 .filter(param -> param.getName().equals(name)).findFirst();

@@ -133,6 +133,7 @@ public class Test implements AnalysisPass {
     protected void visitMethods(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
         TypeUtils.currentMethod = currentMethod;
+        TypeUtils.isStatic = NodeUtils.getBooleanAttribute(method, "isStatic", "false");
         var params = table.getParameters(currentMethod);
         Set<String> paramsSet = Set.copyOf(params.stream().map(field -> field.getName()).toList());
         if (paramsSet.size() != params.size()) {
