@@ -60,9 +60,9 @@ public class Test implements AnalysisPass {
     }
 
     protected void visitStatement(JmmNode stmt, SymbolTable table) {
-        for(int i = 0; i < stmt.getChildren().size(); i++){
+        for (int i = 0; i < stmt.getChildren().size(); i++) {
             var stmtChild = stmt.getChild(i);
-            if(stmtChild.getKind().equals("ReturnStmt") && i < stmt.getChildren().size()-1){
+            if (stmtChild.getKind().equals("ReturnStmt") && i < stmt.getChildren().size() - 1) {
                 addNewReport("Error : Return not the last stmt on block", stmt);
             }
         }
@@ -141,32 +141,34 @@ public class Test implements AnalysisPass {
         TypeUtils.isStatic = NodeUtils.getBooleanAttribute(method, "isStatic", "false");
         var params = table.getParameters(currentMethod);
 
-        if(currentMethod.equals("main")){
-            if(params.size() != 1 || !params.get(0).getType().getName().equals("String") || !params.get(0).getType().isArray()){
+        if (currentMethod.equals("main")) {
+            if (params.size() != 1 || !params.get(0).getType().getName().equals("String")
+                    || !params.get(0).getType().isArray()) {
                 addNewReport("Error: Main method does not have only String[] as params", method);
             }
-            if(!method.get("isStatic").equals("true")){
+            if (!method.get("isStatic").equals("true")) {
                 addNewReport("Error: Main method not static", method);
             }
-            if(!method.get("isPublic").equals("true")){
+            if (!method.get("isPublic").equals("true")) {
                 addNewReport("Error: Main method not public", method);
             }
-            if(!method.getChildren().get(0).get("name").equals("void")){
+            if (!method.getChildren().get(0).get("name").equals("void")) {
                 addNewReport("Error: Main method not void", method);
             }
-        }
-        else {
-            if(method.get("isStatic").equals("true")){
+        } else {
+            if (method.get("isStatic").equals("true")) {
                 addNewReport("Error: method not main cannot be static", method);
             }
         }
 
         Set<String> paramsSet = Set.copyOf(params.stream().map(field -> {
             String name = field.getName();
-            if(ReservedWords.isReservedWord(name)){
-                addNewReport("Error: The word '" + name + "' is a reserved word and cannot be used as an identifier", method);
+            if (ReservedWords.isReservedWord(name)) {
+                addNewReport("Error: The word '" + name + "' is a reserved word and cannot be used as an identifier",
+                        method);
             }
-            return name;}).toList());
+            return name;
+        }).toList());
 
         if (paramsSet.size() != params.size()) {
             addNewReport("Duplicate param names in method declaration", method);
@@ -174,10 +176,12 @@ public class Test implements AnalysisPass {
         var locals = table.getLocalVariables(currentMethod);
         Set<String> localsSet = Set.copyOf(locals.stream().map(field -> {
             String name = field.getName();
-            if(ReservedWords.isReservedWord(name)){
-                addNewReport("Error: The word '" + name + "' is a reserved word and cannot be used as an identifier", method);
+            if (ReservedWords.isReservedWord(name)) {
+                addNewReport("Error: The word '" + name + "' is a reserved word and cannot be used as an identifier",
+                        method);
             }
-            return name;}).toList());
+            return name;
+        }).toList());
         if (localsSet.size() != locals.size()) {
             addNewReport("Duplicate local variable names in method declaration", method);
         }
@@ -187,14 +191,15 @@ public class Test implements AnalysisPass {
                         method);
             }
         }
-        for(int i = 0; i < method.getChildren().size(); i++){
+        for (int i = 0; i < method.getChildren().size(); i++) {
             var stmt = method.getChild(i);
-            if(stmt.getKind().equals("ReturnStmt") && i < method.getChildren().size()-1){
+            if (stmt.getKind().equals("ReturnStmt") && i < method.getChildren().size() - 1) {
                 addNewReport("Error : Return not the last stmt", method);
             }
-            visitStatement(stmt,table);
+            visitStatement(stmt, table);
         }
-        if(!method.getChild(method.getChildren().size()-1).getKind().equals("ReturnStmt") && !method.getChildren().get(0).get("name").equals("void")){
+        if (!method.getChild(method.getChildren().size() - 1).getKind().equals("ReturnStmt")
+                && !method.getChildren().get(0).get("name").equals("void")) {
             addNewReport("Error : method should have a return", method);
         }
     }
@@ -204,29 +209,35 @@ public class Test implements AnalysisPass {
         TypeUtils.reports = this.reports;
         Set<String> fieldsSet = Set.copyOf(table.getFields().stream().map(field -> {
             String name = field.getName();
-            if(ReservedWords.isReservedWord(name)){
-                addNewReport("Error: The word '" + name + "' is a reserved word and cannot be used as an identifier", root);
+            if (ReservedWords.isReservedWord(name)) {
+                addNewReport("Error: The word '" + name + "' is a reserved word and cannot be used as an identifier",
+                        root);
             }
-            return name;}).toList());
+            return name;
+        }).toList());
         if (fieldsSet.size() != table.getFields().size()) {
             addNewReport("Duplicate field names in class declaration", root);
         }
 
         Set<String> importSet = new HashSet<>();
-        for(int i = 0; i < table.getImports().size(); i++){
-            importSet.add(table.getImports().get(i));
+        var imports = table.getImports();
+        importSet.add(table.getClassName());
+        for (int i = 0; i < imports.size(); i++) {
+            var splitImport = imports.get(i).split("\\.");
+            importSet.add(splitImport[splitImport.length - 1]);
         }
 
-        if(importSet.size()!=table.getImports().size()){
+        if (importSet.size() != table.getImports().size()) {
             addNewReport("Error: Duplicated Imports", root);
         }
 
         Set<String> methodSet = new HashSet<>();
-        for(int i = 0; i < table.getMethods().size(); i++){
-            methodSet.add(table.getMethods().get(i));
+        var methods = table.getMethods();
+        for (int i = 0; i < methods.size(); i++) {
+            methodSet.add(methods.get(i));
         }
 
-        if(methodSet.size()!=table.getMethods().size()){
+        if (methodSet.size() != methods.size()) {
             addNewReport("Error: Duplicated Methods", root);
         }
 
