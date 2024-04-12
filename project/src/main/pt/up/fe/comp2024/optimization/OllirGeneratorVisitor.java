@@ -139,6 +139,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var name = node.get("name");
         code.append(name);
         TypeUtils.currentMethod = name;
+        TypeUtils.isStatic = NodeUtils.getBooleanAttribute(node, "isStatic", "false");
+
         // param
         int paramsSize = 0;
         List<String> params = new ArrayList<>();
