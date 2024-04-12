@@ -80,6 +80,7 @@ public class JasminGenerator {
         for (var field : classUnit.getFields()) {
             code.append(".field private ");
             code.append(field.getFieldName());
+            code.append(" ");
             code.append(typeJasmin(field.getFieldType()));
             code.append(NL);
         }
