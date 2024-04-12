@@ -29,6 +29,7 @@ public class JasminGenerator {
     String code;
 
     Method currentMethod;
+    ClassUnit classUnit;
 
     private final FunctionClassMap<TreeNode, String> generators;
 
@@ -68,7 +69,9 @@ public class JasminGenerator {
     }
 
     private String generateClassUnit(ClassUnit classUnit) {
-
+        System.out.println(classUnit.getImports());
+        System.out.println(classUnit.getImportedClasseNames());
+        this.classUnit = classUnit;
         var code = new StringBuilder();
 
         // generate class name
@@ -97,7 +100,7 @@ public class JasminGenerator {
                     aload_0
                 """);
         code.append("    invokespecial ");
-        code.append(superName);
+        code.append(typeJasmin(superName));
         code.append("/<init>()V\n");
         code.append("""
                     return
@@ -261,7 +264,7 @@ public class JasminGenerator {
     private void invokeMethod(StringBuilder code, CallInstruction callInst, String callType) {
         System.out.println(callInst.toTree());
         var operand = (Operand) callInst.getOperands().get(0);
-        var className = ((ClassType) ((Operand) callInst.getOperands().get(0)).getType()).getName();
+        var className = typeJasmin(((Operand) callInst.getOperands().get(0)).getType());
         var methodName = ((LiteralElement) callInst.getOperands().get(1)).getLiteral();
         if (methodName.charAt(0) == '"') {
             methodName = methodName.substring(1, methodName.length() - 1);
@@ -303,7 +306,7 @@ public class JasminGenerator {
         var code = new StringBuilder();
         code.append("aload 0 ; push this\n");
         code.append("getfield ");
-        code.append(ollirResult.getOllirClass().getClassName());
+        code.append(classUnit.getClassName());
         code.append("/");
         code.append(getFieldInst.getField().getName());
         code.append(" ");
@@ -326,13 +329,11 @@ public class JasminGenerator {
         return code.toString();
     }
 
-    private String typeJasmin(Type type) {
-        var ret = "";
-        var typeString = type.toString();
-        if (type.getTypeOfElement().equals(ElementType.ARRAYREF)) {
-            ret = "[";
-            typeString = typeString.substring(0, typeString.length() - 2);
-        }
+    private String typeJasmin(String typeString) {
+        return typeJasmin("", typeString);
+    }
+
+    private String typeJasmin(String ret, String typeString) {
         switch (typeString) {
             case "INT32":
                 return ret + "I";
@@ -343,7 +344,32 @@ public class JasminGenerator {
             case "VOID":
                 return ret + "V";
         }
+        if (typeString.equals(classUnit.getClassName())) {
+            return typeString;
+        }
+        if (classUnit.isImportedClass(typeString)) {
+            for (var importedClass : classUnit.getImports()) {
+                if (importedClass.endsWith("." + typeString)) {
+                    return importedClass.replace(".", "/");
+                }
+            }
+        }
+        System.out.println("Invalid type");
+        System.out.println(typeString);
         return "";
+    }
+
+    private String typeJasmin(Type type) {
+        var ret = "";
+        var typeString = type.toString();
+        if (type instanceof ClassType) {
+            typeString = ((ClassType) type).getName();
+        }
+        if (type.getTypeOfElement().equals(ElementType.ARRAYREF)) {
+            ret = "[";
+            typeString = typeString.substring(0, typeString.length() - 2);
+        }
+        return typeJasmin(ret, typeString);
     }
 
 }
