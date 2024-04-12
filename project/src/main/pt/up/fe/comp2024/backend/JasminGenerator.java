@@ -100,7 +100,7 @@ public class JasminGenerator {
                     aload_0
                 """);
         code.append("    invokespecial ");
-        code.append(typeJasmin(superName));
+        code.append(superName);
         code.append("/<init>()V\n");
         code.append("""
                     return
