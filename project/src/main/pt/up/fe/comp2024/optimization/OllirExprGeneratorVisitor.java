@@ -4,6 +4,7 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
+import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
@@ -108,17 +109,22 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         var functionName = node.get("functionName");
         String callType;
 
-        var fieldName = node.getChild(0).get("name");
-        var isFieldList = table.getFields().stream().filter(field->field.getName().equals(fieldName)).toList();
-
         if (object.getCode().contains(".")) {
             callType = "invokevirtual";
         } else {
             callType = "invokestatic";
         }
-        if(!isFieldList.isEmpty()){
-            return generateFunction(object.getCode(), callType, object.getComputation(), node, 1, functionName, type,fieldName,true);
+
+        if(node.getKind().toString().equals("FuncExpr")){
+            var fieldName = node.getChild(0).get("name");
+            var isFieldList = table.getFields().stream().filter(field->field.getName().equals(fieldName)).toList();
+
+            if(!isFieldList.isEmpty()){
+                return generateFunction(object.getCode(), callType, object.getComputation(), node, 1, functionName, type,fieldName,true);
+            }
+
         }
+
         return generateFunction(object.getCode(), callType, object.getComputation(), node, 1, functionName, type,"",false);
     }
 
