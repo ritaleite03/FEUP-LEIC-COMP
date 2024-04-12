@@ -11,10 +11,7 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.comp2024.utils.ReservedWords;
 
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class Test implements AnalysisPass {
     private String currentMethod;
@@ -136,7 +133,22 @@ public class Test implements AnalysisPass {
         TypeUtils.currentMethod = currentMethod;
         TypeUtils.isStatic = NodeUtils.getBooleanAttribute(method, "isStatic", "false");
         var params = table.getParameters(currentMethod);
-        
+
+        if(currentMethod.equals("main")){
+            if(params.size() != 1 || !params.get(0).getType().getName().equals("String") || !params.get(0).getType().isArray()){
+                addNewReport("Error: Main method does not have only String[] as params", method);
+            }
+            if(!method.get("isStatic").equals("true")){
+                addNewReport("Error: Main method not static", method);
+            }
+            if(!method.get("isPublic").equals("true")){
+                addNewReport("Error: Main method not public", method);
+            }
+            if(!method.getChildren().get(0).get("name").equals("void")){
+                addNewReport("Error: Main method not void", method);
+            }
+        }
+
         Set<String> paramsSet = Set.copyOf(params.stream().map(field -> {
             String name = field.getName();
             if(ReservedWords.isReservedWord(name)){
@@ -178,6 +190,25 @@ public class Test implements AnalysisPass {
         if (fieldsSet.size() != table.getFields().size()) {
             addNewReport("Duplicate field names in class declaration", root);
         }
+
+        Set<String> importSet = new HashSet<>();
+        for(int i = 0; i < table.getImports().size(); i++){
+            importSet.add(table.getImports().get(i));
+        }
+
+        if(importSet.size()!=table.getImports().size()){
+            addNewReport("Error: Duplicated Imports", root);
+        }
+
+        Set<String> methodSet = new HashSet<>();
+        for(int i = 0; i < table.getMethods().size(); i++){
+            methodSet.add(table.getMethods().get(i));
+        }
+
+        if(methodSet.size()!=table.getMethods().size()){
+            addNewReport("Error: Duplicated Methods", root);
+        }
+
         root.getChildren(Kind.CLASS_DECL).get(0).getChildren(Kind.METHOD_DECL).stream()
                 .forEach(method -> visitMethods(method, table));
         return reports;
