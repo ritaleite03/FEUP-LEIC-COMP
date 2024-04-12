@@ -133,7 +133,22 @@ public class Test implements AnalysisPass {
         TypeUtils.currentMethod = currentMethod;
         TypeUtils.isStatic = NodeUtils.getBooleanAttribute(method, "isStatic", "false");
         var params = table.getParameters(currentMethod);
-        
+
+        if(currentMethod.equals("main")){
+            if(params.size() != 1 || !params.get(0).getType().getName().equals("String") || !params.get(0).getType().isArray()){
+                addNewReport("Error: Main method does not have only String[] as params", method);
+            }
+            if(!method.get("isStatic").equals("true")){
+                addNewReport("Error: Main method not static", method);
+            }
+            if(!method.get("isPublic").equals("true")){
+                addNewReport("Error: Main method not public", method);
+            }
+            if(!method.getChildren().get(0).get("name").equals("void")){
+                addNewReport("Error: Main method not void", method);
+            }
+        }
+
         Set<String> paramsSet = Set.copyOf(params.stream().map(field -> {
             String name = field.getName();
             if(ReservedWords.isReservedWord(name)){
