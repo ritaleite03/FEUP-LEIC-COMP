@@ -3,27 +3,27 @@ import C;
 
 class T extends C{
     T abc;
-    int[] ola(){
-        return [];
+    int ola(){
+        return 1;
     }
     int test(){
-        float a;
+        // float a;
         int a;
-        int[] b;
+        // int[] b;
         C c;
-        c = new T();
+        // c = new T();
         c.ola;
-        abc.ola;
-        a = b[0];
-        a = b.length;
-        a = C;
-        if(true){
-            a = true;
-        }else{
-            a = true;
-        }
-        b[a] = 1;
-        ola()[0] = 1;
+        abc.ola();
+        // a = b[0];
+        // a = b.length;
+        // a = C;
+        // if(true){
+        //     a = true;
+        // }else{
+        //     a = true;
+        // }
+        // b[a] = 1;
+        ola();
         return 0;
     }
 
