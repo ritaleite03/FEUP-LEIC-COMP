@@ -155,6 +155,11 @@ public class Test implements AnalysisPass {
                 addNewReport("Error: Main method not void", method);
             }
         }
+        else {
+            if(method.get("isStatic").equals("true")){
+                addNewReport("Error: method not main cannot be static", method);
+            }
+        }
 
         Set<String> paramsSet = Set.copyOf(params.stream().map(field -> {
             String name = field.getName();
@@ -189,7 +194,9 @@ public class Test implements AnalysisPass {
             }
             visitStatement(stmt,table);
         }
-       // method.getChildren("Stmt").forEach(stmt -> visitStatement(stmt, table));
+        if(!method.getChild(method.getChildren().size()-1).getKind().equals("ReturnStmt") && !method.getChildren().get(0).get("name").equals("void")){
+            addNewReport("Error : method should have a return", method);
+        }
     }
 
     @Override
