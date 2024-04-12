@@ -1,6 +1,4 @@
-import io;
-import test.C;
-class T extends C {
+class T {
     T abc;
     public static void main(String[] args) {
     }
@@ -8,14 +6,11 @@ class T extends C {
         return this;
     }
     public int foo() {
-        C c;
         String b;
         int a;
-        c = new C();
         a = 1;
         abc = this;
         abc.abc.foo();
-        b=c.foo();
         return 0;
     }
 }
