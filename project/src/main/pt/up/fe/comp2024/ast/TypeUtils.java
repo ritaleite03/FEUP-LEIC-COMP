@@ -254,4 +254,27 @@ public class TypeUtils {
         type.putObject("isVarArg", value);
     }
 
+    public static boolean isValidType(Type type, SymbolTable table) {
+        if (type.getName().equals("int"))
+            return true;
+        if (type.getName().equals("String"))
+            return true;
+        if (type.isArray())
+            return false;
+        if (type.getName().equals("boolean"))
+            return true;
+        if (type.getName().equals(table.getClassName()))
+            return true;
+        if (isInImports(type.getName(), table))
+            return true;
+        return false;
+    }
+
+    private static boolean isInImports(String name, SymbolTable table) {
+        return table.getImports().stream().map(x -> {
+            var splitImport = x.split("\\.");
+            return splitImport[splitImport.length - 1];
+        }).anyMatch(x -> x.equals(name));
+    }
+
 }

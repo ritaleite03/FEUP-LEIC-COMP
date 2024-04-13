@@ -174,21 +174,27 @@ public class Test implements AnalysisPass {
             addNewReport("Duplicate param names in method declaration", method);
         }
         var locals = table.getLocalVariables(currentMethod);
-        Set<String> localsSet = Set.copyOf(locals.stream().map(field -> {
-            String name = field.getName();
+        Set<String> localsSet = Set.copyOf(locals.stream().map(local -> {
+            String name = local.getName();
             if (ReservedWords.isReservedWord(name)) {
                 addNewReport("Error: The word '" + name + "' is a reserved word and cannot be used as an identifier",
                         method);
+            }
+            if (!TypeUtils.isValidType(local.getType(), table)) {
+                addNewReport("Invalid type : " + local.getType(), method);
             }
             return name;
         }).toList());
         if (localsSet.size() != locals.size()) {
             addNewReport("Duplicate local variable names in method declaration", method);
         }
-        for (int i = 0; i < params.size() - 1; i++) {
-            if (TypeUtils.isVarArgs(params.get(i).getType())) {
+        for (int i = 0; i < params.size(); i++) {
+            if (i < params.size() - 1 && TypeUtils.isVarArgs(params.get(i).getType())) {
                 addNewReport("VarArgs : VarArgs are only valid as the last argument",
                         method);
+            }
+            if (!TypeUtils.isValidType(params.get(i).getType(), table)) {
+                addNewReport("Invalid type : " + params.get(i).getType(), method);
             }
         }
         for (int i = 0; i < method.getChildren().size(); i++) {
@@ -212,6 +218,9 @@ public class Test implements AnalysisPass {
             if (ReservedWords.isReservedWord(name)) {
                 addNewReport("Error: The word '" + name + "' is a reserved word and cannot be used as an identifier",
                         root);
+            }
+            if (!TypeUtils.isValidType(field.getType(), table)) {
+                addNewReport("Invalid type : " + field.getType(), root);
             }
             return name;
         }).toList());
