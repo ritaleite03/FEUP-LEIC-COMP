@@ -2,6 +2,8 @@ import B;
 
 class ObjectAssignmentPassExtends extends B {
 
+    int ola;
+
     public static void main(String[] args) {
 
     }
@@ -9,10 +11,13 @@ class ObjectAssignmentPassExtends extends B {
     public ObjectAssignmentPassExtends foo() {
         ObjectAssignmentPassExtends a;
         B b;
+        int c;
 
         a = new ObjectAssignmentPassExtends();
         b = new B();
 
+        //a = b.ola;
+        c = a.ola;
         // ObjectAssignmentPassExtends extends B
         b = a;
 

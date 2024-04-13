@@ -190,10 +190,14 @@ public class TypeUtils {
             addNewReport("Not .length on array", expr);
             return null;
         }
+        if(!rigth.getName().equals(table.getClassName())){
+            addNewReport("Field Access Expression : field cannot be access because object is not the same as class", expr);
+        }
+        /*
         if (table.getImports().contains(rigth.getName())) {
             return null;
         }
-
+        */
         var symbol = table.getFields().stream()
                 .filter(param -> param.getName().equals(field)).findFirst();
 
