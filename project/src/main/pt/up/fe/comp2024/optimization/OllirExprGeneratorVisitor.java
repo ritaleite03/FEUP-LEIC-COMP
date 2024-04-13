@@ -31,6 +31,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(UNARY_EXPR, this::visitUnaryExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
+        addVisit("ParenExpr", this::visitParenExpr);
         addVisit("FuncExpr", this::visitFunctionCall);
         addVisit("SelfFuncExpr", this::visitSelfFunctionCall);
         addVisit("NewExpr", this::visitNewExpr);
@@ -44,6 +45,10 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         String ollirIntType = OptUtils.toOllirType(intType);
         String code = node.get("value") + ollirIntType;
         return new OllirExprResult(code);
+    }
+
+    private OllirExprResult visitParenExpr(JmmNode node, Type expected) {
+        return visit(node.getChild(0), expected);
     }
 
     private OllirExprResult visitNewExpr(JmmNode node, Type expected) {
