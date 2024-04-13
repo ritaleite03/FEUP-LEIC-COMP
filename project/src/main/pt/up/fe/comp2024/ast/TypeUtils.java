@@ -164,10 +164,12 @@ public class TypeUtils {
             return new Type("boolean", false);
         }
 
-        if (!isStatic) {
-            if (name.equals("this")) {
-                return new Type(table.getClassName(), false);
-            }
+        if (isStatic && name.equals("this")) {
+            addNewReport("This in static method", expr);
+            return null;
+        }
+        if (name.equals("this")) {
+            return new Type(table.getClassName(), false);
         }
 
         List<Symbol> symbols = new ArrayList<>();
