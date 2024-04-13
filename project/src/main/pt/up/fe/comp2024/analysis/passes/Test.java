@@ -39,9 +39,9 @@ public class Test implements AnalysisPass {
             return;
         }
 
-        if (left.isArray()) {
-            addNewReport("Assign Statement : Assignment of array variable wrong", stmt);
-        }
+        // if (left.isArray()) {
+        // addNewReport("Assign Statement : Assignment of array variable wrong", stmt);
+        // }
 
         boolean leftIsImport = TypeUtils.isInImports(left.getName(), table);
         // boolean leftIsMain = table.getClassName().equals(left.getName());

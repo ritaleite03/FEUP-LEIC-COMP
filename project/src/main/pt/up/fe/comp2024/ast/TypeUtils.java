@@ -199,11 +199,7 @@ public class TypeUtils {
             addNewReport("Field Access Expression : field cannot be access because object is not the same as class",
                     expr);
         }
-        /*
-         * if (table.getImports().contains(rigth.getName())) {
-         * return null;
-         * }
-         */
+
         var symbol = table.getFields().stream()
                 .filter(param -> param.getName().equals(field)).findFirst();
 
@@ -214,6 +210,14 @@ public class TypeUtils {
         if (table.getSuper() == null)
             addNewReport("Field Access Expression : field not declared", expr);
 
+        return null;
+    }
+
+    protected static Type visitNewExpr(JmmNode expr, SymbolTable table) {
+        var type = new Type(expr.get("name"), false);
+        if (isValidType(type, table))
+            return type;
+        addNewReport("Invalid new expression", expr);
         return null;
     }
 
@@ -242,7 +246,7 @@ public class TypeUtils {
             case "ParenExpr" -> getExprType(expr.getChild(0), table);
             case "VarRefExpr" -> visitVariableReferenceExpression(expr.get("name"), table, expr);
             case "FieldAccessExpr" -> visitFieldAccessExpression(expr, table);
-            case "NewExpr" -> new Type(expr.get("name"), false);
+            case "NewExpr" -> visitNewExpr(expr, table);
             case "ArrayExpr" -> visitArrayExpr(expr, table);
             case "NewArrayExpr" -> visitNewArrayExpr(expr, table);
             case "UnaryExpr" -> visitUnaryExpression(expr, table);
