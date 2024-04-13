@@ -301,6 +301,10 @@ public class JasminGenerator {
             return code.toString();
         }
         code.append(generators.apply(returnInst.getOperand()));
+        if (returnInst.getReturnType() instanceof ClassType) {
+            code.append("areturn").append(NL);
+            return code.toString();
+        }
         code.append("ireturn").append(NL);
         return code.toString();
     }

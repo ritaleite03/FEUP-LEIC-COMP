@@ -28,7 +28,7 @@ RBRACKETS: ']';
 // Words
 CLASS: 'class';
 PUBLIC: 'public';
-STATIC : 'static';
+STATIC: 'static';
 RETURN: 'return';
 IMPORT: 'import';
 EXTENDS: 'extends';
@@ -78,7 +78,7 @@ expr:
 	| expr op = (DIV | MUL) expr									# BinaryExpr
 	| expr op = (SUB | ADD) expr									# BinaryExpr
 	| expr op = (LOGICAL | RELACIONAL) expr							# BinaryExpr
-	| expr LBRACKETS expr RBRACKETS									# ArrayDeclExpr
+	| expr LBRACKETS expr RBRACKETS									# ArrayAccessExpr
 	| NEW ID LBRACKETS expr RBRACKETS								# NewArrayExpr
 	| NEW name = ID LPAREN RPAREN									# NewExpr
 	| LBRACKETS (expr (COL expr)*)? RBRACKETS						# ArrayExpr

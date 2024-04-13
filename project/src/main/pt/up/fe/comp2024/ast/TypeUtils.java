@@ -72,7 +72,7 @@ public class TypeUtils {
         return null;
     }
 
-    protected static Type visitArrayDeclarationExpression(JmmNode expr, SymbolTable table) {
+    protected static Type visitArrayAccessExpression(JmmNode expr, SymbolTable table) {
 
         var left = getExprType(expr.getChild(0), table);
         var right = getExprType(expr.getChild(1), table);
@@ -80,7 +80,7 @@ public class TypeUtils {
         if (!left.isArray()) {
             addNewReport("Array Declaration Expression : left node not an array", expr);
             return null;
-        } else if (!right.getName().equals("int")) {
+        } else if (!right.getName().equals("int") || right.isArray()) {
             addNewReport("Array Declaration Expression : right node not an int", expr);
             return null;
         }
@@ -225,6 +225,7 @@ public class TypeUtils {
     public static Type getExprType(JmmNode expr, SymbolTable table) {
         var a = switch (expr.getKind()) {
             case "IntegerLiteral" -> new Type("int", false);
+            case "ParenExpr" -> getExprType(expr.getChild(0), table);
             case "VarRefExpr" -> visitVariableReferenceExpression(expr.get("name"), table, expr);
             case "FieldAccessExpr" -> visitFieldAccessExpression(expr, table);
             case "NewExpr" -> new Type(expr.get("name"), false);
@@ -232,7 +233,7 @@ public class TypeUtils {
             case "NewArrayExpr" -> new Type("int", true);
             case "UnaryExpr" -> visitUnaryExpression(expr, table);
             case "BinaryExpr" -> visitBinaryExpression(expr, table);
-            case "ArrayDeclExpr" -> visitArrayDeclarationExpression(expr, table);
+            case "ArrayAccessExpr" -> visitArrayAccessExpression(expr, table);
             case "FuncExpr", "SelfFuncExpr" -> visitFunctionExpression(expr, table);
             default -> null;
         };
@@ -255,6 +256,29 @@ public class TypeUtils {
 
     public static void setVarArgs(Type type, Boolean value) {
         type.putObject("isVarArg", value);
+    }
+
+    public static boolean isValidType(Type type, SymbolTable table) {
+        if (type.getName().equals("int"))
+            return true;
+        if (type.getName().equals("String"))
+            return true;
+        if (type.isArray())
+            return false;
+        if (type.getName().equals("boolean"))
+            return true;
+        if (type.getName().equals(table.getClassName()))
+            return true;
+        if (isInImports(type.getName(), table))
+            return true;
+        return false;
+    }
+
+    private static boolean isInImports(String name, SymbolTable table) {
+        return table.getImports().stream().map(x -> {
+            var splitImport = x.split("\\.");
+            return splitImport[splitImport.length - 1];
+        }).anyMatch(x -> x.equals(name));
     }
 
 }
