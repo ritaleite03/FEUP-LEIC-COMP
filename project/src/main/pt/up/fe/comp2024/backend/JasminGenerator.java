@@ -1,9 +1,11 @@
 package pt.up.fe.comp2024.backend;
 
+import org.antlr.v4.parse.v3TreeGrammarException;
 import org.specs.comp.ollir.*;
 import org.specs.comp.ollir.tree.TreeNode;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
@@ -276,10 +278,11 @@ public class JasminGenerator {
         if (methodName.charAt(0) == '"') {
             methodName = methodName.substring(1, methodName.length() - 1);
         }
-        if (!callType.equals("invokestatic"))
+        if (!callType.equals("invokestatic")) {
             code.append(generateOperand(operand));
-        else
-            className = operand.getName();
+        } else {
+            className = handleImports(operand.getName());
+        }
         for (var param : callInst.getOperands().stream().skip(2).toList()) {
             code.append(generators.apply(param));
         }
@@ -372,6 +375,10 @@ public class JasminGenerator {
 
     private String handleImports(Type type) {
         var typeString = ((ClassType) type).getName();
+        return handleImports(typeString);
+    }
+
+    private String handleImports(String typeString) {
         if (classUnit.isImportedClass(typeString)) {
             for (var importedClass : classUnit.getImports()) {
                 if (importedClass.endsWith("." + typeString)) {
