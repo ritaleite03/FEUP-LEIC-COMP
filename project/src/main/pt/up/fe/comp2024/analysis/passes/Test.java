@@ -43,7 +43,7 @@ public class Test implements AnalysisPass {
             addNewReport("Assign Statement : Assignment of array variable wrong", stmt);
         }
 
-        boolean leftIsImport = table.getImports().contains(left.getName());
+        boolean leftIsImport = TypeUtils.isInImports(left.getName(), table);
         // boolean leftIsMain = table.getClassName().equals(left.getName());
         boolean leftIsSuper = table.getSuper() != null && table.getSuper().equals(left.getName());
         // boolean rightIsImport = table.getImports().contains(right.getName());
@@ -115,7 +115,7 @@ public class Test implements AnalysisPass {
                         table.getClassName().equals(value.getName())) {
                     return;
                 }
-                if (table.getImports().contains(array.getName()) && !table.getClassName().equals(value.getName()))
+                if (TypeUtils.isInImports(value.getName(), table) && !table.getClassName().equals(value.getName()))
                     return;
                 if (!array.getName().equals(value.getName())) {
                     addNewReport("Array assignment value must be of the same tipe as array", stmt.getChild(2));

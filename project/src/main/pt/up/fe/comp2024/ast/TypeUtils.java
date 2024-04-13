@@ -166,7 +166,7 @@ public class TypeUtils {
         if (symbol.isPresent()) {
             return symbol.get().getType();
         }
-        if (table.getImports().contains(name)) {
+        if (isInImports(name, table)) {
             return null;
         }
         if (table.getSuper() != null) {
@@ -275,7 +275,7 @@ public class TypeUtils {
         return false;
     }
 
-    private static boolean isInImports(String name, SymbolTable table) {
+    public static boolean isInImports(String name, SymbolTable table) {
         return table.getImports().stream().map(x -> {
             var splitImport = x.split("\\.");
             return splitImport[splitImport.length - 1];

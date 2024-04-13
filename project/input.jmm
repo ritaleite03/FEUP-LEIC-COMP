@@ -1,14 +1,18 @@
-class T {
-    T abc;
+import io.ola;
+
+class CompileMethodInvocation {
+
     public static void main(String[] args) {
+
     }
-    public T bar() {
-        return this;
-    }
+
     public int foo() {
-        int b;
-        int[] a;
-        b = a.length;
+        int a;
+
+        a = 1;
+
+        ola.println(a);
+
         return 0;
     }
 }
