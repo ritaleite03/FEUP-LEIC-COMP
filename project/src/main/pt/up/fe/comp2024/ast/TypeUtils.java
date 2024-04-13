@@ -84,7 +84,7 @@ public class TypeUtils {
             addNewReport("Array Declaration Expression : right node not an int", expr);
             return null;
         }
-        return null;
+        return new Type(left.getName(), false);
     }
 
     protected static Type visitFunctionExpression(JmmNode expr, SymbolTable table) {
@@ -190,14 +190,15 @@ public class TypeUtils {
             addNewReport("Not .length on array", expr);
             return null;
         }
-        if(!rigth.getName().equals(table.getClassName())){
-            addNewReport("Field Access Expression : field cannot be access because object is not the same as class", expr);
+        if (!rigth.getName().equals(table.getClassName())) {
+            addNewReport("Field Access Expression : field cannot be access because object is not the same as class",
+                    expr);
         }
         /*
-        if (table.getImports().contains(rigth.getName())) {
-            return null;
-        }
-        */
+         * if (table.getImports().contains(rigth.getName())) {
+         * return null;
+         * }
+         */
         var symbol = table.getFields().stream()
                 .filter(param -> param.getName().equals(field)).findFirst();
 
