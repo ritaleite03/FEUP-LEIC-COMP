@@ -140,7 +140,7 @@ public class Test implements AnalysisPass {
         TypeUtils.currentMethod = currentMethod;
         TypeUtils.isStatic = NodeUtils.getBooleanAttribute(method, "isStatic", "false");
         var params = table.getParameters(currentMethod);
-
+        System.out.println(currentMethod + ":" + TypeUtils.isStatic);
         if (currentMethod.equals("main")) {
             if (params.size() != 1 || !params.get(0).getType().getName().equals("String")
                     || !params.get(0).getType().isArray()) {

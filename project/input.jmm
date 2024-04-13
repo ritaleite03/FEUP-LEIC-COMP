@@ -1,11 +1,16 @@
 import io;
-import foo.bar.A;
+import Auxi;
 
-class CompileMethodInvocation {
-
+class CompileMethodInvocation extends Auxi{
     public static void main(String[] args) {
-        String b;
-        b = A.foo();
+        Auxi a;
+        int b;
+        a = new CompileMethodInvocation();
+        b = a.instanceCallInt();
         io.println(b);
+    }
+
+    public int instanceCallInt() {
+        return 10;
     }
 }

@@ -97,6 +97,11 @@ public class TypeUtils {
             isMainClass = false;
             child = getExprType(expr.getChild(0), table);
             arguments = arguments.stream().skip(1).toList();
+        } else {
+            if (isStatic) {
+                addNewReport("Self call in static method", expr);
+                return null;
+            }
         }
         isMainClass = isMainClass || (child != null && table.getClassName().equals(child.getName()));
         // class object and function declared

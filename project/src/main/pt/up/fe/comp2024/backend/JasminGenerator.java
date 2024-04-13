@@ -80,10 +80,9 @@ public class JasminGenerator {
         var className = ollirResult.getOllirClass().getClassName();
         code.append(".class ").append(className).append(NL).append(NL);
 
-        // TODO: Hardcoded to Object, needs to be expanded
         var superName = "java/lang/Object";
         if (classUnit.getSuperClass() != null)
-            superName = classUnit.getSuperClass();
+            superName = handleImports(classUnit.getSuperClass());
         code.append(".super ");
         code.append(superName);
         code.append(NL);
@@ -185,7 +184,6 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
-        // TODO: Hardcoded for int type, needs to be expanded
         if (operand.getType() instanceof ClassType || operand.getType().toString().equals("STRING"))
             code.append("astore ").append(reg).append(NL);
         else
@@ -308,7 +306,7 @@ public class JasminGenerator {
             return code.toString();
         }
         code.append(generators.apply(returnInst.getOperand()));
-        if (returnInst.getReturnType() instanceof ClassType) {
+        if (returnInst.getReturnType() instanceof ClassType || returnInst.getReturnType().toString().equals("STRING")) {
             code.append("areturn").append(NL);
             return code.toString();
         }
