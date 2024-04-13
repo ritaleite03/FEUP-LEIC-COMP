@@ -8,8 +8,18 @@ class CompileMethodInvocation extends Auxi{
 
     public String instanceCallString() {
         int[] a;
-        String s;
-        a = new int[s];
+        int i;
+        a = new int[5];
+        i = 0;
+        while(i < a.length){
+            if((i/2 <10) && false){
+                io.println(a[i]);
+            }else{
+
+            }
+            i = i + 1;
+        }
+        
         return A.foo();
     }
 }

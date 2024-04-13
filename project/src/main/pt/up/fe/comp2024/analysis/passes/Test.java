@@ -73,7 +73,7 @@ public class Test implements AnalysisPass {
                 break;
             case ("IfStmt"): {
                 Type type = TypeUtils.getExprType(stmt.getChild(0), table);
-                if (!type.getName().equals("boolean") || type.isArray()) {
+                if (type != null && (!type.getName().equals("boolean") || type.isArray())) {
                     addNewReport("Not boolean expression in if", stmt.getChild(0));
                 }
                 visitStatement(stmt.getChild(1), table);
@@ -82,7 +82,7 @@ public class Test implements AnalysisPass {
             }
             case ("WhileStmt"): {
                 Type type = TypeUtils.getExprType(stmt.getChild(0), table);
-                if (!type.getName().equals("boolean") || type.isArray()) {
+                if (type != null && (!type.getName().equals("boolean") || type.isArray())) {
                     addNewReport("Not boolean expression in while", stmt.getChild(0));
                 }
                 visitStatement(stmt.getChild(1), table);
@@ -98,14 +98,20 @@ public class Test implements AnalysisPass {
                 var array = TypeUtils.getExprType(stmt.getChild(0), table);
                 var index = TypeUtils.getExprType(stmt.getChild(1), table);
                 var value = TypeUtils.getExprType(stmt.getChild(2), table);
+                if (array == null)
+                    return;
                 if (!array.isArray()) {
                     addNewReport("Array index of non array", stmt.getChild(0));
                     return;
                 }
+                if (index == null)
+                    return;
                 if (index.isArray() || !index.getName().equals("int")) {
                     addNewReport("Array index must be an integer", stmt.getChild(1));
                     return;
                 }
+                if (value == null)
+                    return;
                 if (value.isArray()) {
                     addNewReport("Array assignment value must not be array", stmt.getChild(2));
                     return;

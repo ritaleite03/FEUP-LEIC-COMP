@@ -35,7 +35,8 @@ public class TypeUtils {
     }
 
     protected static Type visitUnaryExpression(JmmNode expr, SymbolTable table) {
-        if (getExprType(expr.getChild(0), table).getName().equals("boolean")) {
+        var type = getExprType(expr.getChild(0), table);
+        if (type == null || type.getName().equals("boolean")) {
             return new Type("boolean", false);
         }
         addNewReport("Unary Expression : argument not boolean", expr);
@@ -47,24 +48,33 @@ public class TypeUtils {
         var left = getExprType(expr.getChild(0), table);
         var right = getExprType(expr.getChild(1), table);
 
-        if (left == null || right == null) {
-            return null;
-        }
         switch (expr.get("op")) {
             case "+", "-", "*", "/":
+                if (left == null || right == null) {
+                    return new Type("int", false);
+                }
                 // if it is INT and the expression does not need to be boolean (for loops and
                 // ifs conditions)
                 if (left.getName().equals("int") && !left.isArray() && left.equals(right)) {
                     return new Type("int", false);
                 }
+                break;
             case "<", "==":
+                if (left == null || right == null) {
+                    return new Type("boolean", false);
+                }
                 if (left.getName().equals("int") && !left.isArray() && left.equals(right)) {
                     return new Type("boolean", false);
                 }
+                break;
             case "&&":
+                if (left == null || right == null) {
+                    return new Type("boolean", false);
+                }
                 if (left.getName().equals("boolean") && !left.isArray() && left.equals(right)) {
                     return new Type("boolean", false);
                 }
+                break;
         }
         addNewReport(
                 "Arithmetic Expression : at least one argument not of right type or it is not expected an arithmetic expression",
@@ -76,6 +86,8 @@ public class TypeUtils {
 
         var left = getExprType(expr.getChild(0), table);
         var right = getExprType(expr.getChild(1), table);
+        if (left == null || right == null)
+            return new Type("int", false);
 
         if (!left.isArray()) {
             addNewReport("Array Declaration Expression : left node not an array", expr);
