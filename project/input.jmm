@@ -6,13 +6,9 @@ class CompileMethodInvocation {
 
     }
 
-    public int foo() {
-        int a;
-
-        a = 1;
-
-        ola.println(a);
-
-        return 0;
+    public void foo( ) {
+        ola a;
+        a = new ola();
+        a.println(1);
     }
 }

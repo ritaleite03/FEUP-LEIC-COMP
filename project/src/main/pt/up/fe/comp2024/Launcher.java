@@ -62,6 +62,11 @@ public class Launcher {
         System.out.println("====JASMIN====================");
         // Print Jasmin code
         System.out.println(jasminResult.getJasminCode());
+        System.out.println("====END=======================");
+
+        var runOutput = jasminResult.runWithFullOutput();
+        System.out.println("\n Result: " + runOutput.getOutput());
+        System.out.println("\n Exit code: " + runOutput.getReturnValue());
     }
 
 }

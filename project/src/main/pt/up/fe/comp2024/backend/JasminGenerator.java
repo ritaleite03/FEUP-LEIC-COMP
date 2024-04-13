@@ -240,7 +240,7 @@ public class JasminGenerator {
         switch (callInst.getInvocationType()) {
             case NEW:
                 code.append("new ");
-                code.append(((ClassType) callInst.getCaller().getType()).getName());
+                code.append(handleImports(callInst.getCaller().getType()));
                 break;
             case arraylength: {
                 var operand = (Operand) callInst.getOperands().get(0);
