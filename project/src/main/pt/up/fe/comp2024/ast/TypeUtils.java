@@ -228,6 +228,14 @@ public class TypeUtils {
         return new Type("int", true);
     }
 
+    protected static Type visitNewArrayExpr(JmmNode expr, SymbolTable table) {
+        var type = getExprType(expr.getChild(0), table);
+        if (type != null && (type.isArray() || !type.getName().equals("int"))) {
+            addNewReport("Invalid size for new array", expr.getChild(0));
+        }
+        return new Type("int", true);
+    }
+
     public static Type getExprType(JmmNode expr, SymbolTable table) {
         var a = switch (expr.getKind()) {
             case "IntegerLiteral" -> new Type("int", false);
@@ -236,7 +244,7 @@ public class TypeUtils {
             case "FieldAccessExpr" -> visitFieldAccessExpression(expr, table);
             case "NewExpr" -> new Type(expr.get("name"), false);
             case "ArrayExpr" -> visitArrayExpr(expr, table);
-            case "NewArrayExpr" -> new Type("int", true);
+            case "NewArrayExpr" -> visitNewArrayExpr(expr, table);
             case "UnaryExpr" -> visitUnaryExpression(expr, table);
             case "BinaryExpr" -> visitBinaryExpression(expr, table);
             case "ArrayAccessExpr" -> visitArrayAccessExpression(expr, table);
