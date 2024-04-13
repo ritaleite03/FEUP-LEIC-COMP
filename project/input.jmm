@@ -1,14 +1,11 @@
-import io.ola;
+import io;
+import foo.bar.A;
 
 class CompileMethodInvocation {
 
     public static void main(String[] args) {
-
-    }
-
-    public void foo( ) {
-        ola a;
-        a = new ola();
-        a.println(1);
+        String b;
+        b = A.foo();
+        io.println(b);
     }
 }

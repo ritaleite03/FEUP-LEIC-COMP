@@ -186,7 +186,7 @@ public class JasminGenerator {
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
         // TODO: Hardcoded for int type, needs to be expanded
-        if (operand.getType() instanceof ClassType)
+        if (operand.getType() instanceof ClassType || operand.getType().toString().equals("STRING"))
             code.append("astore ").append(reg).append(NL);
         else
             code.append("istore ").append(reg).append(NL);
@@ -209,7 +209,7 @@ public class JasminGenerator {
             return "aload 0\n";
         }
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        if (operand.getType() instanceof ClassType)
+        if (operand.getType() instanceof ClassType || operand.getType().toString().equals("STRING"))
             return "aload " + reg + NL;
         return "iload " + reg + NL;
     }
