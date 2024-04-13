@@ -174,17 +174,23 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
                 .append(ASSIGN)
                 .append(ollirType);
         computation.append(SPACE);
-        computation.append("getfield");
-        computation.append("(");
-        computation.append(lhs.getCode());
-        if (!lhs.getCode().contains("."))
-            computation.append(OptUtils.toOllirType(lhsType));
-        computation.append(", ");
-        computation.append(fieldName);
-        computation.append(ollirType);
-        computation.append(")");
-        computation.append(ollirType);
-        computation.append(";\n");
+        if (lhsType.isArray() && fieldName.equals("length")) {
+            computation.append("arraylength(");
+            computation.append(lhs.getCode());
+            computation.append(").i32;\n");
+        } else {
+            computation.append("getfield");
+            computation.append("(");
+            computation.append(lhs.getCode());
+            if (!lhs.getCode().contains("."))
+                computation.append(OptUtils.toOllirType(lhsType));
+            computation.append(", ");
+            computation.append(fieldName);
+            computation.append(ollirType);
+            computation.append(")");
+            computation.append(ollirType);
+            computation.append(";\n");
+        }
         return new OllirExprResult(code, computation);
     }
 

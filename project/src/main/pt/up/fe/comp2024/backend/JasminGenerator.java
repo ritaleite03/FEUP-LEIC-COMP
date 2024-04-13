@@ -240,8 +240,12 @@ public class JasminGenerator {
                 code.append("new ");
                 code.append(((ClassType) callInst.getCaller().getType()).getName());
                 break;
-            case arraylength:
+            case arraylength: {
+                var operand = (Operand) callInst.getOperands().get(0);
+                code.append(generators.apply(operand));
+                code.append("arraylength");
                 break;
+            }
             case invokeinterface:
                 invokeMethod(code, callInst, "invokeinterface");
                 break;

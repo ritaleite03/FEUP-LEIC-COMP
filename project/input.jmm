@@ -6,11 +6,9 @@ class T {
         return this;
     }
     public int foo() {
-        String b;
-        int a;
-        a = 1;
-        abc = this;
-        abc.abc.foo();
+        int b;
+        int[] a;
+        b = a.length;
         return 0;
     }
 }
