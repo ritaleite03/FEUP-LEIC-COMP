@@ -3,7 +3,7 @@ import foo.bar.A;
 import Auxi;
 
 class CompileMethodInvocation extends Auxi{
-    public void print(String a){
+    public void print(int a){
         io.println(a);
     }
 
@@ -11,6 +11,7 @@ class CompileMethodInvocation extends Auxi{
         CompileMethodInvocation a;
         a = new CompileMethodInvocation();
         a.instanceCallString();
+
     }
 
     public String instanceCallString() {
@@ -26,7 +27,10 @@ class CompileMethodInvocation extends Auxi{
         //     }
         //     i = i + 1;
         // }
-        print(A.foo());
+        Auxi ab;
+        ab = new Auxi();
+        print(ab.instanceCallInt());
+        [1,2,3][0]=1;
         return A.foo();
     }
 }

@@ -86,10 +86,10 @@ expr:
 	| name = ID														# VarRefExpr;
 
 stmt:
-	LCURLY (stmt)* RCURLY								# MultiStmt
-	| IF LPAREN expr RPAREN stmt ELSE stmt				# IfStmt
-	| WHILE LPAREN expr RPAREN stmt						# WhileStmt
-	| expr SEMI											# VarStmt
-	| name = ID EQUALS expr SEMI						# AssignStmt
-	| expr LBRACKETS expr RBRACKETS EQUALS expr SEMI	# AssignStmtArray
-	| RETURN expr SEMI									# ReturnStmt;
+	LCURLY (stmt)* RCURLY									# MultiStmt
+	| IF LPAREN expr RPAREN stmt ELSE stmt					# IfStmt
+	| WHILE LPAREN expr RPAREN stmt							# WhileStmt
+	| expr SEMI												# VarStmt
+	| name = ID EQUALS expr SEMI							# AssignStmt
+	| name = ID LBRACKETS expr RBRACKETS EQUALS expr SEMI	# AssignStmtArray
+	| RETURN expr SEMI										# ReturnStmt;

@@ -95,25 +95,25 @@ public class Test implements AnalysisPass {
                 visitAssignStatement(stmt, table);
                 break;
             case ("AssignStmtArray"): {
-                var array = TypeUtils.getExprType(stmt.getChild(0), table);
-                var index = TypeUtils.getExprType(stmt.getChild(1), table);
-                var value = TypeUtils.getExprType(stmt.getChild(2), table);
+                var array = TypeUtils.visitVariableReferenceExpression(stmt.get("name"), table, stmt);
+                var index = TypeUtils.getExprType(stmt.getChild(0), table);
+                var value = TypeUtils.getExprType(stmt.getChild(1), table);
                 if (array == null)
                     return;
                 if (!array.isArray()) {
-                    addNewReport("Array index of non array", stmt.getChild(0));
+                    addNewReport("Array index of non array", stmt);
                     return;
                 }
                 if (index == null)
                     return;
                 if (index.isArray() || !index.getName().equals("int")) {
-                    addNewReport("Array index must be an integer", stmt.getChild(1));
+                    addNewReport("Array index must be an integer", stmt.getChild(0));
                     return;
                 }
                 if (value == null)
                     return;
                 if (value.isArray()) {
-                    addNewReport("Array assignment value must not be array", stmt.getChild(2));
+                    addNewReport("Array assignment value must not be array", stmt.getChild(1));
                     return;
                 }
                 if (table.getSuper() != null &&
@@ -124,7 +124,7 @@ public class Test implements AnalysisPass {
                 if (TypeUtils.isInImports(value.getName(), table) && !table.getClassName().equals(value.getName()))
                     return;
                 if (!array.getName().equals(value.getName())) {
-                    addNewReport("Array assignment value must be of the same tipe as array", stmt.getChild(2));
+                    addNewReport("Array assignment value must be of the same tipe as array", stmt.getChild(1));
                     return;
                 }
                 break;
