@@ -246,15 +246,15 @@ public class Test implements AnalysisPass {
             addNewReport("Error: Duplicated Imports", root);
         }
 
-        // Set<String> methodSet = new HashSet<>();
-        // var methods = table.getMethods();
-        // for (int i = 0; i < methods.size(); i++) {
-        // methodSet.add(methods.get(i));
-        // }
+        Set<String> methodSet = new HashSet<>();
+        var methods = table.getMethods();
+        for (int i = 0; i < methods.size(); i++) {
+            methodSet.add(methods.get(i));
+        }
 
-        // if (methodSet.size() != methods.size()) {
-        // addNewReport("Error: Duplicated Methods", root);
-        // }
+        if (methodSet.size() != methods.size()) {
+            addNewReport("Error: Duplicated Methods", root);
+        }
 
         root.getChildren(Kind.CLASS_DECL).get(0).getChildren(Kind.METHOD_DECL).stream()
                 .forEach(method -> visitMethods(method, table));
