@@ -11,8 +11,6 @@ import pt.up.fe.comp2024.optimization.JmmOptimizationImpl;
 import pt.up.fe.comp2024.parser.JmmParserImpl;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsSystem;
-import pt.up.fe.specs.util.exceptions.NotImplementedException;
-
 import java.util.Map;
 
 public class Launcher {

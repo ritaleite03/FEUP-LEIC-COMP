@@ -10,7 +10,6 @@ import pt.up.fe.comp2024.ast.TypeUtils;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 
-import java.awt.desktop.SystemSleepEvent;
 import java.util.ArrayList;
 import java.util.List;
 

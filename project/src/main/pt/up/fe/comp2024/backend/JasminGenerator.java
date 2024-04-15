@@ -1,11 +1,9 @@
 package pt.up.fe.comp2024.backend;
 
-import org.antlr.v4.parse.v3TreeGrammarException;
 import org.specs.comp.ollir.*;
 import org.specs.comp.ollir.tree.TreeNode;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
@@ -341,6 +339,7 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    @SuppressWarnings("unused")
     private String typeJasmin(String typeString) {
         return typeJasmin("", typeString);
     }

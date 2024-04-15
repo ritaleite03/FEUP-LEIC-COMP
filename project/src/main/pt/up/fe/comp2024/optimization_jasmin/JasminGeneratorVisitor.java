@@ -19,6 +19,7 @@ public class JasminGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private JasminExprGeneratorVisitor exprGenerator;
 
+    @SuppressWarnings("unused")
     private String currentMethod;
     private int nextRegister;
 

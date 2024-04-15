@@ -43,7 +43,7 @@ public class CompilerConfig {
 
         config.put(CompilerConfig.OPTIMIZE, "false");
         config.put(CompilerConfig.REGISTER, "-1");
-        config.put(CompilerConfig.INPUT_FILE, "test/pt/up/fe/comp/initial/apps/App1.jmm");
+        config.put(CompilerConfig.INPUT_FILE, "input.jmm");
 
         return config;
     }
