@@ -12,7 +12,6 @@ class CompileMethodInvocation extends Auxi{
         CompileMethodInvocation a;
         a = new CompileMethodInvocation();
         a.instanceCallString();
-        i = 1;
     }
 
 }

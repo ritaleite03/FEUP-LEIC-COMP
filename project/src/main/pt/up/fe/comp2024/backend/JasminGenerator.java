@@ -144,7 +144,6 @@ public class JasminGenerator {
         // Add return
         var returnType = method.getReturnType();
         code.append(")").append(this.typeJasmin(returnType)).append(NL);
-
         // Add limits
         code.append(TAB).append(".limit stack 99").append(NL);
         code.append(TAB).append(".limit locals 99").append(NL);

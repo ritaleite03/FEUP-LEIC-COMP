@@ -3,8 +3,8 @@ package pt.up.fe.comp2024.optimization;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
+import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.JmmNode;
-import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 /**
  * Generates OLLIR code from JmmNodes that are expressions.
  */
-public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExprResult> {
+public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult> {
 
     private static final String SPACE = " ";
     private static final String ASSIGN = ":=";
@@ -243,7 +243,8 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         var computedArgs = new ArrayList<OllirExprResult>();
         var args = node.getChildren().stream().skip(start).toList();
 
-        if (object.contains(".") && object.split("\\.")[1].equals(table.getClassName())) {
+        if (object.contains(".") && object.split("\\.")[1].equals(table.getClassName()) && table
+                .getParameters(functionName) != null) {
             var params = table.getParameters(functionName);
             for (int i = 0; i < params.size(); i++) {
                 var computed = visit(args.get(i), params.get(i).getType());

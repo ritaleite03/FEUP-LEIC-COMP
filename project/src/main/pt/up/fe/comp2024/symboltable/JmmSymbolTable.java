@@ -71,6 +71,8 @@ public class JmmSymbolTable implements SymbolTable {
 
     @Override
     public List<Symbol> getParameters(String methodSignature) {
+        if (!params.containsKey(methodSignature))
+            return null;
         return Collections.unmodifiableList(params.get(methodSignature));
     }
 
