@@ -191,7 +191,7 @@ public class TypeUtils {
         if (isInImports(name, table)) {
             return null;
         }
-        if (table.getSuper() != null) {
+        if (!isStatic && table.getSuper() != null) {
             return null;
         }
         addNewReport("Variable Reference Expression : variable not declared", expr);

@@ -3,6 +3,7 @@ import foo.bar.A;
 import Auxi;
 
 class CompileMethodInvocation extends Auxi{
+    int i;
     public void print(int a){
         io.println(a);
     }
@@ -11,30 +12,7 @@ class CompileMethodInvocation extends Auxi{
         CompileMethodInvocation a;
         a = new CompileMethodInvocation();
         a.instanceCallString();
-
+        i = 1;
     }
 
-    public String instanceCallString() {
-        int[] a;
-        int i;
-        // a = new int[5];
-        // i = 0;
-        // while(i < a.length){
-        //     if((i/2 <10) && false){
-        //         io.println(a[i]);
-        //     }else{
-
-        //     }
-        //     i = i + 1;
-        // }
-        Auxi ab;
-        ab = new Auxi();
-        print(ab.instanceCallInt());
-        if(1 < a[(a[0] +2*3)]){
-
-        }else{
-
-        }
-        return A.foo();
-    }
 }
