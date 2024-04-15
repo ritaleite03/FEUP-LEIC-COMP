@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.optimization;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
@@ -8,6 +9,8 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
+
+import java.util.ArrayList;
 
 /**
  * Generates OLLIR code from JmmNodes that are expressions.
@@ -71,8 +74,12 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
 
     private OllirExprResult visitBinExpr(JmmNode node, Type expected) {
 
-        var lhs = visit(node.getJmmChild(0));
-        var rhs = visit(node.getJmmChild(1));
+        var expectedChild = new Type("int", false);
+        if (node.get("op").equals("&&")) {
+            expectedChild = new Type("boolean", false);
+        }
+        var lhs = visit(node.getJmmChild(0), expectedChild);
+        var rhs = visit(node.getJmmChild(1), expectedChild);
 
         StringBuilder computation = new StringBuilder();
 
@@ -81,7 +88,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         computation.append(rhs.getComputation());
 
         // code to compute self
-        Type resType = TypeUtils.getExprType(node, table);
+        Type resType = typeOrExpected(TypeUtils.getExprType(node, table), expected);
         String resOllirType = OptUtils.toOllirType(resType);
         String code = OptUtils.getTemp() + resOllirType;
 
@@ -98,7 +105,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
 
     private OllirExprResult visitUnaryExpr(JmmNode node, Type expected) {
 
-        var s = visit(node.getJmmChild(0));
+        var s = visit(node.getJmmChild(0), new Type("boolean", false));
 
         StringBuilder computation = new StringBuilder();
 
@@ -106,15 +113,14 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         computation.append(s.getComputation());
 
         // code to compute self
-        Type resType = TypeUtils.getExprType(node, table);
+        Type resType = typeOrExpected(TypeUtils.getExprType(node, table), expected);
         String resOllirType = OptUtils.toOllirType(resType);
         String code = OptUtils.getTemp() + resOllirType;
 
         computation.append(code).append(SPACE)
                 .append(ASSIGN).append(resOllirType).append(SPACE);
 
-        Type type = TypeUtils.getExprType(node, table);
-        computation.append(node.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
+        computation.append(node.get("op")).append(resOllirType).append(SPACE)
                 .append(s.getCode()).append(END_STMT);
 
         return new OllirExprResult(code, computation);
@@ -159,12 +165,18 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
 
     private OllirExprResult visitFieldAccessExpr(JmmNode node, Type expected) {
         var lhs = visit(node.getChild(0));
-        var lhsType = typeOrExpected(TypeUtils.getExprType(node.getChild(0), table), new Type("V", false));
+        var lhsType = TypeUtils.getExprType(node.getChild(0), table);
         var fieldName = node.get("field");
-        var ollirType = ".V";
+        var rhsType = expected;
         if (!lhsType.isArray() && lhsType.getName().equals(table.getClassName())) {
-            ollirType = OptUtils.toOllirType(table.getFields().stream()
-                    .filter(field -> field.getName().equals(fieldName)).findFirst().get().getType());
+            rhsType = table.getFields().stream()
+                    .filter(field -> field.getName().equals(fieldName)).findFirst()
+                    .orElse(new Symbol(expected, ""))
+                    .getType();
+        }
+        var ollirType = ".V";
+        if (rhsType != null) {
+            ollirType = OptUtils.toOllirType(rhsType);
         }
         var code = OptUtils.getTemp() + ollirType;
         var computation = new StringBuilder();
@@ -229,13 +241,29 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         var computation = new StringBuilder();
         String res;
 
-        var args = node.getChildren().stream().skip(start).map(arg -> visit(arg)).toList();
-        for (var arg : args) {
-            computation.append(arg.getComputation());
-            computation.append("\n");
-        }
+        var computedArgs = new ArrayList<OllirExprResult>();
+        var args = node.getChildren().stream().skip(start).toList();
 
-        if (type == null) {
+        if (object.contains(".") && object.split("\\.")[1].equals(table.getClassName())) {
+            var params = table.getParameters(functionName);
+            for (int i = 0; i < params.size(); i++) {
+                var computed = visit(args.get(i), params.get(i).getType());
+                computedArgs.add(computed);
+                computation.append(computed.getComputation());
+                computation.append("\n");
+            }
+        } else {
+            for (var arg : args) {
+                var computed = visit(arg);
+                computedArgs.add(computed);
+                computation.append(computed.getComputation());
+                computation.append("\n");
+            }
+        }
+        System.out.println("call to " + functionName + " with n args:");
+        System.out.println(computedArgs.size());
+        System.out.println(type);
+        if (type == null || type.getName().equals("void")) {
             res = "";
         } else {
             res = OptUtils.getTemp() + OptUtils.toOllirType(type);
@@ -252,7 +280,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Type, OllirExp
         computation.append(",\"");
         computation.append(functionName);
         computation.append("\"");
-        for (var arg : args) {
+        for (var arg : computedArgs) {
             computation.append(", " + arg.getCode());
         }
         computation.append(")");

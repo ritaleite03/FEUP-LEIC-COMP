@@ -3,23 +3,30 @@ import foo.bar.A;
 import Auxi;
 
 class CompileMethodInvocation extends Auxi{
-    public static void main(String[] args) {
+    public void print(String a){
+        io.println(a);
+    }
+
+    public static void main(String[] args){
+        CompileMethodInvocation a;
+        a = new CompileMethodInvocation();
+        a.instanceCallString();
     }
 
     public String instanceCallString() {
         int[] a;
         int i;
-        a = new int[5];
-        i = 0;
-        while(i < a.length){
-            if((i/2 <10) && false){
-                io.println(a[i]);
-            }else{
+        // a = new int[5];
+        // i = 0;
+        // while(i < a.length){
+        //     if((i/2 <10) && false){
+        //         io.println(a[i]);
+        //     }else{
 
-            }
-            i = i + 1;
-        }
-        
+        //     }
+        //     i = i + 1;
+        // }
+        print(A.foo());
         return A.foo();
     }
 }

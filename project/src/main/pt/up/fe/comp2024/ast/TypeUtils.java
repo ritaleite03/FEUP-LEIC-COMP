@@ -131,6 +131,9 @@ public class TypeUtils {
             for (int i = 0; i < parametersMethod.size(); i++) {
                 Type argument = getExprType(arguments.get(i), table);
                 Type parameter = parametersMethod.get(i).getType();
+                if (argument == null || parameter == null) {
+                    continue;
+                }
                 if (!argument.equals(parameter)
                         && !(TypeUtils.isVarArgs(parameter) && parameter.getName().equals(argument.getName()))) {
                     addNewReport("Function Expression : parameter with wrong type", arguments.get(i));
