@@ -4,14 +4,23 @@ import Auxi;
 
 class CompileMethodInvocation extends Auxi{
     int i;
-    public void print(int a){
-        io.println(a);
+    public int instanceCallVoid(){
+        io.println(1234567890);
+        return 10;
     }
 
     public static void main(String[] args){
         CompileMethodInvocation a;
         a = new CompileMethodInvocation();
-        a.instanceCallString();
+        a.foo();
+    }
+
+    public void foo(){
+        Auxi a;
+        int b;
+        a = this;
+        a.instanceCallVoid();
+        b = this.instanceCallVoid();
     }
 
 }

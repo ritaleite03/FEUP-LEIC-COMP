@@ -180,7 +180,8 @@ public class JasminGenerator {
 
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-
+        code.append("dup").append(NL);
+        code.append("pop").append(NL);
         if (operand.getType() instanceof ClassType || operand.getType().toString().equals("STRING"))
             code.append("astore ").append(reg).append(NL);
         else
