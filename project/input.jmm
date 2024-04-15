@@ -30,7 +30,11 @@ class CompileMethodInvocation extends Auxi{
         Auxi ab;
         ab = new Auxi();
         print(ab.instanceCallInt());
-        [1,2,3][0]=1;
+        if(1 < a[(a[0] +2*3)]){
+
+        }else{
+
+        }
         return A.foo();
     }
 }

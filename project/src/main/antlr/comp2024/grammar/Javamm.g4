@@ -75,13 +75,13 @@ expr:
 	| expr DOT field = ID											# FieldAccessExpr
 	| expr DOT functionName = ID LPAREN (expr (COL expr)*)? RPAREN	# FuncExpr
 	| functionName = ID (LPAREN (expr (COL expr)*)? RPAREN)			# SelfFuncExpr
-	| expr op = (DIV | MUL) expr									# BinaryExpr
-	| expr op = (SUB | ADD) expr									# BinaryExpr
-	| expr op = (LOGICAL | RELACIONAL) expr							# BinaryExpr
 	| expr LBRACKETS expr RBRACKETS									# ArrayAccessExpr
 	| NEW ID LBRACKETS expr RBRACKETS								# NewArrayExpr
 	| NEW name = ID LPAREN RPAREN									# NewExpr
 	| LBRACKETS (expr (COL expr)*)? RBRACKETS						# ArrayExpr
+	| expr op = (DIV | MUL) expr									# BinaryExpr
+	| expr op = (SUB | ADD) expr									# BinaryExpr
+	| expr op = (LOGICAL | RELACIONAL) expr							# BinaryExpr
 	| value = INTEGER												# IntegerLiteral
 	| name = ID														# VarRefExpr;
 
