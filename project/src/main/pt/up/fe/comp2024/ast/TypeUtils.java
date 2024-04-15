@@ -218,6 +218,7 @@ public class TypeUtils {
                     expr);
             return null;
         }
+        addNewReport("Invalid field access", expr);
 
         var symbol = table.getFields().stream()
                 .filter(param -> param.getName().equals(field)).findFirst();
