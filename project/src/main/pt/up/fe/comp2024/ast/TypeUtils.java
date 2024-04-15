@@ -202,6 +202,7 @@ public class TypeUtils {
     protected static Type visitFieldAccessExpression(JmmNode expr, SymbolTable table) {
         Type rigth = getExprType(expr.getChild(0), table);
         if (rigth == null) {
+            addNewReport("Invalid field access of import", expr);
             return null;
         }
         String field = expr.get("field");
