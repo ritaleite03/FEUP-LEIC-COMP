@@ -216,6 +216,7 @@ public class TypeUtils {
         if (!rigth.getName().equals(table.getClassName())) {
             addNewReport("Field Access Expression : field cannot be access because object is not the same as class",
                     expr);
+            return null;
         }
 
         var symbol = table.getFields().stream()
