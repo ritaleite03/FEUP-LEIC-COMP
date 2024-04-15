@@ -236,13 +236,13 @@ public class Test implements AnalysisPass {
 
         Set<String> importSet = new HashSet<>();
         var imports = table.getImports();
-        importSet.add(table.getClassName());
+        // importSet.add(table.getClassName());
         for (int i = 0; i < imports.size(); i++) {
             var splitImport = imports.get(i).split("\\.");
             importSet.add(splitImport[splitImport.length - 1]);
         }
 
-        if (importSet.size() != imports.size() + 1) {
+        if (importSet.size() != imports.size()) {
             addNewReport("Error: Duplicated Imports", root);
         }
 
