@@ -275,7 +275,8 @@ public class JasminGenerator {
         if (!callType.equals("invokestatic")) {
             code.append(generateOperand(operand));
         } else {
-            className = handleImports(operand.getName());
+            // className = handleImports(operand.getName());
+            className = operand.getName();
         }
         for (var param : callInst.getOperands().stream().skip(2).toList()) {
             code.append(generators.apply(param));
