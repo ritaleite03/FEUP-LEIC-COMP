@@ -358,12 +358,12 @@ public class JasminGenerator {
                 return ret + "V";
         }
         if (typeString.equals(classUnit.getClassName())) {
-            return "L" + typeString + ";";
+            return ret + "L" + typeString + ";";
         }
         if (classUnit.isImportedClass(typeString)) {
             for (var importedClass : classUnit.getImports()) {
                 if (importedClass.endsWith("." + typeString)) {
-                    return "L" + importedClass.replace(".", "/") + ";";
+                    return ret + "L" + importedClass.replace(".", "/") + ";";
                 }
             }
         }
