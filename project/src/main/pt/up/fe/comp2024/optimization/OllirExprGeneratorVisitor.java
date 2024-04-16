@@ -172,10 +172,10 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
                     .filter(field -> field.getName().equals(fieldName)).findFirst()
                     .orElse(new Symbol(
                             expected != null ? expected.type : null, ""))
-                    .getType(), true);
+                    .getType());
         }
         var ollirType = ".V";
-        if (rhsType != null) {
+        if (rhsType != null && rhsType.type != null) {
             ollirType = OptUtils.toOllirType(rhsType.type);
         }
         var code = OptUtils.getTemp() + ollirType;
@@ -220,14 +220,14 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         }
 
         return generateFunction(object.getCode(), callType, object.getComputation(), node, 1, functionName, type,
-                expected != null ? expected.needsResult : null);
+                expected != null ? expected.needsResult : true);
     }
 
     private OllirExprResult visitSelfFunctionCall(JmmNode node, InferType expected) {
         var functionName = node.get("functionName");
         var type = typeOrExpected(TypeUtils.getExprType(node, table), expected);
         return generateFunction("this." + table.getClassName(), "invokevirtual", "", node, 0,
-                functionName, type, expected != null ? expected.needsResult : null);
+                functionName, type, expected != null ? expected.needsResult : true);
     }
 
     private OllirExprResult generateFunction(
