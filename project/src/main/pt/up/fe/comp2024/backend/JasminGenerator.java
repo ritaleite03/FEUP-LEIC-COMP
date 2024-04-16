@@ -378,6 +378,19 @@ public class JasminGenerator {
         return "";
     }
 
+    private String typeJasmin(Type type) {
+        var ret = "";
+        var typeString = type.toString();
+        if (type instanceof ClassType) {
+            typeString = ((ClassType) type).getName();
+        }
+        if (type.getTypeOfElement().equals(ElementType.ARRAYREF)) {
+            ret = "[";
+            typeString = typeString.substring(0, typeString.length() - 2);
+        }
+        return typeJasmin(ret, typeString);
+    }
+
     private String handleImports(Type type) {
         var typeString = ((ClassType) type).getName();
         return handleImports(typeString);
@@ -392,19 +405,6 @@ public class JasminGenerator {
             }
         }
         return typeString;
-    }
-
-    private String typeJasmin(Type type) {
-        var ret = "";
-        var typeString = type.toString();
-        if (type instanceof ClassType) {
-            typeString = ((ClassType) type).getName();
-        }
-        if (type.getTypeOfElement().equals(ElementType.ARRAYREF)) {
-            ret = "[";
-            typeString = typeString.substring(0, typeString.length() - 2);
-        }
-        return typeJasmin(ret, typeString);
     }
 
 }
