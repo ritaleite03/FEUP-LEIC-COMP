@@ -181,7 +181,7 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         var jasminType = typeJasmin(operand.getType());
-        if (jasminType.startsWith("L") || jasminType.startsWith("["))
+        if (jasminType.endsWith(";"))
             code.append("astore ").append(reg).append(NL);
         else
             code.append("istore ").append(reg).append(NL);
@@ -203,9 +203,15 @@ public class JasminGenerator {
         if (operand.getName().equals("this")) {
             return "aload 0\n";
         }
+        if (operand.getName().equals("true")) {
+            return "ldc 1\n";
+        }
+        if (operand.getName().equals("false")) {
+            return "ldc 0\n";
+        }
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         var jasminType = typeJasmin(operand.getType());
-        if (jasminType.startsWith("L") || jasminType.startsWith("["))
+        if (jasminType.endsWith(";"))
             return "aload " + reg + NL;
         return "iload " + reg + NL;
     }
@@ -306,7 +312,7 @@ public class JasminGenerator {
         }
         code.append(generators.apply(returnInst.getOperand()));
         var jasminType = typeJasmin(returnInst.getReturnType());
-        if (jasminType.startsWith("L") || jasminType.startsWith("[")) {
+        if (jasminType.endsWith(";")) {
             code.append("areturn").append(NL);
             return code.toString();
         }
