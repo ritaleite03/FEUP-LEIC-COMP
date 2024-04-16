@@ -180,7 +180,8 @@ public class JasminGenerator {
 
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        if (operand.getType() instanceof ClassType || operand.getType().toString().equals("STRING"))
+        var jasminType = typeJasmin(operand.getType());
+        if (jasminType.startsWith("L") || jasminType.startsWith("["))
             code.append("astore ").append(reg).append(NL);
         else
             code.append("istore ").append(reg).append(NL);
@@ -203,7 +204,8 @@ public class JasminGenerator {
             return "aload 0\n";
         }
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        if (operand.getType() instanceof ClassType || operand.getType().toString().equals("STRING"))
+        var jasminType = typeJasmin(operand.getType());
+        if (jasminType.startsWith("L") || jasminType.startsWith("["))
             return "aload " + reg + NL;
         return "iload " + reg + NL;
     }
@@ -303,7 +305,8 @@ public class JasminGenerator {
             return code.toString();
         }
         code.append(generators.apply(returnInst.getOperand()));
-        if (returnInst.getReturnType() instanceof ClassType || returnInst.getReturnType().toString().equals("STRING")) {
+        var jasminType = typeJasmin(returnInst.getReturnType());
+        if (jasminType.startsWith("L") || jasminType.startsWith("[")) {
             code.append("areturn").append(NL);
             return code.toString();
         }
