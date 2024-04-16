@@ -181,7 +181,7 @@ public class JasminGenerator {
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         var jasminType = typeJasmin(operand.getType());
-        if (jasminType.endsWith(";"))
+        if (jasminType.startsWith("L") || jasminType.startsWith("["))
             code.append("astore ").append(reg).append(NL);
         else
             code.append("istore ").append(reg).append(NL);
@@ -209,9 +209,10 @@ public class JasminGenerator {
         if (operand.getName().equals("false")) {
             return "ldc 0\n";
         }
+        System.out.println(operand.getName());
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         var jasminType = typeJasmin(operand.getType());
-        if (jasminType.endsWith(";"))
+        if (jasminType.startsWith("L") || jasminType.startsWith("["))
             return "aload " + reg + NL;
         return "iload " + reg + NL;
     }
@@ -312,7 +313,7 @@ public class JasminGenerator {
         }
         code.append(generators.apply(returnInst.getOperand()));
         var jasminType = typeJasmin(returnInst.getReturnType());
-        if (jasminType.endsWith(";")) {
+        if (jasminType.startsWith("L") || jasminType.startsWith("[")) {
             code.append("areturn").append(NL);
             return code.toString();
         }
@@ -399,7 +400,7 @@ public class JasminGenerator {
     private String handleImports(String typeString) {
         if (classUnit.isImportedClass(typeString)) {
             for (var importedClass : classUnit.getImports()) {
-                if (importedClass.endsWith("." + typeString)) {
+                if (importedClass.endsWith("." + typeString) || importedClass.equals(typeString)) {
                     return importedClass.replace(".", "/");
                 }
             }
