@@ -8,8 +8,6 @@ import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
 
-import static pt.up.fe.comp2024.ast.Kind.FUNC_EXPR;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
