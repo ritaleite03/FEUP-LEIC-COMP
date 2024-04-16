@@ -14,7 +14,7 @@ import java.util.ArrayList;
 /**
  * Generates OLLIR code from JmmNodes that are expressions.
  */
-public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult> {
+public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprResult> {
 
     private static final String SPACE = " ";
     private static final String ASSIGN = ":=";
@@ -42,18 +42,18 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult
         setDefaultVisit(this::defaultVisit);
     }
 
-    private OllirExprResult visitInteger(JmmNode node, Type expected) {
+    private OllirExprResult visitInteger(JmmNode node, InferType expected) {
         var intType = new Type(TypeUtils.getIntTypeName(), false);
         String ollirIntType = OptUtils.toOllirType(intType);
         String code = node.get("value") + ollirIntType;
         return new OllirExprResult(code);
     }
 
-    private OllirExprResult visitParenExpr(JmmNode node, Type expected) {
+    private OllirExprResult visitParenExpr(JmmNode node, InferType expected) {
         return visit(node.getChild(0), expected);
     }
 
-    private OllirExprResult visitNewExpr(JmmNode node, Type expected) {
+    private OllirExprResult visitNewExpr(JmmNode node, InferType expected) {
         var name = node.get("name");
         var tmp = OptUtils.getTemp();
         var code = tmp + "." + name;
@@ -71,11 +71,11 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult
         return new OllirExprResult(code, computation);
     }
 
-    private OllirExprResult visitBinExpr(JmmNode node, Type expected) {
+    private OllirExprResult visitBinExpr(JmmNode node, InferType expected) {
 
-        var expectedChild = new Type("int", false);
+        var expectedChild = new InferType(new Type("int", false));
         if (node.get("op").equals("&&")) {
-            expectedChild = new Type("boolean", false);
+            expectedChild = new InferType(new Type("boolean", false));
         }
         var lhs = visit(node.getJmmChild(0), expectedChild);
         var rhs = visit(node.getJmmChild(1), expectedChild);
@@ -102,9 +102,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult
         return new OllirExprResult(code, computation);
     }
 
-    private OllirExprResult visitUnaryExpr(JmmNode node, Type expected) {
+    private OllirExprResult visitUnaryExpr(JmmNode node, InferType expected) {
 
-        var s = visit(node.getJmmChild(0), new Type("boolean", false));
+        var s = visit(node.getJmmChild(0), new InferType(new Type("boolean", false)));
 
         StringBuilder computation = new StringBuilder();
 
@@ -125,7 +125,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult
         return new OllirExprResult(code, computation);
     }
 
-    private OllirExprResult visitVarRef(JmmNode node, Type expected) {
+    private OllirExprResult visitVarRef(JmmNode node, InferType expected) {
 
         var id = node.get("name");
         Type type = typeOrExpected(TypeUtils.getExprType(node, table), expected);
@@ -162,20 +162,21 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult
         return new OllirExprResult(code);
     }
 
-    private OllirExprResult visitFieldAccessExpr(JmmNode node, Type expected) {
+    private OllirExprResult visitFieldAccessExpr(JmmNode node, InferType expected) {
         var lhs = visit(node.getChild(0));
         var lhsType = TypeUtils.getExprType(node.getChild(0), table);
         var fieldName = node.get("field");
         var rhsType = expected;
         if (!lhsType.isArray() && lhsType.getName().equals(table.getClassName())) {
-            rhsType = table.getFields().stream()
+            rhsType = new InferType(table.getFields().stream()
                     .filter(field -> field.getName().equals(fieldName)).findFirst()
-                    .orElse(new Symbol(expected, ""))
-                    .getType();
+                    .orElse(new Symbol(
+                            expected != null ? expected.type : null, ""))
+                    .getType(), true);
         }
         var ollirType = ".V";
         if (rhsType != null) {
-            ollirType = OptUtils.toOllirType(rhsType);
+            ollirType = OptUtils.toOllirType(rhsType.type);
         }
         var code = OptUtils.getTemp() + ollirType;
         var computation = new StringBuilder();
@@ -205,7 +206,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult
         return new OllirExprResult(code, computation);
     }
 
-    private OllirExprResult visitFunctionCall(JmmNode node, Type expected) {
+    private OllirExprResult visitFunctionCall(JmmNode node, InferType expected) {
 
         var type = typeOrExpected(TypeUtils.getExprType(node, table), expected);
         var object = visit(node.getChild(0));
@@ -218,14 +219,15 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult
             callType = "invokestatic";
         }
 
-        return generateFunction(object.getCode(), callType, object.getComputation(), node, 1, functionName, type);
+        return generateFunction(object.getCode(), callType, object.getComputation(), node, 1, functionName, type,
+                expected != null ? expected.needsResult : null);
     }
 
-    private OllirExprResult visitSelfFunctionCall(JmmNode node, Type expected) {
+    private OllirExprResult visitSelfFunctionCall(JmmNode node, InferType expected) {
         var functionName = node.get("functionName");
         var type = typeOrExpected(TypeUtils.getExprType(node, table), expected);
         return generateFunction("this." + table.getClassName(), "invokevirtual", "", node, 0,
-                functionName, type);
+                functionName, type, expected != null ? expected.needsResult : null);
     }
 
     private OllirExprResult generateFunction(
@@ -235,7 +237,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult
             JmmNode node,
             int start,
             String functionName,
-            Type type) {
+            Type type,
+            boolean needsResult) {
 
         var computation = new StringBuilder();
         String res;
@@ -247,7 +250,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult
                 .getParameters(functionName) != null) {
             var params = table.getParameters(functionName);
             for (int i = 0; i < params.size(); i++) {
-                var computed = visit(args.get(i), params.get(i).getType());
+                var computed = visit(args.get(i), new InferType(params.get(i).getType()));
                 computedArgs.add(computed);
                 computation.append(computed.getComputation());
                 computation.append("\n");
@@ -263,7 +266,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult
         System.out.println("call to " + functionName + " with n args:");
         System.out.println(computedArgs.size());
         System.out.println(type);
-        if (type == null || type.getName().equals("void")) {
+        if (type == null || type.getName().equals("void") || !needsResult) {
             res = "";
         } else {
             res = OptUtils.getTemp() + OptUtils.toOllirType(type);
@@ -300,7 +303,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult
      * @param expected
      * @return
      */
-    private OllirExprResult defaultVisit(JmmNode node, Type expected) {
+    private OllirExprResult defaultVisit(JmmNode node, InferType expected) {
 
         for (var child : node.getChildren()) {
             visit(child);
@@ -309,10 +312,12 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<Type, OllirExprResult
         return OllirExprResult.EMPTY;
     }
 
-    private Type typeOrExpected(Type type, Type expected) {
+    private Type typeOrExpected(Type type, InferType expected) {
         if (type != null)
             return type;
-        return expected;
+        if (expected == null)
+            return null;
+        return expected.type;
     }
 
 }

@@ -1,27 +1,6 @@
-import io;
-import foo.bar.A;
-import Auxi;
-
-class CompileMethodInvocation extends Auxi{
-    int i;
-    public int instanceCallVoid(){
-        io.println(1234567890);
-        return 10;
+class T{
+    public int foo(){
+        foo();
+        return 1;
     }
-
-    public static void main(String[] args){
-        CompileMethodInvocation a;
-        a = new CompileMethodInvocation();
-        a.foo();
-        a.i.a;
-    }
-
-    public void foo(){
-        Auxi a;
-        int b;
-        a = this;
-        a.instanceCallVoid();
-        b = this.instanceCallVoid();
-    }
-
 }

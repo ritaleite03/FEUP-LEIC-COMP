@@ -8,6 +8,8 @@ import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
 
+import static pt.up.fe.comp2024.ast.Kind.FUNC_EXPR;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +34,7 @@ public class JasminGenerator {
     ClassUnit classUnit;
 
     private final FunctionClassMap<TreeNode, String> generators;
+    private boolean needsResult;
 
     public JasminGenerator(OllirResult ollirResult) {
         this.ollirResult = ollirResult;
@@ -149,7 +152,7 @@ public class JasminGenerator {
         code.append(TAB).append(".limit locals 99").append(NL);
 
         for (var inst : method.getInstructions()) {
-
+            needsResult = !inst.getInstType().equals(InstructionType.CALL);
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
             code.append(instCode);
@@ -165,7 +168,6 @@ public class JasminGenerator {
 
     private String generateAssign(AssignInstruction assign) {
         var code = new StringBuilder();
-
         // generate code for loading what's on the right
         code.append(generators.apply(assign.getRhs()));
 
@@ -275,6 +277,8 @@ public class JasminGenerator {
 
     private void invokeMethod(StringBuilder code, CallInstruction callInst, String callType) {
         System.out.println(callInst.toTree());
+        boolean savedNeedsResult = needsResult;
+        needsResult = true;
         var operand = (Operand) callInst.getOperands().get(0);
         var className = handleImports(((Operand) callInst.getOperands().get(0)).getType());
         var methodName = ((LiteralElement) callInst.getOperands().get(1)).getLiteral();
@@ -301,7 +305,11 @@ public class JasminGenerator {
             code.append(this.typeJasmin(callInst.getArguments().get(i).getType()));
         }
         code.append(")");
-        code.append(this.typeJasmin(callInst.getReturnType()));
+        var jasminType = this.typeJasmin(callInst.getReturnType());
+        code.append(jasminType);
+        if (!savedNeedsResult && !jasminType.equals("V")) {
+            code.append("\npop");
+        }
     }
 
     private String generateReturn(ReturnInstruction returnInst) {

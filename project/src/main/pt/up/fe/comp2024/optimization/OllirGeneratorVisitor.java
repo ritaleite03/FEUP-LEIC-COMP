@@ -58,7 +58,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         Type thisType = TypeUtils.visitVariableReferenceExpression(lhs, table, node);
         String typeString = OptUtils.toOllirType(thisType);
 
-        var rhs = exprVisitor.visit(node.getJmmChild(0), thisType);
+        var rhs = exprVisitor.visit(node.getJmmChild(0), new InferType(thisType));
 
         StringBuilder code = new StringBuilder();
 
@@ -99,7 +99,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitVarStmt(JmmNode node, Void unused) {
         StringBuilder code = new StringBuilder();
-        var expression = exprVisitor.visit(node.getJmmChild(0));
+        var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(null, false));
 
         // code to compute the children
         code.append(expression.getComputation());
@@ -117,7 +117,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var expr = OllirExprResult.EMPTY;
 
         if (node.getNumChildren() > 0) {
-            expr = exprVisitor.visit(node.getJmmChild(0), retType);
+            expr = exprVisitor.visit(node.getJmmChild(0), new InferType(retType));
         }
 
         code.append(expr.getComputation());
