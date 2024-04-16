@@ -368,7 +368,7 @@ public class JasminGenerator {
         }
         if (classUnit.isImportedClass(typeString)) {
             for (var importedClass : classUnit.getImports()) {
-                if (importedClass.endsWith("." + typeString)) {
+                if (importedClass.endsWith("." + typeString) || importedClass.equals(typeString)) {
                     return ret + "L" + importedClass.replace(".", "/") + ";";
                 }
             }
