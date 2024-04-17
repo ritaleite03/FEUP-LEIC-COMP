@@ -128,6 +128,7 @@ public class TypeUtils {
                 addNewReport("Function Expression : wrong number of parameters", expr);
                 return null;
             }
+            boolean arrayInLast = false;
             for (int i = 0; i < parametersMethod.size(); i++) {
                 Type argument = getExprType(arguments.get(i), table);
                 Type parameter = parametersMethod.get(i).getType();
@@ -139,11 +140,18 @@ public class TypeUtils {
                     addNewReport("Function Expression : parameter with wrong type", arguments.get(i));
                     return null;
                 }
+                if (i == parametersMethod.size() - 1 && argument.isArray()) {
+                    arrayInLast = true;
+                }
+            }
+            if (isVarArgs && arrayInLast && parametersMethod.size() != arguments.size()) {
+                addNewReport("Varargs alredy handled by array", expr);
+                return null;
             }
             for (int i = parametersMethod.size(); i < arguments.size(); i++) {
                 Type argument = getExprType(arguments.get(i), table);
                 Type parameter = parametersMethod.get(parametersMethod.size() - 1).getType();
-                if (!parameter.getName().equals(argument.getName())) {
+                if (!parameter.getName().equals(argument.getName()) || argument.isArray()) {
                     addNewReport("Function Expression : parameter with wrong type2", arguments.get(i));
                     return null;
                 }

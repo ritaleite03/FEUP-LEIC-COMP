@@ -1,8 +1,5 @@
 class T{
-    T a;
-    public int foo(){
-        foo();
-        a;
-        return 1;
+    public void foo(int... a){
+        foo([1,1,1]);
     }
 }
