@@ -1,5 +1,13 @@
 class T{
-    public void foo(int... a){
-        foo([1,1,1]);
+    public static void main(String[] args){
+    }
+
+    int foo(){
+        int sum;
+        int[] A;
+        sum=0;
+        sum = sum + A[1];
+        sum = sum + A[3];
+        return 1;
     }
 }

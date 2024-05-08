@@ -38,6 +38,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         addVisit("SelfFuncExpr", this::visitSelfFunctionCall);
         addVisit("NewExpr", this::visitNewExpr);
         addVisit("FieldAccessExpr", this::visitFieldAccessExpr);
+        addVisit("ArrayAccessExpr", this::visitArrayAccessExpr);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -203,6 +204,34 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             computation.append(ollirType);
             computation.append(";\n");
         }
+        return new OllirExprResult(code, computation);
+    }
+
+    private OllirExprResult visitArrayAccessExpr(JmmNode node, InferType expected) {
+        var var = visit(node.getChild(0));
+        var pos = visit(node.getChild(1));
+        var arrayType = TypeUtils.getExprType(node.getChild(0), table);
+        var posType = TypeUtils.getExprType(node.getChild(1), table);
+
+        var ollirArrayType = OptUtils.toOllirType(arrayType.getName());
+        var ollirPosType  = OptUtils.toOllirType(posType);
+
+        var code = OptUtils.getTemp() + ollirArrayType;
+        var computation = new StringBuilder();
+        computation.append(var.getComputation());
+        computation.append(pos.getComputation());
+        computation.append(code);
+        computation.append(SPACE)
+                .append(ASSIGN)
+                .append(ollirArrayType);
+        computation.append(SPACE);
+        computation.append(var.getCode());
+        computation.append("[");
+        computation.append(pos.getCode());
+        computation.append("]");
+        computation.append(ollirArrayType);
+        computation.append(";\n");
+
         return new OllirExprResult(code, computation);
     }
 

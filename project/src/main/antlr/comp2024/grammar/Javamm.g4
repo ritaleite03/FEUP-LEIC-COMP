@@ -70,23 +70,25 @@ methodDecl
 param: typeOrVargs name = ID;
 
 expr:
-	op = NOT expr													# UnaryExpr
-	| LPAREN expr RPAREN											# ParenExpr
+    expr LBRACKETS expr RBRACKETS									# ArrayAccessExpr
 	| expr DOT field = ID											# FieldAccessExpr
 	| expr DOT functionName = ID LPAREN (expr (COL expr)*)? RPAREN	# FuncExpr
 	| functionName = ID (LPAREN (expr (COL expr)*)? RPAREN)			# SelfFuncExpr
-	| expr LBRACKETS expr RBRACKETS									# ArrayAccessExpr
 	| NEW ID LBRACKETS expr RBRACKETS								# NewArrayExpr
 	| NEW name = ID LPAREN RPAREN									# NewExpr
+	| op = NOT expr	                                                # UnaryExpr
+	| LPAREN expr RPAREN											# ParenExpr
 	| LBRACKETS (expr (COL expr)*)? RBRACKETS						# ArrayExpr
 	| expr op = (DIV | MUL) expr									# BinaryExpr
 	| expr op = (SUB | ADD) expr									# BinaryExpr
-	| expr op = (LOGICAL | RELACIONAL) expr							# BinaryExpr
+	| expr op = RELACIONAL expr									    # BinaryExpr
+	| expr op = LOGICAL expr	            						# BinaryExpr
 	| value = INTEGER												# IntegerLiteral
 	| name = ID														# VarRefExpr;
 
 stmt:
-	LCURLY (stmt)* RCURLY									# MultiStmt
+	name = ID EQUALS expr SEMI							# AssignStmt
+	| LCURLY (stmt)* RCURLY									# MultiStmt
 	| IF LPAREN expr RPAREN stmt ELSE stmt					# IfStmt
 	| WHILE LPAREN expr RPAREN stmt							# WhileStmt
 	| expr SEMI												# VarStmt
