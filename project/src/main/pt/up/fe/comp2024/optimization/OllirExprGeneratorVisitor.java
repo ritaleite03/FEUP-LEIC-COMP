@@ -413,7 +413,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             for (int i = 0; i < paramsSize; i++) {
                 if(TypeUtils.isVarArgs(params.get(i).getType())){
                     var elements = args.subList(paramsSize - 1, argsSize);
-                    var computed = generateVararg(elements);
+                    var computed = generateVararg(elements, params.get(i).getType());
                     computedArgs.add(computed);
                     computation.append(computed.getComputation());
                 } else {
@@ -461,10 +461,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         return new OllirExprResult(res, preComputation + computation);
     }
 
-    private OllirExprResult generateVararg(List<JmmNode> nodes){
+    private OllirExprResult generateVararg(List<JmmNode> nodes, Type arrayType){
 
         Type type = TypeUtils.getExprType(nodes.get(0), table);
-        Type arrayType = new Type(type.getName(), true);
         String ollirType = OptUtils.toOllirType(type);
         String ollirArrayType = OptUtils.toOllirType(arrayType);
         int size = nodes.size();
