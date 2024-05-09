@@ -1,23 +1,28 @@
-import ioPlus;
-class ArrayAccess {
+import io;
 
-	public int foo(String[] a) {
-		int result;
-	
-		result = a[0];
-		result = a[1] + a[2];
-		result = result + a[3];
-		result = 1 + a[4];
+class ArrayVarargs {
 
-	    a[0] = 1;
-		a[1] = 2;
-		a[2] = 3;
-		a[3] = 4;
-		a[4] = 5;
+    public static void main(String[] args) {
+        ArrayVarargs a;
+        a = new ArrayVarargs();
 
+        a.bar();
+    }
 
-		return result;
-	}
+    int foo(int... a) {
+        return a[0];
+    }
 
+    int bar() {
+        int res;
+
+        res = this.foo(1, 2, 3);
+        io.println(res);
+
+        res = this.foo(4);
+        io.println(res);
+
+        return res;
+    }
 
 }

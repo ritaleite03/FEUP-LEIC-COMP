@@ -9,6 +9,8 @@ import static pt.up.fe.comp2024.ast.Kind.TYPE;
 public class OptUtils {
     private static int tempNumber = -1;
 
+    private static int tempArrayNumber = -1;
+
     public static String getTemp() {
 
         return getTemp("tmp");
@@ -23,6 +25,17 @@ public class OptUtils {
 
         tempNumber += 1;
         return tempNumber;
+    }
+
+    public static String getTempArray(String prefix) {
+
+        return prefix + getNextTempArrayNum();
+    }
+
+    public static int getNextTempArrayNum() {
+
+        tempArrayNumber += 1;
+        return tempArrayNumber;
     }
 
     public static String toOllirType(JmmNode typeNode) {
