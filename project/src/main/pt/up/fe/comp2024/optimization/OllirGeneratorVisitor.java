@@ -37,7 +37,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     @Override
     protected void buildVisitor() {
-
         addVisit(PROGRAM, this::visitProgram);
         addVisit(IMPORT, this::visitImport);
         addVisit(CLASS_DECL, this::visitClass);
@@ -46,9 +45,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(ASSIGN_STMT_ARRAY, this::visitAssignStmtArray);
-
         addVisit(VAR_STMT, this::visitVarStmt);
-
+        addVisit(IF_STMT, this::visitIfStmt);
+        addVisit(MULTI_STMT,this::visitMultiStmt);
+        addVisit(WHILE_STMT,this::visitWhileStmt);
         setDefaultVisit(this::defaultVisit);
     }
 
@@ -61,6 +61,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var rhs = exprVisitor.visit(node.getJmmChild(0), new InferType(thisType));
 
         StringBuilder code = new StringBuilder();
+;
 
         // code to compute the children
         code.append(rhs.getComputation());
@@ -145,6 +146,101 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(rhs.getCode());
         code.append(END_STMT);
 
+        return code.toString();
+    }
+
+    private String visitWhileStmt(JmmNode node, Void unused){
+        StringBuilder code = new StringBuilder();
+        // number used for the labels
+        var numberLabel = OptUtils.getNextTempNum();
+        // condition
+        var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("boolean",false)));
+        // code block of the loop
+        var body = this.visit(node.getJmmChild(1));
+
+        String condLabel = "whileCond" + numberLabel;
+        String loopLabel = "whileLoop" + numberLabel;
+        String endLabel = "whileEnd" + numberLabel;
+
+        code.append(condLabel);
+        code.append(":\n");
+        code.append(expression.getComputation());
+
+        code.append("if");
+        code.append(SPACE);
+        code.append("(");
+        code.append(expression.getCode());
+        code.append(")");
+        code.append(SPACE);
+        code.append("goto");
+        code.append(SPACE);
+        code.append(loopLabel);
+        code.append(END_STMT);
+        code.append("goto");
+        code.append(SPACE);
+        code.append(endLabel);
+        code.append(END_STMT);
+
+        code.append(loopLabel);
+        code.append(":\n");
+        code.append(body);
+        code.append("goto");
+        code.append(SPACE);
+        code.append(condLabel);
+        code.append(END_STMT);
+
+        code.append(endLabel);
+        code.append(":\n");
+
+        return code.toString();
+    }
+
+    private String visitIfStmt(JmmNode node, Void unused){
+        // condition
+        var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("boolean",false)));
+        // number used for the labels
+        var numberLabel = OptUtils.getNextTempNum();
+        String initLabel = "if" + numberLabel;
+        String endLabel = "endif" + numberLabel;
+
+        var ifTrue = this.visit(node.getJmmChild(1)); // code block if true
+        var ifFalse = this.visit(node.getJmmChild(2)); // code block if false
+
+        StringBuilder code = new StringBuilder();
+        code.append(expression.getComputation());
+        code.append("if");
+        code.append(SPACE);
+        code.append("(");
+        code.append(expression.getCode());
+        code.append(")");
+        code.append(SPACE);
+        code.append("goto");
+        code.append(SPACE);
+        code.append(initLabel);
+        code.append(END_STMT);
+
+        code.append(ifFalse);
+        code.append("goto");
+        code.append(SPACE);
+        code.append(endLabel);
+        code.append(END_STMT);
+
+        code.append(initLabel);
+        code.append(":\n");
+        code.append(ifTrue);
+
+        code.append(endLabel);
+        code.append(":\n");
+
+        return code.toString();
+    }
+
+    private String visitMultiStmt(JmmNode node, Void unused){
+        System.out.println("visitMultiStmt");
+        StringBuilder code = new StringBuilder();
+        for(int i = 0; i < node.getChildren().size(); i++){
+            code.append(this.visit(node.getJmmChild(i)));
+        }
         return code.toString();
     }
 
