@@ -87,7 +87,7 @@ expr:
 	| name = ID														# VarRefExpr;
 
 stmt:
-	name = ID EQUALS expr SEMI							# AssignStmt
+	name = ID EQUALS expr SEMI							    # AssignStmt
 	| LCURLY (stmt)* RCURLY									# MultiStmt
 	| IF LPAREN expr RPAREN stmt ELSE stmt					# IfStmt
 	| WHILE LPAREN expr RPAREN stmt							# WhileStmt

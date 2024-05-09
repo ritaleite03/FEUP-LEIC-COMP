@@ -45,7 +45,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(PARAM, this::visitParam);
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
-        addVisit(ASSIGN_STMT_ARRAY, this::visitAssignStmt);
+        addVisit(ASSIGN_STMT_ARRAY, this::visitAssignStmtArray);
 
         addVisit(VAR_STMT, this::visitVarStmt);
 
@@ -86,6 +86,57 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         // code to compute self
         // statement has type of lhs
         code.append(lhs);
+        code.append(typeString);
+        code.append(SPACE);
+        code.append(ASSIGN);
+        code.append(typeString);
+        code.append(SPACE);
+        code.append(rhs.getCode());
+        code.append(END_STMT);
+
+        return code.toString();
+    }
+
+    private String visitAssignStmtArray(JmmNode node, Void unused) {
+
+        String lhsName = node.get("name");
+        Type thisType = TypeUtils.visitVariableReferenceExpression(lhsName, table, node);
+        Type thisType2 = new Type(thisType.getName(), false);
+        String typeString = OptUtils.toOllirType(thisType2);
+
+        var lhs = exprVisitor.visit(node.getJmmChild(0));
+        var rhs = exprVisitor.visit(node.getJmmChild(1), new InferType(thisType2));
+
+        StringBuilder code = new StringBuilder();
+
+        // code to compute the children
+        code.append(lhs.getComputation());
+        code.append(rhs.getComputation());
+
+        var isLocalList = table.getLocalVariables(currentMethod).stream().filter(local -> local.getName().equals(
+                        lhsName))
+                .toList();
+        var isParamList = table.getParameters(currentMethod).stream().filter(param -> param.getName().equals(
+                        lhsName))
+                .toList();
+        var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(lhsName)).toList();
+
+        if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
+            code.append("putfield(this, ");
+            code.append(lhs);
+            code.append(typeString);
+            code.append(", ");
+            code.append(rhs.getCode());
+            code.append(").V;\n");
+            return code.toString();
+        }
+
+        // code to compute self
+        // statement has type of lhs
+        code.append(lhsName);
+        code.append("[");
+        code.append(lhs.getCode());
+        code.append("]");
         code.append(typeString);
         code.append(SPACE);
         code.append(ASSIGN);

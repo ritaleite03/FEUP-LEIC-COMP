@@ -225,7 +225,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
                 .append(ASSIGN)
                 .append(ollirArrayType);
         computation.append(SPACE);
-        computation.append(var.getCode());
+        int firstDotIndex = var.getCode().indexOf('.');
+        String name = var.getCode().substring(0, firstDotIndex);
+        computation.append(name);
         computation.append("[");
         computation.append(pos.getCode());
         computation.append("]");

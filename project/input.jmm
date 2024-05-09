@@ -1,13 +1,23 @@
-class T{
-    public static void main(String[] args){
-    }
+import ioPlus;
+class ArrayAccess {
 
-    int foo(){
-        int sum;
-        int[] A;
-        sum=0;
-        sum = sum + A[1];
-        sum = sum + A[3];
-        return 1;
-    }
+	public int foo(String[] a) {
+		int result;
+	
+		result = a[0];
+		result = a[1] + a[2];
+		result = result + a[3];
+		result = 1 + a[4];
+
+	    a[0] = 1;
+		a[1] = 2;
+		a[2] = 3;
+		a[3] = 4;
+		a[4] = 5;
+
+
+		return result;
+	}
+
+
 }
