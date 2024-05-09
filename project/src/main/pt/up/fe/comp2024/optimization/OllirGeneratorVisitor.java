@@ -37,7 +37,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     @Override
     protected void buildVisitor() {
-
         addVisit(PROGRAM, this::visitProgram);
         addVisit(IMPORT, this::visitImport);
         addVisit(CLASS_DECL, this::visitClass);
@@ -47,10 +46,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(ASSIGN_STMT_ARRAY, this::visitAssignStmt);
         addVisit(VAR_STMT, this::visitVarStmt);
-        addVisit("IfStmt", this::visitIfStmt);
-        addVisit("MultiStmt",this::visitMultiStmt);
-        addVisit("WhileStmt",this::visitWhileStmt);
-
+        addVisit(IF_STMT, this::visitIfStmt);
+        addVisit(MULTI_STMT,this::visitMultiStmt);
+        addVisit(WHILE_STMT,this::visitWhileStmt);
         setDefaultVisit(this::defaultVisit);
     }
 
@@ -101,11 +99,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitWhileStmt(JmmNode node, Void unused){
-        System.out.println(node.getChildren());
         StringBuilder code = new StringBuilder();
-
+        // number used for the labels
         var numberLabel = OptUtils.getNextTempNum();
+        // condition
         var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("boolean",false)));
+        // code block of the loop
         var body = this.visit(node.getJmmChild(1));
 
         String condLabel = "whileCond" + numberLabel;
@@ -146,14 +145,15 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitIfStmt(JmmNode node, Void unused){
+        // condition
         var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("boolean",false)));
-
+        // number used for the labels
         var numberLabel = OptUtils.getNextTempNum();
         String initLabel = "if" + numberLabel;
         String endLabel = "endif" + numberLabel;
 
-        var ifTrue = this.visit(node.getJmmChild(1));
-        var ifFalse = this.visit(node.getJmmChild(2));
+        var ifTrue = this.visit(node.getJmmChild(1)); // code block if true
+        var ifFalse = this.visit(node.getJmmChild(2)); // code block if false
 
         StringBuilder code = new StringBuilder();
         code.append(expression.getComputation());

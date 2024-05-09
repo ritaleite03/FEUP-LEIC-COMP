@@ -33,12 +33,12 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(UNARY_EXPR, this::visitUnaryExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
-        addVisit("ParenExpr", this::visitParenExpr);
-        addVisit("FuncExpr", this::visitFunctionCall);
-        addVisit("SelfFuncExpr", this::visitSelfFunctionCall);
-        addVisit("NewExpr", this::visitNewExpr);
-        addVisit("NewArrayExpr", this::visitNewArrayExpr);
-        addVisit("FieldAccessExpr", this::visitFieldAccessExpr);
+        addVisit(PAREN_EXPR, this::visitParenExpr);
+        addVisit(FUNC_EXPR, this::visitFunctionCall);
+        addVisit(SELF_FUNC_EXPR, this::visitSelfFunctionCall);
+        addVisit(NEW_EXPR, this::visitNewExpr);
+        addVisit(NEW_ARRAY_EXPR, this::visitNewArrayExpr);
+        addVisit(FIELD_ACCESS_EXPR, this::visitFieldAccessExpr);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -93,15 +93,61 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
     }
 
     private OllirExprResult visitBinExpr(JmmNode node, InferType expected) {
-
-        var expectedChild = new InferType(new Type("int", false));
-        if (node.get("op").equals("&&")) {
-            expectedChild = new InferType(new Type("boolean", false));
-        }
-        var lhs = visit(node.getJmmChild(0), expectedChild);
-        var rhs = visit(node.getJmmChild(1), expectedChild);
-
         StringBuilder computation = new StringBuilder();
+
+        if (node.get("op").equals("&&")) {
+
+            String code = OptUtils.getTemp() + OptUtils.toOllirType(new Type("boolean", false));
+
+            var numberIf = OptUtils.getNextTempNum();
+
+            var lhs = visit(node.getJmmChild(0), new InferType(new Type("boolean", false)));
+            var rhs = visit(node.getJmmChild(1), new InferType(new Type("boolean", false)));
+
+            String initIf = "if" + numberIf;
+            String endIf = "end" + numberIf;
+
+            // computation of left side
+            computation.append(lhs.getComputation());
+            // see if left side is true
+            computation.append("if");
+            computation.append(SPACE);
+            computation.append("(");
+            computation.append(lhs.getCode());
+            computation.append(")");
+            computation.append(SPACE);
+            // if true analyse right side
+            computation.append("goto");
+            computation.append(SPACE);
+            computation.append(initIf);
+            computation.append(END_STMT);
+            // else is false
+            computation.append(code);
+            computation.append(SPACE);
+            computation.append(":=.bool false.bool");
+            computation.append(END_STMT);
+            // assign the right side
+            computation.append(initIf);
+            computation.append(":\n");
+            computation.append(code);
+            computation.append(SPACE);
+            computation.append(ASSIGN);
+            computation.append(".bool");
+            computation.append(SPACE);
+            computation.append(rhs.getCode());
+            computation.append(END_STMT);
+            computation.append("goto");
+            computation.append(SPACE);
+            computation.append(endIf);
+            computation.append(END_STMT);
+
+            computation.append(endIf);
+            computation.append(":\n");
+            return new OllirExprResult(code, computation);
+        }
+        var lhs = visit(node.getJmmChild(0), new InferType(new Type("int", false)));
+        var rhs = visit(node.getJmmChild(1), new InferType(new Type("int", false)));
+
 
         // code to compute the children
         computation.append(lhs.getComputation());

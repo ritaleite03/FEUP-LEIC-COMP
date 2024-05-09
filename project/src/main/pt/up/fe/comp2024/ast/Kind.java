@@ -8,22 +8,29 @@ import java.util.Set;
 
 public enum Kind {
     PROGRAM,
-    CLASS_DECL,
     IMPORT,
+    CLASS_DECL,
+    METHOD_DECL,
     VAR_DECL,
     TYPE,
     TYPE_OR_VARGS,
-    METHOD_DECL,
     PARAM,
     ASSIGN_STMT,
     ASSIGN_STMT_ARRAY,
     VAR_STMT,
+    IF_STMT,
+    MULTI_STMT,
+    WHILE_STMT,
     RETURN_STMT,
     BINARY_EXPR,
-    FUNC_EXPR,
     UNARY_EXPR,
+    FUNC_EXPR,
+    SELF_FUNC_EXPR,
+    PAREN_EXPR,
+    NEW_EXPR,
+    NEW_ARRAY_EXPR,
+    FIELD_ACCESS_EXPR,
     INTEGER_LITERAL,
-
     VAR_REF_EXPR;
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);
