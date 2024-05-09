@@ -50,6 +50,9 @@ public class Cpf3_Ollir {
         var ifInsts = CpUtils.getInstructions(CondBranchInstruction.class, method);
         var gotoInsts = CpUtils.getInstructions(GotoInstruction.class, method);
 
+        System.out.println("oiii");
+        System.out.println(ifInsts);
+
         CpUtils.assertTrue("Expected to find 1 if in method " + method.getMethodName(), ifInsts.size() == 1, ollirResult);
         CpUtils.assertTrue("Expected to find 1 goto in method " + method.getMethodName(), gotoInsts.size() == 1, ollirResult);
     }

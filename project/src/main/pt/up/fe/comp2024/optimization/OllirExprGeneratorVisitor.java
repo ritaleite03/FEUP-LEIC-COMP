@@ -37,6 +37,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         addVisit("FuncExpr", this::visitFunctionCall);
         addVisit("SelfFuncExpr", this::visitSelfFunctionCall);
         addVisit("NewExpr", this::visitNewExpr);
+        addVisit("NewArrayExpr", this::visitNewArrayExpr);
         addVisit("FieldAccessExpr", this::visitFieldAccessExpr);
 
         setDefaultVisit(this::defaultVisit);
@@ -68,6 +69,26 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         computation.append(";\ninvokespecial(");
         computation.append(code);
         computation.append(",\"<init>\").V;\n");
+        return new OllirExprResult(code, computation);
+    }
+
+    private OllirExprResult visitNewArrayExpr(JmmNode node, InferType expected) {
+        Type resType = typeOrExpected(TypeUtils.getExprType(node, table), expected);
+        String resOllirType = OptUtils.toOllirType(resType);
+        var tmp = OptUtils.getTemp();
+        var code = tmp + resOllirType ;
+        var computation = new StringBuilder();
+        computation.append(code);
+        computation.append(SPACE);
+        computation.append(ASSIGN);
+        computation.append(resOllirType);
+        computation.append(SPACE);
+        computation.append("new(array,");
+        computation.append(SPACE);
+        computation.append(node.getChild(0).get("value"));
+        computation.append(".i32)");
+        computation.append(resOllirType);
+        computation.append(END_STMT);
         return new OllirExprResult(code, computation);
     }
 
@@ -263,9 +284,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
                 computation.append("\n");
             }
         }
-        System.out.println("call to " + functionName + " with n args:");
-        System.out.println(computedArgs.size());
-        System.out.println(type);
         if (type == null || type.getName().equals("void") || !needsResult) {
             res = "";
         } else {

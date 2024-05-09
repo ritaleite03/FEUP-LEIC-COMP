@@ -46,8 +46,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(ASSIGN_STMT_ARRAY, this::visitAssignStmt);
-
         addVisit(VAR_STMT, this::visitVarStmt);
+        addVisit("IfStmt", this::visitIfStmt);
+        addVisit("MultiStmt",this::visitMultiStmt);
+        addVisit("WhileStmt",this::visitWhileStmt);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -61,6 +63,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var rhs = exprVisitor.visit(node.getJmmChild(0), new InferType(thisType));
 
         StringBuilder code = new StringBuilder();
+;
 
         // code to compute the children
         code.append(rhs.getComputation());
@@ -94,6 +97,99 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(rhs.getCode());
         code.append(END_STMT);
 
+        return code.toString();
+    }
+
+    private String visitWhileStmt(JmmNode node, Void unused){
+        System.out.println(node.getChildren());
+        StringBuilder code = new StringBuilder();
+
+        var numberLabel = OptUtils.getNextTempNum();
+        var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("boolean",false)));
+        var body = this.visit(node.getJmmChild(1));
+
+        String condLabel = "whileCond" + numberLabel;
+        String loopLabel = "whileLoop" + numberLabel;
+        String endLabel = "whileEnd" + numberLabel;
+
+        code.append(condLabel);
+        code.append(":\n");
+        code.append(expression.getComputation());
+
+        code.append("if");
+        code.append(SPACE);
+        code.append("(");
+        code.append(expression.getCode());
+        code.append(")");
+        code.append(SPACE);
+        code.append("goto");
+        code.append(SPACE);
+        code.append(loopLabel);
+        code.append(END_STMT);
+        code.append("goto");
+        code.append(SPACE);
+        code.append(endLabel);
+        code.append(END_STMT);
+
+        code.append(loopLabel);
+        code.append(":\n");
+        code.append(body);
+        code.append("goto");
+        code.append(SPACE);
+        code.append(condLabel);
+        code.append(END_STMT);
+
+        code.append(endLabel);
+        code.append(":\n");
+
+        return code.toString();
+    }
+
+    private String visitIfStmt(JmmNode node, Void unused){
+        var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("boolean",false)));
+
+        var numberLabel = OptUtils.getNextTempNum();
+        String initLabel = "if" + numberLabel;
+        String endLabel = "endif" + numberLabel;
+
+        var ifTrue = this.visit(node.getJmmChild(1));
+        var ifFalse = this.visit(node.getJmmChild(2));
+
+        StringBuilder code = new StringBuilder();
+        code.append(expression.getComputation());
+        code.append("if");
+        code.append(SPACE);
+        code.append("(");
+        code.append(expression.getCode());
+        code.append(")");
+        code.append(SPACE);
+        code.append("goto");
+        code.append(SPACE);
+        code.append(initLabel);
+        code.append(END_STMT);
+
+        code.append(ifFalse);
+        code.append("goto");
+        code.append(SPACE);
+        code.append(endLabel);
+        code.append(END_STMT);
+
+        code.append(initLabel);
+        code.append(":\n");
+        code.append(ifTrue);
+
+        code.append(endLabel);
+        code.append(":\n");
+
+        return code.toString();
+    }
+
+    private String visitMultiStmt(JmmNode node, Void unused){
+        System.out.println("visitMultiStmt");
+        StringBuilder code = new StringBuilder();
+        for(int i = 0; i < node.getChildren().size(); i++){
+            code.append(this.visit(node.getJmmChild(i)));
+        }
         return code.toString();
     }
 
