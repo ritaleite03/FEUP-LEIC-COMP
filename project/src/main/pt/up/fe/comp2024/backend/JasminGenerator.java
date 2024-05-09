@@ -9,6 +9,7 @@ import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,10 +50,15 @@ public class JasminGenerator {
         generators.put(LiteralElement.class, this::generateLiteral);
         generators.put(Operand.class, this::generateOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
+        generators.put(UnaryOpInstruction.class, this::generateUnaryOp);
         generators.put(CallInstruction.class, this::generateCall);
         generators.put(ReturnInstruction.class, this::generateReturn);
         generators.put(GetFieldInstruction.class, this::generateGetField);
         generators.put(PutFieldInstruction.class, this::generatePutField);
+        generators.put(OpCondInstruction.class,this::generateOpCond);
+        generators.put(SingleOpCondInstruction.class,this::generateSingleOpCond);
+        generators.put(GotoInstruction.class,this::generateGoto);
+
     }
 
     public List<Report> getReports() {
@@ -60,7 +66,6 @@ public class JasminGenerator {
     }
 
     public String build() {
-
         // This way, build is idempotent
         if (code == null) {
             code = generators.apply(ollirResult.getOllirClass());
@@ -70,8 +75,7 @@ public class JasminGenerator {
     }
 
     private String generateClassUnit(ClassUnit classUnit) {
-        System.out.println(classUnit.getImports());
-        System.out.println(classUnit.getImportedClasseNames());
+
         this.classUnit = classUnit;
         var code = new StringBuilder();
 
@@ -150,9 +154,16 @@ public class JasminGenerator {
         code.append(TAB).append(".limit locals 99").append(NL);
 
         for (var inst : method.getInstructions()) {
+            System.out.println("inst - "+inst);
             needsResult = !inst.getInstType().equals(InstructionType.CALL);
+            for (var label : method.getLabels(inst)) {
+                code.append(label);
+                code.append(":\n");
+            }
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
+
+            System.out.println("instcode - " + instCode);
             code.append(instCode);
         }
 
@@ -169,6 +180,7 @@ public class JasminGenerator {
         // generate code for loading what's on the right
         code.append(generators.apply(assign.getRhs()));
 
+        System.out.println("hello - " + assign.getRhs());
         // store value in the stack in destination
         var lhs = assign.getDest();
 
@@ -199,7 +211,6 @@ public class JasminGenerator {
 
     private String generateOperand(Operand operand) {
         // get register
-        // System.out.println("Getting " + operand.getName());
         if (operand.getName().equals("this")) {
             return "aload 0\n";
         }
@@ -209,7 +220,6 @@ public class JasminGenerator {
         if (operand.getName().equals("false")) {
             return "ldc 0\n";
         }
-        System.out.println(operand.getName());
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         var jasminType = typeJasmin(operand.getType());
         if (jasminType.startsWith("L") || jasminType.startsWith("["))
@@ -235,6 +245,14 @@ public class JasminGenerator {
 
         code.append(op).append(NL);
 
+        return code.toString();
+    }
+
+    private String generateUnaryOp(UnaryOpInstruction unaryOpInst) {
+        var code = new StringBuilder();
+        code.append(generators.apply(unaryOpInst.getOperand()));
+        code.append("iconst_1").append(NL);
+        code.append("ixor").append(NL);
         return code.toString();
     }
 
@@ -274,7 +292,6 @@ public class JasminGenerator {
     }
 
     private void invokeMethod(StringBuilder code, CallInstruction callInst, String callType) {
-        System.out.println(callInst.toTree());
         boolean savedNeedsResult = needsResult;
         needsResult = true;
         var operand = (Operand) callInst.getOperands().get(0);
@@ -342,7 +359,7 @@ public class JasminGenerator {
 
     private String generatePutField(PutFieldInstruction putFieldInst) {
         var code = new StringBuilder();
-        code.append("aload 0 ; push this\n");
+        code.append("aload 0 ; push this").append(NL);
         code.append(generators.apply(putFieldInst.getValue()));
         code.append("putfield ");
         code.append(ollirResult.getOllirClass().getClassName());
@@ -351,6 +368,27 @@ public class JasminGenerator {
         code.append(" ");
         code.append(typeJasmin(putFieldInst.getValue().getType()));
         code.append("\n");
+        return code.toString();
+    }
+
+    private String generateOpCond(OpCondInstruction opCondInst){
+        var code = new StringBuilder();
+        code.append(generators.apply(opCondInst.getOperands().get(0)));
+        code.append(generators.apply(opCondInst.getOperands().get(1)));
+        code.append("isub").append(NL);
+        code.append("iflt ").append(opCondInst.getLabel()).append(NL);
+        return code.toString();
+    }
+
+    private String generateSingleOpCond(SingleOpCondInstruction singleOpCondInst){
+        var code = new StringBuilder();
+        code.append(generators.apply(singleOpCondInst.getOperands().get(0)));
+        code.append("ifne ").append(singleOpCondInst.getLabel()).append(NL);
+        return code.toString();
+    }
+    private String generateGoto(GotoInstruction gotoInst){
+        var code = new StringBuilder();
+        code.append("goto ").append(gotoInst.getLabel()).append(NL);
         return code.toString();
     }
 
@@ -380,8 +418,6 @@ public class JasminGenerator {
                 }
             }
         }
-        System.out.println("Invalid type");
-        System.out.println(typeString);
         return "";
     }
 
