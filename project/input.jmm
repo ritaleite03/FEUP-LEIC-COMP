@@ -1,9 +1,17 @@
 import ioPlus;
-class ArrayAccess {
+class ArrayAsArg {
 
-	public static void main(String[] args) {
-	    int[] a;
-        a = new int[5];
-        a[0] = 1;
-	}
+    public int func(int[] a) 
+    {   
+        int x;
+        int[] arr;
+        ArrayAsArg c;
+        
+		c = new ArrayAsArg();
+        arr = new int[2];
+        x = c.func(arr);
+        return x;
+    }
+
+    
 }

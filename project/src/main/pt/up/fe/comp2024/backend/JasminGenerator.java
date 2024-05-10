@@ -151,11 +151,15 @@ public class JasminGenerator {
         code.append(")").append(this.typeJasmin(returnType)).append(NL);
         // Add limits
         code.append(TAB).append(".limit stack 99").append(NL);
-        code.append(TAB).append(".limit locals 99").append(NL);
+        var vars = method.getVarTable().keySet();
+        vars.remove("this");
+        code.append(TAB).append(".limit locals ").append(vars.size() + 1)
+                .append(NL);
 
+        System.out.println(vars);
         for (var inst : method.getInstructions()) {
             // System.out.println("inst - " + inst);
-            code.append(";inst - " + inst).append(NL);
+            // code.append(";inst - " + inst).append(NL);
             needsResult = !inst.getInstType().equals(InstructionType.CALL);
             for (var label : method.getLabels(inst)) {
                 code.append(label);
