@@ -55,9 +55,9 @@ public class JasminGenerator {
         generators.put(ReturnInstruction.class, this::generateReturn);
         generators.put(GetFieldInstruction.class, this::generateGetField);
         generators.put(PutFieldInstruction.class, this::generatePutField);
-        generators.put(OpCondInstruction.class,this::generateOpCond);
-        generators.put(SingleOpCondInstruction.class,this::generateSingleOpCond);
-        generators.put(GotoInstruction.class,this::generateGoto);
+        generators.put(OpCondInstruction.class, this::generateOpCond);
+        generators.put(SingleOpCondInstruction.class, this::generateSingleOpCond);
+        generators.put(GotoInstruction.class, this::generateGoto);
 
     }
 
@@ -154,7 +154,8 @@ public class JasminGenerator {
         code.append(TAB).append(".limit locals 99").append(NL);
 
         for (var inst : method.getInstructions()) {
-            System.out.println("inst - "+inst);
+            // System.out.println("inst - " + inst);
+            code.append(";inst - " + inst).append(NL);
             needsResult = !inst.getInstType().equals(InstructionType.CALL);
             for (var label : method.getLabels(inst)) {
                 code.append(label);
@@ -163,7 +164,7 @@ public class JasminGenerator {
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
 
-            System.out.println("instcode - " + instCode);
+            // System.out.println("instcode - " + instCode);
             code.append(instCode);
         }
 
@@ -178,9 +179,8 @@ public class JasminGenerator {
     private String generateAssign(AssignInstruction assign) {
         var code = new StringBuilder();
         // generate code for loading what's on the right
-        code.append(generators.apply(assign.getRhs()));
 
-        System.out.println("hello - " + assign.getRhs());
+        // System.out.println("hello - " + assign.getRhs());
         // store value in the stack in destination
         var lhs = assign.getDest();
 
@@ -189,15 +189,25 @@ public class JasminGenerator {
         }
 
         var operand = (Operand) lhs;
-
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         var jasminType = typeJasmin(operand.getType());
-        if (jasminType.startsWith("L") || jasminType.startsWith("["))
-            code.append("astore ").append(reg).append(NL);
-        else
-            code.append("istore ").append(reg).append(NL);
-
+        if (operand instanceof ArrayOperand) {
+            var arrayOperand = (ArrayOperand) operand;
+            code.append("aload ").append(reg).append(NL);
+            code.append(generators.apply(arrayOperand.getIndexOperands().get(0)));
+            code.append(generators.apply(assign.getRhs()));
+            if (jasminType.startsWith("L") || jasminType.startsWith("["))
+                code.append("aastore").append(NL);
+            else
+                code.append("iastore").append(NL);
+        } else {
+            code.append(generators.apply(assign.getRhs()));
+            if (jasminType.startsWith("L") || jasminType.startsWith("["))
+                code.append("astore ").append(reg).append(NL);
+            else
+                code.append("istore ").append(reg).append(NL);
+        }
         return code.toString();
     }
 
@@ -222,6 +232,15 @@ public class JasminGenerator {
         }
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         var jasminType = typeJasmin(operand.getType());
+        if (operand instanceof ArrayOperand) {
+            var code = new StringBuilder();
+            var arrayOperand = (ArrayOperand) operand;
+            code.append("aload ").append(reg).append(NL);
+            code.append(generators.apply(arrayOperand.getIndexOperands().get(0)));
+            if (jasminType.startsWith("L") || jasminType.startsWith("["))
+                return code.toString() + "aaload" + NL;
+            return code.toString() + "iaload" + NL;
+        }
         if (jasminType.startsWith("L") || jasminType.startsWith("["))
             return "aload " + reg + NL;
         return "iload " + reg + NL;
@@ -260,8 +279,16 @@ public class JasminGenerator {
         var code = new StringBuilder();
         switch (callInst.getInvocationType()) {
             case NEW:
-                code.append("new ");
-                code.append(handleImports(callInst.getCaller().getType()));
+                var operads = callInst.getOperands();
+                if (operads.size() > 1) {
+                    code.append(generators.apply(callInst.getOperands().get(1)));
+                    code.append("newarray int");
+                    // var type = ((ArrayType) callInst.getReturnType()).getElementType();
+                    // code.append(typeJasmin(type));
+                } else {
+                    code.append("new ");
+                    code.append(handleImports(callInst.getCaller().getType()));
+                }
                 break;
             case arraylength: {
                 var operand = (Operand) callInst.getOperands().get(0);
@@ -371,22 +398,30 @@ public class JasminGenerator {
         return code.toString();
     }
 
-    private String generateOpCond(OpCondInstruction opCondInst){
+    private String generateOpCond(OpCondInstruction opCondInst) {
         var code = new StringBuilder();
         code.append(generators.apply(opCondInst.getOperands().get(0)));
         code.append(generators.apply(opCondInst.getOperands().get(1)));
         code.append("isub").append(NL);
-        code.append("iflt ").append(opCondInst.getLabel()).append(NL);
+        code.append(switch (opCondInst.getCondition().getOperation().getOpType()) {
+            case LTH -> "iflt ";
+            case LTE -> "ifle ";
+            case GTE -> "ifge ";
+            default -> throw new IllegalArgumentException(
+                    "Unexpected value: " + opCondInst.getCondition().getOperation().getOpType());
+        });
+        code.append(opCondInst.getLabel()).append(NL);
         return code.toString();
     }
 
-    private String generateSingleOpCond(SingleOpCondInstruction singleOpCondInst){
+    private String generateSingleOpCond(SingleOpCondInstruction singleOpCondInst) {
         var code = new StringBuilder();
         code.append(generators.apply(singleOpCondInst.getOperands().get(0)));
         code.append("ifne ").append(singleOpCondInst.getLabel()).append(NL);
         return code.toString();
     }
-    private String generateGoto(GotoInstruction gotoInst){
+
+    private String generateGoto(GotoInstruction gotoInst) {
         var code = new StringBuilder();
         code.append("goto ").append(gotoInst.getLabel()).append(NL);
         return code.toString();
