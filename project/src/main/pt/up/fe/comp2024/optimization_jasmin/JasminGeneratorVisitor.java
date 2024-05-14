@@ -161,7 +161,7 @@ public class JasminGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append("istore ").append(reg).append(NL);
 
         return code.toString();
-    }
+     }
 
     private String visitReturnStmt(JmmNode returnStmt, Void unused) {
 

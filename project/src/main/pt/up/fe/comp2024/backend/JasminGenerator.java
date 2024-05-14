@@ -206,6 +206,8 @@ public class JasminGenerator {
             else
                 code.append("iastore").append(NL);
         } else {
+            System.out.println(assign.getRhs());
+
             code.append(generators.apply(assign.getRhs()));
             if (jasminType.startsWith("L") || jasminType.startsWith("["))
                 code.append("astore ").append(reg).append(NL);
@@ -220,6 +222,16 @@ public class JasminGenerator {
     }
 
     private String generateLiteral(LiteralElement literal) {
+        System.out.println(literal.getType().toString());
+        if(literal.getType().toString().equals("INT32")){
+            int number = Integer.parseInt(literal.getLiteral());
+            if(number <= 127 && number >= -128){
+                return "bipush " + literal.getLiteral() + NL;
+            }
+            if(number<=32767 && number >= -32768 ){
+                return "sipush " + literal.getLiteral() + NL;
+            }
+        }
         return "ldc " + literal.getLiteral() + NL;
     }
 
