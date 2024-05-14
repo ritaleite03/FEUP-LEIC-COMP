@@ -132,6 +132,10 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             computation.append(SPACE);
             computation.append(":=.bool false.bool");
             computation.append(END_STMT);
+            computation.append("goto");
+            computation.append(SPACE);
+            computation.append(endIf);
+            computation.append(END_STMT);
             // assign the right side
             computation.append(initIf);
             computation.append(":\n");
@@ -141,10 +145,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             computation.append(".bool");
             computation.append(SPACE);
             computation.append(rhs.getCode());
-            computation.append(END_STMT);
-            computation.append("goto");
-            computation.append(SPACE);
-            computation.append(endIf);
             computation.append(END_STMT);
 
             computation.append(endIf);
