@@ -4,6 +4,7 @@ import org.specs.comp.ollir.*;
 import org.specs.comp.ollir.tree.TreeNode;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp2024.optimization.OptUtils;
 import pt.up.fe.specs.util.classmap.FunctionClassMap;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
@@ -206,8 +207,6 @@ public class JasminGenerator {
             else
                 code.append("iastore").append(NL);
         } else {
-            System.out.println(assign.getRhs());
-
             code.append(generators.apply(assign.getRhs()));
             if (jasminType.startsWith("L") || jasminType.startsWith("["))
                 code.append("astore ").append(reg).append(NL);
@@ -222,7 +221,6 @@ public class JasminGenerator {
     }
 
     private String generateLiteral(LiteralElement literal) {
-        System.out.println(literal.getType().toString());
         if(literal.getType().toString().equals("INT32")){
             int number = Integer.parseInt(literal.getLiteral());
             if(number <= 127 && number >= -128){
@@ -269,7 +267,25 @@ public class JasminGenerator {
         code.append(generators.apply(binaryOp.getLeftOperand()));
         code.append(generators.apply(binaryOp.getRightOperand()));
 
-        // apply operation
+        if(binaryOp.getOperation().getOpType().toString().equals("LTH")){
+            String temp = "true" + OptUtils.getNextTempNum();
+            String temp1 = "end" + OptUtils.getNextTempNum();
+
+            // ver 0 e 1 aqui !!!!!
+            code.append("isub").append(NL);
+            code.append("iflt ").append(temp).append(NL);
+            code.append("ldc 0").append(NL);
+            code.append("jmp ").append(temp1).append(NL);
+
+            code.append(temp).append(":").append(NL);
+            code.append("ldc 1").append(NL);
+            code.append("jmp ").append(temp1).append(NL);
+
+            code.append(temp1).append(":").append(NL);
+
+            return code.toString();
+        }
+      // apply operation
         var op = switch (binaryOp.getOperation().getOpType()) {
             case ADD -> "iadd";
             case MUL -> "imul";

@@ -91,6 +91,7 @@ public class Cpf5_Optimizations {
     @Test
     public void section1_InstSelection_IfLt() {
         var jasminResult = getJasminResult("inst_selection/InstSelection_if_lt.jmm");
+        System.out.println(jasminResult.getJasminCode());
         CpUtils.matches(jasminResult, "(iflt|ifge)");
     }
 
