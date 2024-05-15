@@ -129,7 +129,13 @@ public class TypeUtils {
                 return null;
             }
             boolean arrayInLast = false;
-            for (int i = 0; i < parametersMethod.size(); i++) {
+            if (parametersMethod.size() - arguments.size() > 1
+                    || (parametersMethod.size() - arguments.size() == 1 && !TypeUtils.isVarArgs(parametersMethod
+                            .get(parametersMethod.size() - 1).getType()))) {
+                addNewReport("Function Expression : wrong number of parameters", expr);
+                return null;
+            }
+            for (int i = 0; i < arguments.size(); i++) {
                 Type argument = getExprType(arguments.get(i), table);
                 Type parameter = parametersMethod.get(i).getType();
                 if (argument == null || parameter == null) {

@@ -82,7 +82,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         Type resType = typeOrExpected(TypeUtils.getExprType(node, table), expected);
         String resOllirType = OptUtils.toOllirType(resType);
         var tmp = OptUtils.getTemp();
-        var code = tmp + resOllirType ;
+        var code = tmp + resOllirType;
         var computation = new StringBuilder();
         computation.append(code);
         computation.append(SPACE);
@@ -153,7 +153,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         }
         var lhs = visit(node.getJmmChild(0), new InferType(new Type("int", false)));
         var rhs = visit(node.getJmmChild(1), new InferType(new Type("int", false)));
-
 
         // code to compute the children
         computation.append(lhs.getComputation());
@@ -313,7 +312,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         computation.append(temp);
         computation.append(END_STMT);
 
-
         int count = 0;
 
         for (var child : node.getChildren()) {
@@ -411,7 +409,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             int paramsSize = params.size();
 
             for (int i = 0; i < paramsSize; i++) {
-                if(TypeUtils.isVarArgs(params.get(i).getType())){
+                if (TypeUtils.isVarArgs(params.get(i).getType())) {
                     var elements = args.subList(paramsSize - 1, argsSize);
                     var computed = generateVararg(elements, params.get(i).getType());
                     computedArgs.add(computed);
@@ -461,9 +459,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         return new OllirExprResult(res, preComputation + computation);
     }
 
-    private OllirExprResult generateVararg(List<JmmNode> nodes, Type arrayType){
-
-        Type type = TypeUtils.getExprType(nodes.get(0), table);
+    private OllirExprResult generateVararg(List<JmmNode> nodes, Type arrayType) {
+        Type type = new Type(arrayType.getName(), false);
         String ollirType = OptUtils.toOllirType(type);
         String ollirArrayType = OptUtils.toOllirType(arrayType);
         int size = nodes.size();

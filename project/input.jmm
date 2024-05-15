@@ -1,7 +1,14 @@
 class InstSelection_iinc {
 	public static void main(String[] args) {
+		InstSelection_iinc a;
 		int i;
+		int[] b;
 		i = 2;
 		i = i+1;
+		a.foo();
+	}
+
+	public int foo(int... a){
+		return a[0];
 	}
 }
