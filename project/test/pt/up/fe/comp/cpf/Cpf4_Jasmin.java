@@ -49,6 +49,7 @@ public class Cpf4_Jasmin {
         }
 
         var ollirResult = new OllirResult(SpecsIo.getResource(resource), Collections.emptyMap());
+        System.out.println(ollirResult.getOllirCode());
         var result = TestUtils.backend(ollirResult);
 
         return result;

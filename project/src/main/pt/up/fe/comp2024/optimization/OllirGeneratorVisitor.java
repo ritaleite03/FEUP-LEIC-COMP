@@ -95,13 +95,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 lastLineRightSide.length > 1 &&
                 typeString.equals(".i32")){
 
-/*
-            System.out.println("lastlineIndex" + lastLineIndex);
-
-            System.out.println("before : " + code);
-            code = new StringBuilder(code.substring(0, lastLineIndex));
-            System.out.println("after : " + code);
-*/
             int lastLineIndex = code.lastIndexOf("\n");
             int lastLastLineIndex = code.lastIndexOf("\n", lastLineIndex - 1);
 
@@ -111,16 +104,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 code = new StringBuilder();
             }
 
-
-
             code.append(lhs);
             code.append(typeString);
             code.append(SPACE);
             code.append(ASSIGN);
             code.append(lastLineRightSide[1]);
-
-            System.out.println("olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-            System.out.println(code);
+            code.append(NL);
             return code.toString();
         }
 
