@@ -11,6 +11,7 @@ import pt.up.fe.comp2024.ast.TypeUtils;
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -80,6 +81,27 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append(", ");
             code.append(rhs.getCode());
             code.append(").V;\n");
+            return code.toString();
+        }
+
+        // see if last line in computation is an assign
+        String[] rhsComputationLines = rhs.getComputation().split("\n");
+        String lastLine = rhsComputationLines[rhsComputationLines.length-1].strip();
+        String[] lastLineRightSide = lastLine.split(":=");
+
+        // if expression on the right is of type binary and is of type int
+        if(node.getJmmChild(0).getKind().equals("BinaryExpr") &&
+                lastLineRightSide.length > 1 &&
+                typeString.equals(".i32")){
+
+            int lastLineIndex = code.lastIndexOf("\n");
+            code = new StringBuilder(code.substring(0, lastLineIndex));
+            code.append(lhs);
+            code.append(typeString);
+            code.append(SPACE);
+            code.append(ASSIGN);
+            code.append(lastLineRightSide[1]);
+
             return code.toString();
         }
 
@@ -234,7 +256,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitMultiStmt(JmmNode node, Void unused) {
-        System.out.println("visitMultiStmt");
         StringBuilder code = new StringBuilder();
         for (int i = 0; i < node.getChildren().size(); i++) {
             code.append(this.visit(node.getJmmChild(i)));
