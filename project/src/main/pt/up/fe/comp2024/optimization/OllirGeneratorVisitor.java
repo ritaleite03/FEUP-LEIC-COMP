@@ -124,7 +124,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
             code.append("putfield(this, ");
-            code.append(lhs);
+            code.append(lhs.getCode());
             code.append(typeString);
             code.append(", ");
             code.append(rhs.getCode());
