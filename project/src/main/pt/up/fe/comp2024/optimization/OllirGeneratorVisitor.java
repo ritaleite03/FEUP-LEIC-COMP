@@ -47,8 +47,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(ASSIGN_STMT_ARRAY, this::visitAssignStmtArray);
         addVisit(VAR_STMT, this::visitVarStmt);
         addVisit(IF_STMT, this::visitIfStmt);
-        addVisit(MULTI_STMT,this::visitMultiStmt);
-        addVisit(WHILE_STMT,this::visitWhileStmt);
+        addVisit(MULTI_STMT, this::visitMultiStmt);
+        addVisit(WHILE_STMT, this::visitWhileStmt);
         setDefaultVisit(this::defaultVisit);
     }
 
@@ -61,7 +61,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var rhs = exprVisitor.visit(node.getJmmChild(0), new InferType(thisType));
 
         StringBuilder code = new StringBuilder();
-;
 
         // code to compute the children
         code.append(rhs.getComputation());
@@ -115,17 +114,16 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(rhs.getComputation());
 
         var isLocalList = table.getLocalVariables(currentMethod).stream().filter(local -> local.getName().equals(
-                        lhsName))
+                lhsName))
                 .toList();
         var isParamList = table.getParameters(currentMethod).stream().filter(param -> param.getName().equals(
-                        lhsName))
+                lhsName))
                 .toList();
         var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(lhsName)).toList();
 
         if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
             code.append("putfield(this, ");
             code.append(lhs.getCode());
-            code.append(typeString);
             code.append(", ");
             code.append(rhs.getCode());
             code.append(").V;\n");
@@ -149,12 +147,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
-    private String visitWhileStmt(JmmNode node, Void unused){
+    private String visitWhileStmt(JmmNode node, Void unused) {
         StringBuilder code = new StringBuilder();
         // number used for the labels
         var numberLabel = OptUtils.getNextTempNum();
         // condition
-        var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("boolean",false)));
+        var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("boolean", false)));
         // code block of the loop
         var body = this.visit(node.getJmmChild(1));
 
@@ -195,9 +193,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
-    private String visitIfStmt(JmmNode node, Void unused){
+    private String visitIfStmt(JmmNode node, Void unused) {
         // condition
-        var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("boolean",false)));
+        var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("boolean", false)));
         // number used for the labels
         var numberLabel = OptUtils.getNextTempNum();
         String initLabel = "if" + numberLabel;
@@ -235,10 +233,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
-    private String visitMultiStmt(JmmNode node, Void unused){
+    private String visitMultiStmt(JmmNode node, Void unused) {
         System.out.println("visitMultiStmt");
         StringBuilder code = new StringBuilder();
-        for(int i = 0; i < node.getChildren().size(); i++){
+        for (int i = 0; i < node.getChildren().size(); i++) {
             code.append(this.visit(node.getJmmChild(i)));
         }
         return code.toString();
