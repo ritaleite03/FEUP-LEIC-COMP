@@ -189,6 +189,8 @@ public class Cpf3_Ollir {
     public void section4_Arrays_Load_ComplexArrayAccess() {
         // Just parse
         var result = getOllirResult("arrays/ComplexArrayAccess.jmm");
+        System.out.println("olaaaaaaaaaaaaaaaaaaaa");
+        System.out.println(result.getOllirCode());
 
         System.out.println("---------------------- OLLIR ----------------------");
         System.out.println(result.getOllirCode());

@@ -84,6 +84,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             return code.toString();
         }
 
+
         // see if last line in computation is an assign
         String[] rhsComputationLines = rhs.getComputation().split("\n");
         String lastLine = rhsComputationLines[rhsComputationLines.length-1].strip();
@@ -94,16 +95,35 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 lastLineRightSide.length > 1 &&
                 typeString.equals(".i32")){
 
-            int lastLineIndex = code.lastIndexOf("\n");
+/*
+            System.out.println("lastlineIndex" + lastLineIndex);
+
+            System.out.println("before : " + code);
             code = new StringBuilder(code.substring(0, lastLineIndex));
+            System.out.println("after : " + code);
+*/
+            int lastLineIndex = code.lastIndexOf("\n");
+            int lastLastLineIndex = code.lastIndexOf("\n", lastLineIndex - 1);
+
+            if (lastLastLineIndex != -1) {
+                code = new StringBuilder(code.substring(0, lastLastLineIndex) + code.substring(lastLineIndex));
+            } else {
+                code = new StringBuilder();
+            }
+
+
+
             code.append(lhs);
             code.append(typeString);
             code.append(SPACE);
             code.append(ASSIGN);
             code.append(lastLineRightSide[1]);
 
+            System.out.println("olaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+            System.out.println(code);
             return code.toString();
         }
+
 
         // code to compute self
         // statement has type of lhs
