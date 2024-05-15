@@ -207,6 +207,43 @@ public class JasminGenerator {
             else
                 code.append("iastore").append(NL);
         } else {
+            System.out.println("===========");
+            System.out.println(assign.toTree());
+            System.out.println(assign.getRhs() instanceof BinaryOpInstruction);
+            if (assign.getRhs() instanceof BinaryOpInstruction) {
+                var binaryOp = (BinaryOpInstruction) assign.getRhs();
+                System.out.println(binaryOp.getOperation().getOpType().equals(OperationType.ADD));
+                if (binaryOp.getOperation().getOpType().equals(OperationType.ADD)) {
+                    if (binaryOp.getLeftOperand() instanceof Operand) {
+                        System.out.println("---");
+                        System.out.println(
+                                currentMethod.getVarTable().get(((Operand) binaryOp.getLeftOperand()).getName())
+                                        .getVirtualReg());
+                        System.out.println(reg);
+                    }
+                    if (binaryOp.getLeftOperand() instanceof Operand
+                            && binaryOp.getRightOperand() instanceof LiteralElement &&
+                            currentMethod.getVarTable().get(((Operand) binaryOp.getLeftOperand()).getName())
+                                    .getVirtualReg() == reg) {
+                        code.append("iinc ");
+                        code.append(reg);
+                        code.append(" ");
+                        code.append(((LiteralElement) binaryOp.getRightOperand()).getLiteral());
+                        code.append(NL);
+                        return code.toString();
+                    } else if (binaryOp.getRightOperand() instanceof Operand
+                            && binaryOp.getLeftOperand() instanceof LiteralElement &&
+                            currentMethod.getVarTable().get(((Operand) binaryOp.getRightOperand()).getName())
+                                    .getVirtualReg() == reg) {
+                        code.append("iinc ");
+                        code.append(reg);
+                        code.append(" ");
+                        code.append(((LiteralElement) binaryOp.getLeftOperand()).getLiteral());
+                        code.append(NL);
+                        return code.toString();
+                    }
+                }
+            }
             code.append(generators.apply(assign.getRhs()));
             if (jasminType.startsWith("L") || jasminType.startsWith("["))
                 code.append(reg < 4 ? "astore_" : "astore ").append(reg).append(NL);
@@ -265,16 +302,8 @@ public class JasminGenerator {
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
         var code = new StringBuilder();
 
-        System.out.println(binaryOp.toTree());
+        // System.out.println(binaryOp.toTree());
 
-        if (binaryOp.getOperation().getOpType().equals(OperationType.ADD)
-                && binaryOp.getLeftOperand() instanceof Operand
-                && binaryOp.getRightOperand() instanceof LiteralElement) {
-            return "iinc "
-                    + currentMethod.getVarTable().get(((Operand) binaryOp.getLeftOperand()).getName()).getVirtualReg()
-                    + " "
-                    + ((LiteralElement) binaryOp.getRightOperand()).getLiteral() + NL;
-        }
         // load values on the left and on the right
         code.append(generators.apply(binaryOp.getLeftOperand()));
         code.append(generators.apply(binaryOp.getRightOperand()));
@@ -451,6 +480,7 @@ public class JasminGenerator {
             case LTH -> "iflt ";
             case LTE -> "ifle ";
             case GTE -> "ifge ";
+            case GTH -> "ifgt ";
             default -> throw new IllegalArgumentException(
                     "Unexpected value: " + opCondInst.getCondition().getOperation().getOpType());
         });
