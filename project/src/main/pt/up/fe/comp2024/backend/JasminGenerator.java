@@ -199,7 +199,7 @@ public class JasminGenerator {
         var jasminType = typeJasmin(operand.getType());
         if (operand instanceof ArrayOperand) {
             var arrayOperand = (ArrayOperand) operand;
-            code.append("aload ").append(reg).append(NL);
+            code.append(reg < 4 ? "aload_" : "aload ").append(reg).append(NL);
             code.append(generators.apply(arrayOperand.getIndexOperands().get(0)));
             code.append(generators.apply(assign.getRhs()));
             if (jasminType.startsWith("L") || jasminType.startsWith("["))
@@ -209,9 +209,9 @@ public class JasminGenerator {
         } else {
             code.append(generators.apply(assign.getRhs()));
             if (jasminType.startsWith("L") || jasminType.startsWith("["))
-                code.append("astore ").append(reg).append(NL);
+                code.append(reg < 4 ? "astore_" : "astore ").append(reg).append(NL);
             else
-                code.append("istore ").append(reg).append(NL);
+                code.append(reg < 4 ? "istore_" : "istore ").append(reg).append(NL);
         }
         return code.toString();
     }
@@ -221,12 +221,14 @@ public class JasminGenerator {
     }
 
     private String generateLiteral(LiteralElement literal) {
-        if(literal.getType().toString().equals("INT32")){
+        if (literal.getType().toString().equals("INT32")) {
             int number = Integer.parseInt(literal.getLiteral());
-            if(number <= 127 && number >= -128){
+            if (number < 6)
+                return "iconst_" + literal.getLiteral() + NL;
+            if (number <= 127 && number >= -128) {
                 return "bipush " + literal.getLiteral() + NL;
             }
-            if(number<=32767 && number >= -32768 ){
+            if (number <= 32767 && number >= -32768) {
                 return "sipush " + literal.getLiteral() + NL;
             }
         }
@@ -236,38 +238,48 @@ public class JasminGenerator {
     private String generateOperand(Operand operand) {
         // get register
         if (operand.getName().equals("this")) {
-            return "aload 0\n";
+            return "aload_0\n";
         }
         if (operand.getName().equals("true")) {
-            return "ldc 1\n";
+            return "iconst_1\n";
         }
         if (operand.getName().equals("false")) {
-            return "ldc 0\n";
+            return "iconst_0\n";
         }
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         var jasminType = typeJasmin(operand.getType());
         if (operand instanceof ArrayOperand) {
             var code = new StringBuilder();
             var arrayOperand = (ArrayOperand) operand;
-            code.append("aload ").append(reg).append(NL);
+            code.append(reg < 4 ? "aload_" : "aload ").append(reg).append(NL);
             code.append(generators.apply(arrayOperand.getIndexOperands().get(0)));
             if (jasminType.startsWith("L") || jasminType.startsWith("["))
                 return code.toString() + "aaload" + NL;
             return code.toString() + "iaload" + NL;
         }
         if (jasminType.startsWith("L") || jasminType.startsWith("["))
-            return "aload " + reg + NL;
-        return "iload " + reg + NL;
+            return (reg < 4 ? "aload_" : "aload ") + reg + NL;
+        return (reg < 4 ? "iload_" : "iload ") + reg + NL;
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
         var code = new StringBuilder();
 
+        System.out.println(binaryOp.toTree());
+
+        if (binaryOp.getOperation().getOpType().equals(OperationType.ADD)
+                && binaryOp.getLeftOperand() instanceof Operand
+                && binaryOp.getRightOperand() instanceof LiteralElement) {
+            return "iinc "
+                    + currentMethod.getVarTable().get(((Operand) binaryOp.getLeftOperand()).getName()).getVirtualReg()
+                    + " "
+                    + ((LiteralElement) binaryOp.getRightOperand()).getLiteral() + NL;
+        }
         // load values on the left and on the right
         code.append(generators.apply(binaryOp.getLeftOperand()));
         code.append(generators.apply(binaryOp.getRightOperand()));
 
-        if(binaryOp.getOperation().getOpType().toString().equals("LTH")){
+        if (binaryOp.getOperation().getOpType().toString().equals("LTH")) {
             String temp = "true" + OptUtils.getNextTempNum();
             String temp1 = "end" + OptUtils.getNextTempNum();
 
@@ -285,7 +297,7 @@ public class JasminGenerator {
 
             return code.toString();
         }
-      // apply operation
+        // apply operation
         var op = switch (binaryOp.getOperation().getOpType()) {
             case ADD -> "iadd";
             case MUL -> "imul";
@@ -405,7 +417,7 @@ public class JasminGenerator {
 
     private String generateGetField(GetFieldInstruction getFieldInst) {
         var code = new StringBuilder();
-        code.append("aload 0 ; push this\n");
+        code.append("aload_0 ; push this\n");
         code.append("getfield ");
         code.append(classUnit.getClassName());
         code.append("/");
@@ -418,7 +430,7 @@ public class JasminGenerator {
 
     private String generatePutField(PutFieldInstruction putFieldInst) {
         var code = new StringBuilder();
-        code.append("aload 0 ; push this").append(NL);
+        code.append("aload_0 ; push this").append(NL);
         code.append(generators.apply(putFieldInst.getValue()));
         code.append("putfield ");
         code.append(ollirResult.getOllirClass().getClassName());
