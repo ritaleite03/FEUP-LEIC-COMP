@@ -5,7 +5,7 @@ class InstSelection_iinc {
 		int[] b;
 		i = 2;
 		i = i+1;
-		a.foo();
+		a.foo(1,2);
 	}
 
 	public int foo(int... a){

@@ -135,7 +135,7 @@ public class TypeUtils {
                 addNewReport("Function Expression : wrong number of parameters", expr);
                 return null;
             }
-            for (int i = 0; i < arguments.size(); i++) {
+            for (int i = 0; i < Math.min(arguments.size(), parametersMethod.size()); i++) {
                 Type argument = getExprType(arguments.get(i), table);
                 Type parameter = parametersMethod.get(i).getType();
                 if (argument == null || parameter == null) {
