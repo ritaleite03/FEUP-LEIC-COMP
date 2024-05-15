@@ -411,9 +411,16 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             for (int i = 0; i < paramsSize; i++) {
                 if (TypeUtils.isVarArgs(params.get(i).getType())) {
                     var elements = args.subList(paramsSize - 1, argsSize);
-                    var computed = generateVararg(elements, params.get(i).getType());
-                    computedArgs.add(computed);
-                    computation.append(computed.getComputation());
+                    if (elements.size() == 1 && TypeUtils.getExprType(elements.get(0), table).isArray()) {
+                        var computed = visit(elements.get(0));
+                        computedArgs.add(computed);
+                        computation.append(computed.getComputation());
+                        computation.append("\n");
+                    } else {
+                        var computed = generateVararg(elements, params.get(i).getType());
+                        computedArgs.add(computed);
+                        computation.append(computed.getComputation());
+                    }
                 } else {
                     var computed = visit(args.get(i), new InferType(params.get(i).getType()));
                     computedArgs.add(computed);
