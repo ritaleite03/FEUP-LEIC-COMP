@@ -207,20 +207,9 @@ public class JasminGenerator {
             else
                 code.append("iastore").append(NL);
         } else {
-            System.out.println("===========");
-            System.out.println(assign.toTree());
-            System.out.println(assign.getRhs() instanceof BinaryOpInstruction);
             if (assign.getRhs() instanceof BinaryOpInstruction) {
                 var binaryOp = (BinaryOpInstruction) assign.getRhs();
-                System.out.println(binaryOp.getOperation().getOpType().equals(OperationType.ADD));
                 if (binaryOp.getOperation().getOpType().equals(OperationType.ADD)) {
-                    if (binaryOp.getLeftOperand() instanceof Operand) {
-                        System.out.println("---");
-                        System.out.println(
-                                currentMethod.getVarTable().get(((Operand) binaryOp.getLeftOperand()).getName())
-                                        .getVirtualReg());
-                        System.out.println(reg);
-                    }
                     if (binaryOp.getLeftOperand() instanceof Operand
                             && binaryOp.getRightOperand() instanceof LiteralElement &&
                             currentMethod.getVarTable().get(((Operand) binaryOp.getLeftOperand()).getName())
@@ -238,6 +227,30 @@ public class JasminGenerator {
                         code.append("iinc ");
                         code.append(reg);
                         code.append(" ");
+                        code.append(((LiteralElement) binaryOp.getLeftOperand()).getLiteral());
+                        code.append(NL);
+                        return code.toString();
+                    }
+                }
+
+                if (binaryOp.getOperation().getOpType().equals(OperationType.SUB)) {
+                    if (binaryOp.getLeftOperand() instanceof Operand
+                            && binaryOp.getRightOperand() instanceof LiteralElement &&
+                            currentMethod.getVarTable().get(((Operand) binaryOp.getLeftOperand()).getName())
+                                    .getVirtualReg() == reg) {
+                        code.append("iinc ");
+                        code.append(reg);
+                        code.append(" -");
+                        code.append(((LiteralElement) binaryOp.getRightOperand()).getLiteral());
+                        code.append(NL);
+                        return code.toString();
+                    } else if (binaryOp.getRightOperand() instanceof Operand
+                            && binaryOp.getLeftOperand() instanceof LiteralElement &&
+                            currentMethod.getVarTable().get(((Operand) binaryOp.getRightOperand()).getName())
+                                    .getVirtualReg() == reg) {
+                        code.append("iinc ");
+                        code.append(reg);
+                        code.append(" -");
                         code.append(((LiteralElement) binaryOp.getLeftOperand()).getLiteral());
                         code.append(NL);
                         return code.toString();
