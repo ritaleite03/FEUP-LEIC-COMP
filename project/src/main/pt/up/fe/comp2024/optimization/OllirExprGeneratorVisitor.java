@@ -484,7 +484,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         computation.append("new(array, ");
         computation.append(size);
         computation.append(".i32)");
-        computation.append(ollirType);
+        computation.append(ollirArrayType);
         computation.append(END_STMT);
 
         String array = OptUtils.getTempArray("__varargs_array_");
