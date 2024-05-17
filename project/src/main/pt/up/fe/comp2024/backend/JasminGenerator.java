@@ -490,7 +490,10 @@ public class JasminGenerator {
             code.append(this.typeJasmin(callInst.getArguments().get(i).getType()));
         }
         code.append(")");
-        stackMax.sub(callInst.getArguments().size() + 1);
+        stackMax.sub(callInst.getArguments().size());
+        if (!callType.equals("invokestatic")) {
+            stackMax.sub(1);
+        }
         var jasminType = this.typeJasmin(callInst.getReturnType());
         code.append(jasminType);
         if (!jasminType.equals("V")) {
