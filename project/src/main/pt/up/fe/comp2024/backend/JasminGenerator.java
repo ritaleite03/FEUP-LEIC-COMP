@@ -14,6 +14,33 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+class MaxCounter {
+    private int count=0;
+    private int max=0;
+    public void add(int x){
+        count+=x;
+        if(count>max)
+            max=count;
+    }
+
+    public void sub(int x){
+        count-=x;
+    }
+
+    public int getMax(){
+        return max;
+    }
+
+    public int getCount(){
+        return count;
+    }
+
+    public void reset(){
+        max = 0;
+        count = 0;
+    }
+
+}
 /**
  * Generates Jasmin code from an OllirResult.
  * <p>
@@ -33,6 +60,8 @@ public class JasminGenerator {
     Method currentMethod;
     ClassUnit classUnit;
 
+    MaxCounter stackMax;
+
     private final FunctionClassMap<TreeNode, String> generators;
     private boolean needsResult;
 
@@ -42,6 +71,7 @@ public class JasminGenerator {
         reports = new ArrayList<>();
         code = null;
         currentMethod = null;
+        stackMax = new MaxCounter();
 
         this.generators = new FunctionClassMap<>();
         generators.put(ClassUnit.class, this::generateClassUnit);
@@ -133,6 +163,8 @@ public class JasminGenerator {
         currentMethod = method;
         var code = new StringBuilder();
 
+        stackMax.reset();
+
         // calculate modifier
         var modifier = method.getMethodAccessModifier() != AccessModifier.DEFAULT
                 ? method.getMethodAccessModifier().name().toLowerCase() + " "
@@ -151,27 +183,32 @@ public class JasminGenerator {
         var returnType = method.getReturnType();
         code.append(")").append(this.typeJasmin(returnType)).append(NL);
         // Add limits
-        code.append(TAB).append(".limit stack 99").append(NL);
-        var vars = method.getVarTable().keySet();
-        vars.remove("this");
-        code.append(TAB).append(".limit locals ").append(vars.size() + 1)
-                .append(NL);
 
-        System.out.println(vars);
+        var codeTemp = new StringBuilder();
+
         for (var inst : method.getInstructions()) {
             // System.out.println("inst - " + inst);
             // code.append(";inst - " + inst).append(NL);
             needsResult = !inst.getInstType().equals(InstructionType.CALL);
             for (var label : method.getLabels(inst)) {
-                code.append(label);
-                code.append(":\n");
+                codeTemp.append(label);
+                codeTemp.append(":\n");
             }
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
 
             // System.out.println("instcode - " + instCode);
-            code.append(instCode);
+            codeTemp.append(instCode);
         }
+
+        code.append(TAB).append(".limit stack ").append(stackMax.getMax()).append(NL);
+        var vars = method.getVarTable().keySet();
+        vars.remove("this");
+        code.append(TAB).append(".limit locals ").append(vars.size() + 1)
+                .append(NL);
+        System.out.println(vars);
+
+        code.append(codeTemp);
 
         code.append(".end method\n");
 
@@ -200,8 +237,10 @@ public class JasminGenerator {
         if (operand instanceof ArrayOperand) {
             var arrayOperand = (ArrayOperand) operand;
             code.append(reg < 4 ? "aload_" : "aload ").append(reg).append(NL);
+            stackMax.add(1);
             code.append(generators.apply(arrayOperand.getIndexOperands().get(0)));
             code.append(generators.apply(assign.getRhs()));
+            stackMax.sub(3);
             if (jasminType.startsWith("L") || jasminType.startsWith("["))
                 code.append("aastore").append(NL);
             else
@@ -258,6 +297,7 @@ public class JasminGenerator {
                 }
             }
             code.append(generators.apply(assign.getRhs()));
+            stackMax.sub(1);
             if (jasminType.startsWith("L") || jasminType.startsWith("["))
                 code.append(reg < 4 ? "astore_" : "astore ").append(reg).append(NL);
             else
@@ -271,6 +311,7 @@ public class JasminGenerator {
     }
 
     private String generateLiteral(LiteralElement literal) {
+        stackMax.add(1);
         if (literal.getType().toString().equals("INT32")) {
             int number = Integer.parseInt(literal.getLiteral());
             if (number < 6)
@@ -287,6 +328,7 @@ public class JasminGenerator {
 
     private String generateOperand(Operand operand) {
         // get register
+        stackMax.add(1);
         if (operand.getName().equals("this")) {
             return "aload_0\n";
         }
@@ -303,6 +345,7 @@ public class JasminGenerator {
             var arrayOperand = (ArrayOperand) operand;
             code.append(reg < 4 ? "aload_" : "aload ").append(reg).append(NL);
             code.append(generators.apply(arrayOperand.getIndexOperands().get(0)));
+            stackMax.sub(1);
             if (jasminType.startsWith("L") || jasminType.startsWith("["))
                 return code.toString() + "aaload" + NL;
             return code.toString() + "iaload" + NL;
@@ -347,7 +390,7 @@ public class JasminGenerator {
             case SUB -> "isub";
             default -> throw new IllegalArgumentException("Unexpected value: " + binaryOp.getOperation().getOpType());
         };
-
+        stackMax.sub(1);
         code.append(op).append(NL);
 
         return code.toString();
@@ -356,8 +399,10 @@ public class JasminGenerator {
     private String generateUnaryOp(UnaryOpInstruction unaryOpInst) {
         var code = new StringBuilder();
         code.append(generators.apply(unaryOpInst.getOperand()));
+        stackMax.add(1);
         code.append("iconst_1").append(NL);
         code.append("ixor").append(NL);
+        stackMax.sub(1);
         return code.toString();
     }
 
@@ -373,6 +418,7 @@ public class JasminGenerator {
                     // code.append(typeJasmin(type));
                 } else {
                     code.append("new ");
+                    stackMax.add(1);
                     code.append(handleImports(callInst.getCaller().getType()));
                 }
                 break;
@@ -436,6 +482,7 @@ public class JasminGenerator {
         var jasminType = this.typeJasmin(callInst.getReturnType());
         code.append(jasminType);
         if (!savedNeedsResult && !jasminType.equals("V")) {
+            stackMax.sub(1);
             code.append("\npop");
         }
     }
@@ -460,6 +507,7 @@ public class JasminGenerator {
     private String generateGetField(GetFieldInstruction getFieldInst) {
         var code = new StringBuilder();
         code.append("aload_0 ; push this\n");
+        stackMax.add(1);
         code.append("getfield ");
         code.append(classUnit.getClassName());
         code.append("/");
@@ -473,8 +521,10 @@ public class JasminGenerator {
     private String generatePutField(PutFieldInstruction putFieldInst) {
         var code = new StringBuilder();
         code.append("aload_0 ; push this").append(NL);
+        stackMax.add(1);
         code.append(generators.apply(putFieldInst.getValue()));
         code.append("putfield ");
+        stackMax.sub(2);
         code.append(ollirResult.getOllirClass().getClassName());
         code.append("/");
         code.append(putFieldInst.getField().getName());
@@ -489,6 +539,7 @@ public class JasminGenerator {
         code.append(generators.apply(opCondInst.getOperands().get(0)));
         code.append(generators.apply(opCondInst.getOperands().get(1)));
         code.append("isub").append(NL);
+        stackMax.sub(1);
         code.append(switch (opCondInst.getCondition().getOperation().getOpType()) {
             case LTH -> "iflt ";
             case LTE -> "ifle ";
@@ -498,6 +549,7 @@ public class JasminGenerator {
                     "Unexpected value: " + opCondInst.getCondition().getOperation().getOpType());
         });
         code.append(opCondInst.getLabel()).append(NL);
+        stackMax.sub(1);
         return code.toString();
     }
 
@@ -505,6 +557,7 @@ public class JasminGenerator {
         var code = new StringBuilder();
         code.append(generators.apply(singleOpCondInst.getOperands().get(0)));
         code.append("ifne ").append(singleOpCondInst.getLabel()).append(NL);
+        stackMax.sub(1);
         return code.toString();
     }
 
