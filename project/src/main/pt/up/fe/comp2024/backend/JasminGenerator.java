@@ -15,32 +15,34 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 class MaxCounter {
-    private int count=0;
-    private int max=0;
-    public void add(int x){
-        count+=x;
-        if(count>max)
-            max=count;
+    private int count = 0;
+    private int max = 0;
+
+    public void add(int x) {
+        count += x;
+        if (count > max)
+            max = count;
     }
 
-    public void sub(int x){
-        count-=x;
+    public void sub(int x) {
+        count -= x;
     }
 
-    public int getMax(){
+    public int getMax() {
         return max;
     }
 
-    public int getCount(){
+    public int getCount() {
         return count;
     }
 
-    public void reset(){
+    public void reset() {
         max = 0;
         count = 0;
     }
 
 }
+
 /**
  * Generates Jasmin code from an OllirResult.
  * <p>
@@ -328,14 +330,16 @@ public class JasminGenerator {
 
     private String generateOperand(Operand operand) {
         // get register
-        stackMax.add(1);
         if (operand.getName().equals("this")) {
+            stackMax.add(1);
             return "aload_0\n";
         }
         if (operand.getName().equals("true")) {
+            stackMax.add(1);
             return "iconst_1\n";
         }
         if (operand.getName().equals("false")) {
+            stackMax.add(1);
             return "iconst_0\n";
         }
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
@@ -343,13 +347,16 @@ public class JasminGenerator {
         if (operand instanceof ArrayOperand) {
             var code = new StringBuilder();
             var arrayOperand = (ArrayOperand) operand;
+            stackMax.add(1);
             code.append(reg < 4 ? "aload_" : "aload ").append(reg).append(NL);
             code.append(generators.apply(arrayOperand.getIndexOperands().get(0)));
-            stackMax.sub(1);
+            stackMax.sub(2);
+            stackMax.add(1);
             if (jasminType.startsWith("L") || jasminType.startsWith("["))
                 return code.toString() + "aaload" + NL;
             return code.toString() + "iaload" + NL;
         }
+        stackMax.add(1);
         if (jasminType.startsWith("L") || jasminType.startsWith("["))
             return (reg < 4 ? "aload_" : "aload ") + reg + NL;
         return (reg < 4 ? "iload_" : "iload ") + reg + NL;
@@ -390,7 +397,8 @@ public class JasminGenerator {
             case SUB -> "isub";
             default -> throw new IllegalArgumentException("Unexpected value: " + binaryOp.getOperation().getOpType());
         };
-        stackMax.sub(1);
+        stackMax.sub(2);
+        stackMax.add(1);
         code.append(op).append(NL);
 
         return code.toString();
@@ -413,6 +421,7 @@ public class JasminGenerator {
                 var operads = callInst.getOperands();
                 if (operads.size() > 1) {
                     code.append(generators.apply(callInst.getOperands().get(1)));
+                    stackMax.add(1);
                     code.append("newarray int");
                     // var type = ((ArrayType) callInst.getReturnType()).getElementType();
                     // code.append(typeJasmin(type));
@@ -425,6 +434,8 @@ public class JasminGenerator {
             case arraylength: {
                 var operand = (Operand) callInst.getOperands().get(0);
                 code.append(generators.apply(operand));
+                stackMax.sub(1);
+                stackMax.add(1);
                 code.append("arraylength");
                 break;
             }
@@ -479,8 +490,12 @@ public class JasminGenerator {
             code.append(this.typeJasmin(callInst.getArguments().get(i).getType()));
         }
         code.append(")");
+        stackMax.sub(callInst.getArguments().size() + 1);
         var jasminType = this.typeJasmin(callInst.getReturnType());
         code.append(jasminType);
+        if (!jasminType.equals("V")) {
+            stackMax.add(1);
+        }
         if (!savedNeedsResult && !jasminType.equals("V")) {
             stackMax.sub(1);
             code.append("\npop");
@@ -489,13 +504,13 @@ public class JasminGenerator {
 
     private String generateReturn(ReturnInstruction returnInst) {
         var code = new StringBuilder();
-        // TODO: Hardcoded to int return type, needs to be expanded
         if (returnInst.getReturnType().getTypeOfElement().equals(ElementType.VOID)) {
             code.append("return").append(NL);
             return code.toString();
         }
         code.append(generators.apply(returnInst.getOperand()));
         var jasminType = typeJasmin(returnInst.getReturnType());
+        stackMax.sub(1);
         if (jasminType.startsWith("L") || jasminType.startsWith("[")) {
             code.append("areturn").append(NL);
             return code.toString();
@@ -515,6 +530,8 @@ public class JasminGenerator {
         code.append(" ");
         code.append(typeJasmin(getFieldInst.getFieldType()));
         code.append("\n");
+        stackMax.sub(2);
+        stackMax.add(1);
         return code.toString();
     }
 
@@ -539,7 +556,8 @@ public class JasminGenerator {
         code.append(generators.apply(opCondInst.getOperands().get(0)));
         code.append(generators.apply(opCondInst.getOperands().get(1)));
         code.append("isub").append(NL);
-        stackMax.sub(1);
+        stackMax.sub(2);
+        stackMax.add(1);
         code.append(switch (opCondInst.getCondition().getOperation().getOpType()) {
             case LTH -> "iflt ";
             case LTE -> "ifle ";
