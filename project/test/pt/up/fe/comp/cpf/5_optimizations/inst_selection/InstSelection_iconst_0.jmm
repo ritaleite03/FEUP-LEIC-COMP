@@ -1,7 +1,11 @@
 class InstSelection_iconst_0 {
 	public int foo() {
+	    boolean b;
 		int a;
-		a = 0;
+		int c;
+		a = 1;
+		c = a;
+		b = a < c;
 		return a;
 	}
 }

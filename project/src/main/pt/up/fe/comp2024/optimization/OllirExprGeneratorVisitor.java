@@ -105,13 +105,11 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
 
             String code = OptUtils.getTemp() + OptUtils.toOllirType(new Type("boolean", false));
 
-            var numberIf = OptUtils.getNextTempNum();
-
             var lhs = visit(node.getJmmChild(0), new InferType(new Type("boolean", false)));
             var rhs = visit(node.getJmmChild(1), new InferType(new Type("boolean", false)));
 
-            String initIf = "if" + numberIf;
-            String endIf = "end" + numberIf;
+            String initIf = OptUtils.getNextTempLabel();
+            String endIf = OptUtils.getNextTempLabel();
 
             // computation of left side
             computation.append(lhs.getComputation());
@@ -345,6 +343,16 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
 
         var code = OptUtils.getTemp() + ollirArrayType;
         var computation = new StringBuilder();
+
+        String[] arrayNameCodeList = var.getCode().split("\\.");
+        var arrayName = new StringBuilder();
+        for (int i = 0; i < arrayNameCodeList.length - 2; i++) {
+            if (i > 0) {
+                arrayName.append(".");
+            }
+            arrayName.append(arrayNameCodeList[i]);
+        }
+
         computation.append(var.getComputation());
         computation.append(pos.getComputation());
         computation.append(code);
@@ -352,7 +360,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
                 .append(ASSIGN)
                 .append(ollirArrayType);
         computation.append(SPACE);
-        computation.append(var.getCode());
+        computation.append(arrayName);
         computation.append("[");
         computation.append(pos.getCode());
         computation.append("]");

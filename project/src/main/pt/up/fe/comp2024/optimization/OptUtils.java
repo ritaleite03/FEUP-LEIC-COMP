@@ -10,6 +10,7 @@ public class OptUtils {
     private static int tempNumber = -1;
 
     private static int tempArrayNumber = -1;
+    private static int tempLabel = -1;
 
     public static String getTemp() {
 
@@ -36,6 +37,11 @@ public class OptUtils {
 
         tempArrayNumber += 1;
         return tempArrayNumber;
+    }
+
+    public static String getNextTempLabel() {
+        tempLabel += 1;
+        return "label" + tempLabel;
     }
 
     public static String toOllirType(JmmNode typeNode) {
