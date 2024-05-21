@@ -1,10 +1,23 @@
-class LocalLimits{
-
-    public int func(int a, int b){
-       int j;
-	   
-       a = b + 10 * (3 + this.func(3,4));
-       j = this.func(3,4);
-       return 1;
-    }
+class PropWithLoop {
+    public int foo(){
+	  int a;
+	  int i;
+	  int res;
+	  a = 10;
+	  i = 0;
+	  if (i < a){
+        a = 0;
+        if(i<2*a){
+            i = i + 2;
+        }else{
+            i = i + 1;
+        }
+	  }else {
+        a = i;
+      }
+	  res = i;
+	  return res;
+	}
+	public static void main(String[] args) {
+	}
 }
