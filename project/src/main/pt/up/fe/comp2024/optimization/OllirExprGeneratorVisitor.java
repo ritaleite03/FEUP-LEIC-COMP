@@ -105,13 +105,11 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
 
             String code = OptUtils.getTemp() + OptUtils.toOllirType(new Type("boolean", false));
 
-            var numberIf = OptUtils.getNextTempNum();
-
             var lhs = visit(node.getJmmChild(0), new InferType(new Type("boolean", false)));
             var rhs = visit(node.getJmmChild(1), new InferType(new Type("boolean", false)));
 
-            String initIf = "if" + numberIf;
-            String endIf = "end" + numberIf;
+            String initIf = OptUtils.getNextTempLabel();
+            String endIf = OptUtils.getNextTempLabel();
 
             // computation of left side
             computation.append(lhs.getComputation());

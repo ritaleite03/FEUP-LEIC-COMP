@@ -180,16 +180,14 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitWhileStmt(JmmNode node, Void unused) {
         StringBuilder code = new StringBuilder();
-        // number used for the labels
-        var numberLabel = OptUtils.getNextTempNum();
         // condition
         var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("boolean", false)));
         // code block of the loop
         var body = this.visit(node.getJmmChild(1));
 
-        String condLabel = "whileCond" + numberLabel;
-        String loopLabel = "whileLoop" + numberLabel;
-        String endLabel = "whileEnd" + numberLabel;
+        String condLabel = OptUtils.getNextTempLabel();
+        String loopLabel = OptUtils.getNextTempLabel();
+        String endLabel = OptUtils.getNextTempLabel();
 
         code.append(condLabel);
         code.append(":\n");
@@ -227,10 +225,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitIfStmt(JmmNode node, Void unused) {
         // condition
         var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("boolean", false)));
-        // number used for the labels
-        var numberLabel = OptUtils.getNextTempNum();
-        String initLabel = "if" + numberLabel;
-        String endLabel = "endif" + numberLabel;
+        String initLabel = OptUtils.getNextTempLabel();
+        String endLabel = OptUtils.getNextTempLabel();
 
         var ifTrue = this.visit(node.getJmmChild(1)); // code block if true
         var ifFalse = this.visit(node.getJmmChild(2)); // code block if false
