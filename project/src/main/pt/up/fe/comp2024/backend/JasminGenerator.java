@@ -373,11 +373,11 @@ public class JasminGenerator {
             code.append("isub").append(NL);
             code.append("iflt ").append(temp).append(NL);
             code.append("ldc 0").append(NL);
-            code.append("jmp ").append(temp1).append(NL);
+            code.append("goto ").append(temp1).append(NL);
 
             code.append(temp).append(":").append(NL);
             code.append("ldc 1").append(NL);
-            code.append("jmp ").append(temp1).append(NL);
+            code.append("goto ").append(temp1).append(NL);
 
             code.append(temp1).append(":").append(NL);
 

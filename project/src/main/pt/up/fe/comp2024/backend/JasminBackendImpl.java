@@ -10,7 +10,12 @@ public class JasminBackendImpl implements JasminBackend {
     public JasminResult toJasmin(OllirResult ollirResult) {
         var jasminGenerator = new JasminGenerator(ollirResult);
         var jasminCode = jasminGenerator.build();
-        return new JasminResult(ollirResult, jasminCode, jasminGenerator.getReports());
+        System.out.println("--- OLLIR ---");
+        System.out.println(ollirResult.getOllirCode());
+        var temp = new JasminResult(ollirResult, jasminCode, jasminGenerator.getReports());
+        System.out.println("--- JASMIN ---");
+        System.out.println(temp.getJasminCode());
+        return temp;
     }
 
 }

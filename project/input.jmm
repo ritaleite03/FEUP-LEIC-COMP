@@ -1,23 +1,20 @@
-class PropWithLoop {
-    public int foo(){
-	  int a;
-	  int i;
-	  int res;
-	  a = 10;
-	  i = 0;
-	  if (i < a){
-        a = 0;
-        if(i<2*a){
-            i = i + 2;
-        }else{
-            i = i + 1;
-        }
-	  }else {
-        a = i;
-      }
-	  res = i;
-	  return res;
-	}
+class InstSelection_iconst_0 {
+
 	public static void main(String[] args) {
+        int a;
+        int i;
+
+		a = 3;
+        i = 0;
+	}
+
+	public int foo() {
+	    boolean b;
+		int a;
+		int c;
+		a = 1;
+		c = a;
+		b = a < c;
+		return a;
 	}
 }

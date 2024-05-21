@@ -55,6 +55,7 @@ public class Cpf5_Optimizations {
     @Test
     public void section1_InstSelection_iconst_0() {
         JasminResult jasminResult = getJasminResult("inst_selection/InstSelection_iconst_0.jmm");
+        System.out.println(jasminResult.getJasminCode());
         CpUtils.matches(jasminResult, "iconst_0");
     }
 
