@@ -312,11 +312,20 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
 
         int count = 0;
 
+        String[] arrayNameCodeList = code.split("\\.");
+        var arrayName = new StringBuilder();
+        for (int i = 0; i < arrayNameCodeList.length - 2; i++) {
+            if (i > 0) {
+                arrayName.append(".");
+            }
+            arrayName.append(arrayNameCodeList[i]);
+        }
+
         for (var child : node.getChildren()) {
             var element = visit(child);
             computation.append(TAB);
             computation.append(element.getComputation());
-            computation.append(code);
+            computation.append(arrayName);
             computation.append("[");
             computation.append(count);
             computation.append(".i32");
@@ -343,6 +352,16 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
 
         var code = OptUtils.getTemp() + ollirArrayType;
         var computation = new StringBuilder();
+
+        String[] arrayNameCodeList = var.getCode().split("\\.");
+        var arrayName = new StringBuilder();
+        for (int i = 0; i < arrayNameCodeList.length - 2; i++) {
+            if (i > 0) {
+                arrayName.append(".");
+            }
+            arrayName.append(arrayNameCodeList[i]);
+        }
+
         computation.append(var.getComputation());
         computation.append(pos.getComputation());
         computation.append(code);
@@ -350,7 +369,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
                 .append(ASSIGN)
                 .append(ollirArrayType);
         computation.append(SPACE);
-        computation.append(var.getCode());
+        computation.append(arrayName);
         computation.append("[");
         computation.append(pos.getCode());
         computation.append("]");

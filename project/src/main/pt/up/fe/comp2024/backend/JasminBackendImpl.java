@@ -8,12 +8,8 @@ public class JasminBackendImpl implements JasminBackend {
 
     @Override
     public JasminResult toJasmin(OllirResult ollirResult) {
-
-        System.out.println("oii");
-        System.out.println(ollirResult.getOllirCode());
         var jasminGenerator = new JasminGenerator(ollirResult);
         var jasminCode = jasminGenerator.build();
-
         return new JasminResult(ollirResult, jasminCode, jasminGenerator.getReports());
     }
 

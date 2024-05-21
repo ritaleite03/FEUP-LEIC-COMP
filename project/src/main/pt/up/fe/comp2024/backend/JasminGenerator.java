@@ -366,8 +366,8 @@ public class JasminGenerator {
         code.append(generators.apply(binaryOp.getRightOperand()));
 
         if (binaryOp.getOperation().getOpType().toString().equals("LTH")) {
-            String temp = "true" + OptUtils.getNextTempNum();
-            String temp1 = "end" + OptUtils.getNextTempNum();
+            String temp = OptUtils.getNextTempLabel();
+            String temp1 = OptUtils.getNextTempLabel();
 
             // ver 0 e 1 aqui !!!!!
             code.append("isub").append(NL);
