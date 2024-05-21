@@ -44,7 +44,12 @@ public class Launcher {
 
         // Optimization stage
         JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
-        OllirResult ollirResult = ollirGen.toOllir(ollirGen.optimize(semanticsResult));
+        semanticsResult = ollirGen.optimize(semanticsResult);
+        System.out.println("====AST OPTIMIZED=============");
+        System.out.println(semanticsResult.getRootNode().toTree());
+        System.out.println("====END=======================");
+        // System.exit(0);
+        OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
         TestUtils.noErrors(ollirResult.getReports());
 
         System.out.println("====OLIR======================");

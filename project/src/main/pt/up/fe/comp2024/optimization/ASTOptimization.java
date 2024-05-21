@@ -1,118 +1,141 @@
 package pt.up.fe.comp2024.optimization;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
 import pt.up.fe.comp2024.ast.Kind;
 
-class Value {
-    int i;
-    boolean b;
-    boolean isInt;
+class CFGNode {
+    BitSet gen = new BitSet();
+    BitSet kill = new BitSet();
+    BitSet in;
+    BitSet out;
+    List<JmmNode> stmts = new ArrayList<>();
+    List<CFGNode> children = new ArrayList<>();
+    int id;
 
-    Value(int i) {
-        isInt = true;
-        this.i = i;
-    }
-
-    Value(boolean b) {
-        isInt = false;
-        this.b = b;
-    }
-
-    @Override
-    public String toString() {
-        return "" + (isInt ? i : b);
-    }
-
-    public boolean equals(Value other) {
-        if (isInt != other.isInt)
-            return false;
-        if (isInt)
-            return i == other.i;
-        return b == other.b;
+    public CFGNode(int id) {
+        this.id = id;
     }
 }
 
-public class ASTOptimization {
-    public final JmmNode rootNode;
-    public final SymbolTable table;
-    private boolean changed = true;
-    private String currentMethod;
+class AST_CFG {
+    private final SymbolTable table;
+    private final String currentMethod;
+    private Map<String, JmmNode> constants = new HashMap<>();
+    private CFGNode entry;
+    private List<CFGNode> all = new ArrayList<>();
+    private List<JmmNode> gens = new ArrayList<>();
+    private BitSet isConstant = new BitSet();
 
-    private Map<String, Value> constants = new HashMap<>();
-
-    public ASTOptimization(JmmNode rootNode, SymbolTable symbolTable) {
-        this.rootNode = rootNode;
-        this.table = symbolTable;
+    public CFGNode creatNode() {
+        var node = new CFGNode(all.size());
+        all.add(node);
+        return node;
     }
 
-    public void optimize() {
-        while (changed) {
-            changed = false;
-            for (var method : rootNode.getChildren(Kind.CLASS_DECL).get(0).getChildren(Kind.METHOD_DECL)) {
-                visitMethod(method);
-            }
-        }
+    public AST_CFG(SymbolTable table, String currentMethod) {
+        this.table = table;
+        this.currentMethod = currentMethod;
     }
 
-    public void visitMethod(JmmNode method) {
-        currentMethod = method.get("name");
-        constFoldMethod(method);
-        constPropMethod(method);
-    }
-
-    public void constPropMethod(JmmNode method) {
-        constants.clear();
-        for (var stmt : method.getChildren()) {
-            constPropStatement(stmt);
-        }
-    }
-
-    public void constPropStatement(JmmNode stmt) {
-        switch (stmt.getKind()) {
-            case ("MultiStmt"):
-                stmt.getChildren().forEach((stm) -> constPropStatement(stm));
-                break;
-            case ("IfStmt"): {
-                constPropExpr(stmt.getChild(0));
-                var savedConstants = new HashMap<>(constants);
-                constPropStatement(stmt.getChild(1));
-                var ifConstants = new HashMap<>(constants);
-
-                constants = new HashMap<>(savedConstants);
-                constPropStatement(stmt.getChild(2));
-
-                var toRemove = new ArrayList<String>();
-                for (var entry : constants.entrySet()) {
-                    if (!ifConstants.containsKey(entry.getKey())) {
-                        toRemove.add(entry.getKey());
-                    } else if (!entry.getValue().equals(ifConstants.get(entry.getKey()))) {
-                        toRemove.add(entry.getKey());
+    private void computeKillGenSets() {
+        for (var node : all) {
+            node.in = new BitSet(gens.size());
+            node.in.flip(0, gens.size());
+            node.out = new BitSet(gens.size());
+            node.out.flip(0, gens.size());
+            Map<String, Integer> vars = new HashMap<>();
+            for (var stmt : node.stmts) {
+                if (stmt.getKind().equals("AssignStmt")) {
+                    vars.put(stmt.get("name"), stmt.getObject("genIndex", Integer.class));
+                    for (var gen : gens) {
+                        if (gen.get("name").equals(stmt.get("name"))) {
+                            node.kill.set(gen.getObject("genIndex", Integer.class));
+                        }
                     }
                 }
-                for (String name : toRemove) {
-                    constants.remove(name);
-                }
+            }
+            for (var index : vars.values()) {
+                node.gen.set(index);
+            }
+        }
+        entry.in = new BitSet(gens.size());
+    }
 
-                break;
+    static private BitSet or(BitSet a, BitSet b) {
+        var ca = ((BitSet) a.clone());
+        ca.or(b);
+        return ca;
+    }
+
+    static private BitSet and(BitSet a, BitSet b) {
+        var ca = ((BitSet) a.clone());
+        ca.and(b);
+        return ca;
+    }
+
+    static private BitSet andNot(BitSet a, BitSet b) {
+        var ca = ((BitSet) a.clone());
+        ca.andNot(b);
+        return ca;
+    }
+
+    private void computeInOutSets() {
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            for (var node : all) {
+                var out = or(node.gen, andNot(node.in, node.kill));
+                if (!out.equals(node.out)) {
+                    node.out = out;
+                    changed = true;
+                }
+                for (var child : node.children) {
+                    var in = and(child.in, out);
+                    if (!in.equals(child.in)) {
+                        child.in = in;
+                    }
+                }
             }
-            case ("WhileStmt"): {
-                // TODO
-                constants.clear();
-                constPropStatement(stmt.getChild(1));
-                constants.clear();
-                break;
+        }
+    }
+
+    public boolean constProp() {
+        boolean changed = false;
+        for (var node : all) {
+            constants.clear();
+            for (int i = 0; i < node.in.length(); i++) {
+                if (node.in.get(i) && isConstant.get(i)) {
+                    var gen = gens.get(i);
+                    constants.put(gen.get("name"), gen.getChild(0));
+                }
             }
+            for (var stmt : node.stmts) {
+                changed |= constPropStatement(stmt);
+            }
+        }
+        return changed;
+    }
+
+    public boolean constPropStatement(JmmNode stmt) {
+        if (stmt.isInstance("Expr")) {
+            return constPropExpr(stmt);
+        }
+        boolean changed = false;
+        switch (stmt.getKind()) {
             case ("VarStmt"):
-                constPropExpr(stmt.getChild(0));
+                changed |= constPropExpr(stmt.getChild(0));
                 break;
             case ("AssignStmt"): {
-                constPropExpr(stmt.getChild(0));
+                changed |= constPropExpr(stmt.getChild(0));
                 var value = stmt.getChild(0);
                 String name = stmt.get("name");
                 constants.remove(name);
@@ -125,13 +148,13 @@ public class ASTOptimization {
                         switch (type.getName()) {
                             case "int":
                                 if (value.getKind().equals("IntegerLiteral")) {
-                                    constants.put(name, new Value(Integer.parseInt(value.get("value"))));
+                                    constants.put(name, value);
                                 }
                                 break;
                             case "boolean":
                                 if (value.getKind().equals("VarRefExpr")
                                         && (value.get("name").equals("true") || value.get("name").equals("false"))) {
-                                    constants.put(name, new Value(value.get("name").equals("true")));
+                                    constants.put(name, value);
                                 }
                                 break;
                         }
@@ -140,26 +163,27 @@ public class ASTOptimization {
                 break;
             }
             case ("AssignStmtArray"): {
-                constPropExpr(stmt.getChild(0));
-                constPropExpr(stmt.getChild(1));
+                changed |= constPropExpr(stmt.getChild(0));
+                changed |= constPropExpr(stmt.getChild(1));
                 break;
             }
             case ("ReturnStmt"): {
-                constPropExpr(stmt.getChild(0));
+                changed |= constPropExpr(stmt.getChild(0));
                 break;
             }
         }
+        return changed;
     }
 
-    public void constPropExpr(JmmNode expr) {
+    public boolean constPropExpr(JmmNode expr) {
+        boolean changed = false;
         switch (expr.getKind()) {
             case "VarRefExpr":
                 String name = expr.get("name");
                 if (constants.containsKey(name)) {
                     changed = true;
                     var value = constants.get(name);
-                    var newNode = new JmmNodeImpl(value.isInt ? "IntegerLiteral" : "VarRefExpr");
-                    newNode.put(value.isInt ? "value" : "name", value.toString());
+                    var newNode = value.copyNode();
                     expr.replace(newNode);
                 }
                 break;
@@ -167,20 +191,173 @@ public class ASTOptimization {
                 break;
             case "ArrayExpr", "FuncExpr", "SelfFuncExpr": {
                 for (var exp : expr.getChildren()) {
-                    constPropExpr(exp);
+                    changed |= constPropExpr(exp);
                 }
                 break;
             }
             case "NewArrayExpr", "UnaryExpr": {
-                constPropExpr(expr.getChild(0));
+                changed |= constPropExpr(expr.getChild(0));
                 break;
             }
             case "BinaryExpr", "ArrayAccessExpr": {
-                constPropExpr(expr.getChild(0));
-                constPropExpr(expr.getChild(1));
+                changed |= constPropExpr(expr.getChild(0));
+                changed |= constPropExpr(expr.getChild(1));
                 break;
             }
         }
+        return changed;
+    }
+
+    private String listAttribute(List<JmmNode> nodes, String name) {
+        return nodes.stream().map((stmt) -> stmt.getOptional(name).orElse("unkonw")).collect(
+                Collectors.joining(","));
+    }
+
+    public String dump() {
+
+        String graph = "";
+        for (var gen : gens) {
+            graph += "//";
+            graph += gen.getObject("genIndex", Integer.class);
+            graph += " ";
+            graph += gen.get("lineStart");
+            graph += " ";
+            graph += gen.get("name");
+            graph += " ";
+            graph += isConstant.get(gen.getObject("genIndex", Integer.class));
+            graph += "\n";
+        }
+        graph += "digraph {\n";
+        for (var node : all) {
+            graph += node.id + "[label=\"";
+            graph += listAttribute(node.stmts, "lineStart");
+            graph += "\\ngen=";
+            graph += node.gen;
+            graph += "\\nkill=";
+            graph += node.kill;
+            graph += "\\nin=";
+            graph += node.in;
+            graph += "\\nout=";
+            graph += node.out;
+            graph += "\"]\n";
+            for (var child : node.children) {
+                graph += node.id + "->" + child.id + "\n";
+            }
+        }
+        graph += "\n}";
+        return graph;
+    }
+
+    public static AST_CFG build(JmmNode method, SymbolTable table) {
+        var cfg = new AST_CFG(table, method.get("name"));
+        cfg.entry = cfg.creatNode();
+        cfg.build(method.getChildren(), cfg.entry);
+        cfg.computeKillGenSets();
+        cfg.computeInOutSets();
+        return cfg;
+    }
+
+    private CFGNode build(List<JmmNode> nodes, CFGNode current) {
+        for (var stmt : nodes) {
+            current = build(stmt, current);
+        }
+        return current;
+    }
+
+    private CFGNode build(JmmNode stmt, CFGNode current) {
+        switch (stmt.getKind()) {
+            case "AssignStmt":
+                stmt.putObject("genIndex", gens.size());
+                var name = stmt.get("name");
+                var value = stmt.getChild(0);
+                var vars = table.getLocalVariables(currentMethod);
+                for (var v : vars) {
+                    if (v.getName().equals(name)) {
+                        var type = v.getType();
+                        if (type.isArray())
+                            break;
+                        switch (type.getName()) {
+                            case "int":
+                                if (value.getKind().equals("IntegerLiteral")) {
+                                    isConstant.set(gens.size());
+                                }
+                                break;
+                            case "boolean":
+                                if (value.getKind().equals("VarRefExpr")
+                                        && (value.get("name").equals("true") || value.get("name").equals("false"))) {
+                                    isConstant.set(gens.size());
+                                }
+                                break;
+                        }
+                    }
+                }
+                gens.add(stmt);
+            case "VarStmt", "AssignStmtArray", "ReturnStmt":
+                current.stmts.add(stmt);
+                break;
+            case "IfStmt":
+                current.stmts.add(stmt.getChild(0));
+                var ifCFG = creatNode();
+                var elseCFG = creatNode();
+                System.out.println("//if" + ifCFG.id);
+                System.out.println("//else" + elseCFG.id);
+                current.children.add(ifCFG);
+                current.children.add(elseCFG);
+
+                var endIfCFG = build(stmt.getChild(1), ifCFG);
+                var endElseCFG = build(stmt.getChild(2), elseCFG);
+                current = creatNode();
+                System.out.println("//endif" + current.id);
+                endIfCFG.children.add(current);
+                endElseCFG.children.add(current);
+                break;
+            case "WhileStmt":
+                var whileCFG = creatNode();
+                whileCFG.stmts.add(stmt.getChild(0));
+                var whileBodyCFG = creatNode();
+                whileCFG.children.add(whileBodyCFG);
+                var endWhileCFG = build(stmt.getChild(1), whileBodyCFG);
+                current.children.add(whileCFG);
+                endWhileCFG.children.add(whileCFG);
+                current = creatNode();
+                whileCFG.children.add(current);
+                break;
+            case "MultiStmt":
+                current = build(stmt.getChildren(), current);
+                break;
+        }
+        return current;
+    }
+}
+
+public class ASTOptimization {
+    public final JmmNode rootNode;
+    public final SymbolTable table;
+    private boolean changed = true;
+
+    public ASTOptimization(JmmNode rootNode, SymbolTable symbolTable) {
+        this.rootNode = rootNode;
+        this.table = symbolTable;
+    }
+
+    public void optimize() {
+        while (changed) {
+            changed = false;
+            for (var method : rootNode.getChildren(Kind.CLASS_DECL).get(0).getChildren(Kind.METHOD_DECL)) {
+                visitMethod(method);
+            }
+            System.out.println("changed");
+            System.out.println(changed);
+        }
+    }
+
+    public void visitMethod(JmmNode method) {
+        constFoldMethod(method);
+        AST_CFG cfg = AST_CFG.build(method, table);
+        System.out.println("===================================");
+        System.out.println(cfg.dump());
+        System.out.println("===================================");
+        changed |= cfg.constProp();
     }
 
     public void constFoldMethod(JmmNode method) {
@@ -415,5 +592,4 @@ public class ASTOptimization {
             }
         }
     }
-
 }

@@ -3,19 +3,18 @@ class PropWithLoop {
 	  int a;
 	  int i;
 	  int res;
+	  int b;
 	  a = 10;
 	  i = 0;
-	  if (i < a){
-        a = 0;
-        if(i<2*a){
-            i = i + 2;
-        }else{
-            i = i + 1;
-        }
-	  }else {
-        a = i;
-      }
-	  res = i;
+	  if(i<a){
+		b=1;
+	  }else{
+		b=2;
+	  }
+	  while (i < a){
+	    i=i+1;
+	  }
+	  res = i*a;
 	  return res;
 	}
 	public static void main(String[] args) {

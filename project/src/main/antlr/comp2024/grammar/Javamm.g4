@@ -70,28 +70,27 @@ methodDecl
 param: typeOrVargs name = ID;
 
 expr:
-    expr LBRACKETS expr RBRACKETS									# ArrayAccessExpr
+	expr LBRACKETS expr RBRACKETS									# ArrayAccessExpr
 	| expr DOT field = ID											# FieldAccessExpr
 	| expr DOT functionName = ID LPAREN (expr (COL expr)*)? RPAREN	# FuncExpr
 	| functionName = ID (LPAREN (expr (COL expr)*)? RPAREN)			# SelfFuncExpr
 	| NEW ID LBRACKETS expr RBRACKETS								# NewArrayExpr
 	| NEW name = ID LPAREN RPAREN									# NewExpr
-	| op = NOT expr	                                                # UnaryExpr
+	| op = NOT expr													# UnaryExpr
 	| LPAREN expr RPAREN											# ParenExpr
 	| LBRACKETS (expr (COL expr)*)? RBRACKETS						# ArrayExpr
 	| expr op = (DIV | MUL) expr									# BinaryExpr
 	| expr op = (SUB | ADD) expr									# BinaryExpr
-	| expr op = RELACIONAL expr									    # BinaryExpr
-	| expr op = LOGICAL expr	            						# BinaryExpr
+	| expr op = RELACIONAL expr										# BinaryExpr
+	| expr op = LOGICAL expr										# BinaryExpr
 	| value = INTEGER												# IntegerLiteral
 	| name = ID														# VarRefExpr;
 
 stmt:
-	name = ID EQUALS expr SEMI							    # AssignStmt
+	name = ID EQUALS expr SEMI								# AssignStmt
 	| LCURLY (stmt)* RCURLY									# MultiStmt
 	| IF LPAREN expr RPAREN stmt ELSE stmt					# IfStmt
 	| WHILE LPAREN expr RPAREN stmt							# WhileStmt
 	| expr SEMI												# VarStmt
-	| name = ID EQUALS expr SEMI							# AssignStmt
 	| name = ID LBRACKETS expr RBRACKETS EQUALS expr SEMI	# AssignStmtArray
 	| RETURN expr SEMI										# ReturnStmt;
