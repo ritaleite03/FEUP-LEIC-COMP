@@ -509,12 +509,15 @@ public class ASTOptimization {
                             var newNode = new JmmNodeImpl("IntegerLiteral");
                             newNode.put("value", "" + (leftValue * rightValue));
                             expr.replace(newNode);
-                        } else if ((leftIsInt && leftValue == 0) || (rightIsInt && rightValue == 0)) {
-                            changed = true;
-                            var newNode = new JmmNodeImpl("IntegerLiteral");
-                            newNode.put("value", "0");
-                            expr.replace(newNode);
-                        } else if (leftIsInt && leftValue == 1) {
+                        } /*
+                           * else if ((leftIsInt && leftValue == 0) || (rightIsInt && rightValue == 0)) {
+                           * changed = true;
+                           * var newNode = new JmmNodeImpl("IntegerLiteral");
+                           * newNode.put("value", "0");
+                           * expr.replace(newNode);
+                           * }
+                           */
+                        else if (leftIsInt && leftValue == 1) {
                             changed = true;
                             expr.replace(right);
                         } else if (rightIsInt && rightValue == 1) {
@@ -528,12 +531,15 @@ public class ASTOptimization {
                             var newNode = new JmmNodeImpl("IntegerLiteral");
                             newNode.put("value", "" + (leftValue / rightValue));
                             expr.replace(newNode);
-                        } else if (leftIsInt && leftValue == 0) {
-                            changed = true;
-                            var newNode = new JmmNodeImpl("IntegerLiteral");
-                            newNode.put("value", "0");
-                            expr.replace(newNode);
-                        } else if (rightIsInt && rightValue == 1) {
+                        } /*
+                           * else if (leftIsInt && leftValue == 0) {
+                           * changed = true;
+                           * var newNode = new JmmNodeImpl("IntegerLiteral");
+                           * newNode.put("value", "0");
+                           * expr.replace(newNode);
+                           * }
+                           */
+                        else if (rightIsInt && rightValue == 1) {
                             changed = true;
                             expr.replace(left);
                         } else if (leftIsVar && rightIsVar && leftName.equals(rightName)) {
@@ -568,20 +574,25 @@ public class ASTOptimization {
                         } else if (leftIsBool && leftBool) {
                             changed = true;
                             expr.replace(right);
-                        } else if (leftIsBool && !leftBool) {
-                            changed = true;
-                            var newNode = new JmmNodeImpl("VarRefExpr");
-                            newNode.put("name", "false");
-                            expr.replace(newNode);
-                        } else if (rightIsBool && rightBool) {
+                        } /*
+                           * else if (leftIsBool && !leftBool) {
+                           * changed = true;
+                           * var newNode = new JmmNodeImpl("VarRefExpr");
+                           * newNode.put("name", "false");
+                           * expr.replace(newNode);
+                           * }
+                           */
+                        else if (rightIsBool && rightBool) {
                             changed = true;
                             expr.replace(left);
-                        } else if (rightIsBool && !rightBool) {
-                            changed = true;
-                            var newNode = new JmmNodeImpl("VarRefExpr");
-                            newNode.put("name", "false");
-                            expr.replace(newNode);
-                        }
+                        } /*
+                           * else if (rightIsBool && !rightBool) {
+                           * changed = true;
+                           * var newNode = new JmmNodeImpl("VarRefExpr");
+                           * newNode.put("name", "false");
+                           * expr.replace(newNode);
+                           * }
+                           */
                         break;
                 }
                 break;
