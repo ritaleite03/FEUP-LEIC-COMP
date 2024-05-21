@@ -312,20 +312,11 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
 
         int count = 0;
 
-        String[] arrayNameCodeList = code.split("\\.");
-        var arrayName = new StringBuilder();
-        for (int i = 0; i < arrayNameCodeList.length - 2; i++) {
-            if (i > 0) {
-                arrayName.append(".");
-            }
-            arrayName.append(arrayNameCodeList[i]);
-        }
-
         for (var child : node.getChildren()) {
             var element = visit(child);
             computation.append(TAB);
             computation.append(element.getComputation());
-            computation.append(arrayName);
+            computation.append(code);
             computation.append("[");
             computation.append(count);
             computation.append(".i32");
