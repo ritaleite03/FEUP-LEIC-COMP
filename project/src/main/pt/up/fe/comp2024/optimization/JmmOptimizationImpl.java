@@ -3,10 +3,24 @@ package pt.up.fe.comp2024.optimization;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
+import pt.up.fe.comp2024.CompilerConfig;
 
 import java.util.Collections;
 
 public class JmmOptimizationImpl implements JmmOptimization {
+
+    @Override
+    public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
+        if (!CompilerConfig.getOptimize(semanticsResult.getConfig())) {
+            return semanticsResult;
+        }
+
+        ASTOptimization optimizer = new ASTOptimization(semanticsResult.getRootNode(),
+                semanticsResult.getSymbolTable());
+        optimizer.optimize();
+        return new JmmSemanticsResult(optimizer.rootNode, optimizer.table, semanticsResult.getReports(),
+                semanticsResult.getConfig());
+    }
 
     @Override
     public OllirResult toOllir(JmmSemanticsResult semanticsResult) {
