@@ -321,7 +321,7 @@ public class JasminGenerator {
             int number = Integer.parseInt(literal.getLiteral());
             if (number >= -1 && number <= 5) {
                 if (number == -1) {
-                    return "iconst_m" + literal.getLiteral() + NL;
+                    return "iconst_m1" + NL;
                 }
                 return "iconst_" + literal.getLiteral() + NL;
             }
