@@ -247,7 +247,7 @@ public class JasminGenerator {
                             currentMethod.getVarTable().get(((Operand) binaryOp.getLeftOperand()).getName())
                                     .getVirtualReg() == reg) {
                         int value = Integer.parseInt(((LiteralElement) binaryOp.getRightOperand()).getLiteral());
-                        if (value >= -128) {
+                        if (value >= -128 && value <= 127) {
                             code.append("iinc ");
                             code.append(reg);
                             code.append(" ");
@@ -260,7 +260,7 @@ public class JasminGenerator {
                             currentMethod.getVarTable().get(((Operand) binaryOp.getRightOperand()).getName())
                                     .getVirtualReg() == reg) {
                         int value = Integer.parseInt(((LiteralElement) binaryOp.getLeftOperand()).getLiteral());
-                        if (value >= -128) {
+                        if (value >= -128 && value <= 127) {
                             code.append("iinc ");
                             code.append(reg);
                             code.append(" ");
@@ -277,7 +277,7 @@ public class JasminGenerator {
                             currentMethod.getVarTable().get(((Operand) binaryOp.getLeftOperand()).getName())
                                     .getVirtualReg() == reg) {
                         int value = -Integer.parseInt(((LiteralElement) binaryOp.getRightOperand()).getLiteral());
-                        if (value >= -128) {
+                        if (value >= -128 && value <= 127) {
                             code.append("iinc ");
                             code.append(reg);
                             code.append(" ");
@@ -290,7 +290,7 @@ public class JasminGenerator {
                             currentMethod.getVarTable().get(((Operand) binaryOp.getRightOperand()).getName())
                                     .getVirtualReg() == reg) {
                         int value = -Integer.parseInt(((LiteralElement) binaryOp.getLeftOperand()).getLiteral());
-                        if (value >= -128) {
+                        if (value >= -128 && value <= 127) {
                             code.append("iinc ");
                             code.append(reg);
                             code.append(" ");
