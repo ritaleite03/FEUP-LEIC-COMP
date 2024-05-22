@@ -246,22 +246,28 @@ public class JasminGenerator {
                             && binaryOp.getRightOperand() instanceof LiteralElement &&
                             currentMethod.getVarTable().get(((Operand) binaryOp.getLeftOperand()).getName())
                                     .getVirtualReg() == reg) {
-                        code.append("iinc ");
-                        code.append(reg);
-                        code.append(" ");
-                        code.append(((LiteralElement) binaryOp.getRightOperand()).getLiteral());
-                        code.append(NL);
-                        return code.toString();
+                        int value = Integer.parseInt(((LiteralElement) binaryOp.getRightOperand()).getLiteral());
+                        if (value >= -128) {
+                            code.append("iinc ");
+                            code.append(reg);
+                            code.append(" ");
+                            code.append(value);
+                            code.append(NL);
+                            return code.toString();
+                        }
                     } else if (binaryOp.getRightOperand() instanceof Operand
                             && binaryOp.getLeftOperand() instanceof LiteralElement &&
                             currentMethod.getVarTable().get(((Operand) binaryOp.getRightOperand()).getName())
                                     .getVirtualReg() == reg) {
-                        code.append("iinc ");
-                        code.append(reg);
-                        code.append(" ");
-                        code.append(((LiteralElement) binaryOp.getLeftOperand()).getLiteral());
-                        code.append(NL);
-                        return code.toString();
+                        int value = Integer.parseInt(((LiteralElement) binaryOp.getLeftOperand()).getLiteral());
+                        if (value >= -128) {
+                            code.append("iinc ");
+                            code.append(reg);
+                            code.append(" ");
+                            code.append(value);
+                            code.append(NL);
+                            return code.toString();
+                        }
                     }
                 }
 
@@ -270,22 +276,28 @@ public class JasminGenerator {
                             && binaryOp.getRightOperand() instanceof LiteralElement &&
                             currentMethod.getVarTable().get(((Operand) binaryOp.getLeftOperand()).getName())
                                     .getVirtualReg() == reg) {
-                        code.append("iinc ");
-                        code.append(reg);
-                        code.append(" -");
-                        code.append(((LiteralElement) binaryOp.getRightOperand()).getLiteral());
-                        code.append(NL);
-                        return code.toString();
+                        int value = -Integer.parseInt(((LiteralElement) binaryOp.getRightOperand()).getLiteral());
+                        if (value >= -128) {
+                            code.append("iinc ");
+                            code.append(reg);
+                            code.append(" ");
+                            code.append(value);
+                            code.append(NL);
+                            return code.toString();
+                        }
                     } else if (binaryOp.getRightOperand() instanceof Operand
                             && binaryOp.getLeftOperand() instanceof LiteralElement &&
                             currentMethod.getVarTable().get(((Operand) binaryOp.getRightOperand()).getName())
                                     .getVirtualReg() == reg) {
-                        code.append("iinc ");
-                        code.append(reg);
-                        code.append(" -");
-                        code.append(((LiteralElement) binaryOp.getLeftOperand()).getLiteral());
-                        code.append(NL);
-                        return code.toString();
+                        int value = -Integer.parseInt(((LiteralElement) binaryOp.getLeftOperand()).getLiteral());
+                        if (value >= -128) {
+                            code.append("iinc ");
+                            code.append(reg);
+                            code.append(" ");
+                            code.append(value);
+                            code.append(NL);
+                            return code.toString();
+                        }
                     }
                 }
             }
