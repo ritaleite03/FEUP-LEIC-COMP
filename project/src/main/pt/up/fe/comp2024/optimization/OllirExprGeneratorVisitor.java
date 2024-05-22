@@ -516,9 +516,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             computation.append(".i32");
             computation.append("]");
             computation.append(ollirType);
-            computation.append(SPACE)
-                    .append(ASSIGN)
-                    .append(ollirType);
+            computation.append(SPACE);
+            computation.append(ASSIGN);
+            computation.append(ollirType);
             computation.append(SPACE);
             computation.append(element.getCode());
             computation.append(END_STMT);
@@ -537,7 +537,6 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
      * @return
      */
     private OllirExprResult defaultVisit(JmmNode node, InferType expected) {
-
         for (var child : node.getChildren()) {
             visit(child);
         }
