@@ -75,11 +75,25 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(lhs)).toList();
 
         if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
+
+            String tmp = OptUtils.getTemp();
+
+            code.append(tmp);
+            code.append(typeString);
+            code.append(SPACE);
+            code.append(ASSIGN);
+            code.append(typeString);
+            code.append(SPACE);
+            code.append(rhs.getCode());
+            code.append(END_STMT);
+
+
             code.append("putfield(this, ");
             code.append(lhs);
             code.append(typeString);
             code.append(", ");
-            code.append(rhs.getCode());
+            code.append(tmp);
+            code.append(typeString);
             code.append(").V;\n");
             return code.toString();
         }
@@ -153,10 +167,22 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(lhsName)).toList();
 
         if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
+            String tmp = OptUtils.getTemp();
+
+            code.append(tmp);
+            code.append(typeString);
+            code.append(SPACE);
+            code.append(ASSIGN);
+            code.append(typeString);
+            code.append(SPACE);
+            code.append(rhs.getCode());
+            code.append(END_STMT);
+
             code.append("putfield(this, ");
             code.append(lhs.getCode());
             code.append(", ");
-            code.append(rhs.getCode());
+            code.append(tmp);
+            code.append(typeString);
             code.append(").V;\n");
             return code.toString();
         }
