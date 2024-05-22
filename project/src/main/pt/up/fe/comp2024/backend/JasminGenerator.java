@@ -537,7 +537,7 @@ public class JasminGenerator {
         code.append(" ");
         code.append(typeJasmin(getFieldInst.getFieldType()));
         code.append("\n");
-        stackMax.sub(2);
+        stackMax.sub(1);
         stackMax.add(1);
         return code.toString();
     }

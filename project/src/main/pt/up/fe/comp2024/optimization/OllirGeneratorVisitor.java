@@ -145,12 +145,13 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitAssignStmtArray(JmmNode node, Void unused) {
 
         String lhsName = node.get("name");
-        Type thisType = TypeUtils.visitVariableReferenceExpression(lhsName, table, node);
-        Type thisType2 = new Type(thisType.getName(), false);
-        String typeString = OptUtils.toOllirType(thisType2);
+        Type arrayType = TypeUtils.visitVariableReferenceExpression(lhsName, table, node);
+        Type itemType = new Type(arrayType.getName(), false);
+        String ollirArrayType= OptUtils.toOllirType(arrayType);
+        String ollirItemType= OptUtils.toOllirType(itemType);
 
-        var lhs = exprVisitor.visit(node.getJmmChild(0));
-        var rhs = exprVisitor.visit(node.getJmmChild(1), new InferType(thisType2));
+        var lhs = exprVisitor.visit(node.getJmmChild(0),new InferType(new Type("int",false)));
+        var rhs = exprVisitor.visit(node.getJmmChild(1), new InferType(itemType));
 
         StringBuilder code = new StringBuilder();
 
@@ -167,23 +168,35 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(lhsName)).toList();
 
         if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
-            String tmp = OptUtils.getTemp();
 
+            String tmp = OptUtils.getTemp();
             code.append(tmp);
-            code.append(typeString);
+            code.append(ollirArrayType);
             code.append(SPACE);
             code.append(ASSIGN);
-            code.append(typeString);
+            code.append(ollirArrayType);
+            code.append(SPACE);
+            code.append("getfield(this, ");
+            code.append(lhsName);
+            code.append(ollirArrayType);
+            code.append(")");
+            code.append(ollirArrayType);
+            code.append(END_STMT);
+
+
+            code.append(tmp);
+            code.append("[");
+            code.append(lhs.getCode());
+            code.append("]");
+            code.append(ollirItemType);
+            code.append(SPACE);
+            code.append(ASSIGN);
+            code.append(ollirItemType);
             code.append(SPACE);
             code.append(rhs.getCode());
             code.append(END_STMT);
 
-            code.append("putfield(this, ");
-            code.append(lhs.getCode());
-            code.append(", ");
-            code.append(tmp);
-            code.append(typeString);
-            code.append(").V;\n");
+
             return code.toString();
         }
 
@@ -193,10 +206,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append("[");
         code.append(lhs.getCode());
         code.append("]");
-        code.append(typeString);
+        code.append(ollirItemType);
         code.append(SPACE);
         code.append(ASSIGN);
-        code.append(typeString);
+        code.append(ollirItemType);
         code.append(SPACE);
         code.append(rhs.getCode());
         code.append(END_STMT);
