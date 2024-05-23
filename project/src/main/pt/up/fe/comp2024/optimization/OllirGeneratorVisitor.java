@@ -141,9 +141,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 .toList();
         var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(lhsName)).toList();
 
+        String tmp = lhsName;
+
         if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
 
-            String tmp = OptUtils.getTemp();
+            tmp = OptUtils.getTemp();
             code.append(rhs.getComputation());
 
             code.append(tmp);
@@ -158,32 +160,31 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append(")");
             code.append(ollirArrayType);
             code.append(END_STMT);
+            // code.append(tmp);
+            // code.append("[");
+            // code.append(lhs.getCode());
+            // code.append("]");
+            // code.append(ollirItemType);
+            // code.append(SPACE);
+            // code.append(ASSIGN);
+            // code.append(ollirItemType);
+            // code.append(SPACE);
+            // code.append(rhs.getCode());
+            // code.append(END_STMT);
 
-            code.append(tmp);
-            code.append("[");
-            code.append(lhs.getCode());
-            code.append("]");
-            code.append(ollirItemType);
-            code.append(SPACE);
-            code.append(ASSIGN);
-            code.append(ollirItemType);
-            code.append(SPACE);
-            code.append(rhs.getCode());
-            code.append(END_STMT);
-
-            return code.toString();
+            // return code.toString();
         }
 
         if (rhs.getComputation().contains(rhs.getCode())) {
             code.append(
-                    rhs.getComputation().replace(rhs.getCode(), lhsName + "[" + lhs.getCode() + "]" + ollirItemType));
+                    rhs.getComputation().replace(rhs.getCode(), tmp + "[" + lhs.getCode() + "]" + ollirItemType));
             return code.toString();
         }
         code.append(rhs.getComputation());
 
         // code to compute self
         // statement has type of lhs
-        code.append(lhsName);
+        code.append(tmp);
         code.append("[");
         code.append(lhs.getCode());
         code.append("]");
