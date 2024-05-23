@@ -175,7 +175,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         if (rhs.getComputation().contains(rhs.getCode())) {
-            code.append(rhs.getComputation().replace(rhs.getCode(), lhsName + "[" + lhs.getCode() + "]"));
+            code.append(
+                    rhs.getComputation().replace(rhs.getCode(), lhsName + "[" + lhs.getCode() + "]" + ollirItemType));
             return code.toString();
         }
         code.append(rhs.getComputation());
