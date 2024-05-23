@@ -198,6 +198,14 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
     private OllirExprResult visitVarRef(JmmNode node, InferType expected) {
 
         var id = node.get("name");
+        // Ver melhor depois
+        if(id.equals("true")){
+            return  new OllirExprResult("1.bool");
+        }
+        if(id.equals("false")){
+            return  new OllirExprResult("0.bool");
+        }
+
         Type type = typeOrExpected(TypeUtils.getExprType(node, table), expected);
         if (type == null)
             return new OllirExprResult(id);

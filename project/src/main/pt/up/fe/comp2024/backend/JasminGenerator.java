@@ -10,6 +10,7 @@ import pt.up.fe.specs.util.exceptions.NotImplementedException;
 import pt.up.fe.specs.util.utilities.StringLines;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -198,11 +199,8 @@ public class JasminGenerator {
         }
 
         code.append(TAB).append(".limit stack ").append(stackMax.getMax()).append(NL);
-        var vars = method.getVarTable().keySet();
-        vars.remove("this");
-        code.append(TAB).append(".limit locals ").append(vars.size() + 1)
+        code.append(TAB).append(".limit locals ").append(method.getVarTable().values().stream().map(Descriptor::getVirtualReg).max(Comparator.naturalOrder()).get()+1)
                 .append(NL);
-        System.out.println(vars);
 
         code.append(codeTemp);
 
