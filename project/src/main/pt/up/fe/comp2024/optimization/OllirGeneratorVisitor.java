@@ -133,14 +133,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(lhs.getComputation());
 
         var isLocalList = table.getLocalVariables(currentMethod).stream().filter(local -> local.getName().equals(
-                node.get(
-                        "name")))
+                lhsName))
                 .toList();
         var isParamList = table.getParameters(currentMethod).stream().filter(param -> param.getName().equals(
-                node.get(
-                        "name")))
+                lhsName))
                 .toList();
-        var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(node.get("name"))).toList();
+        var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(lhsName)).toList();
 
         if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
 
@@ -159,16 +157,29 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append(ollirArrayType);
             code.append(END_STMT);
 
-            lhsName = tmp;
+            code.append(rhs.getComputation());
+            code.append(tmp);
+            code.append("[");
+            code.append(lhs.getCode());
+            code.append("]");
+            code.append(ollirItemType);
+            code.append(SPACE);
+            code.append(ASSIGN);
+            code.append(ollirItemType);
+            code.append(SPACE);
+            code.append(rhs.getCode());
+            code.append(END_STMT);
+
+            return code.toString();
         }
 
+        code.append(rhs.getComputation());
         if (rhs.getComputation().contains(rhs.getCode())) {
             code.append(rhs.getComputation().replace(rhs.getCode(), lhsName + "[" + lhs.getCode() + "]"));
             return code.toString();
         }
         // code to compute self
         // statement has type of lhs
-        code.append(rhs.getComputation());
         code.append(lhsName);
         code.append("[");
         code.append(lhs.getCode());
