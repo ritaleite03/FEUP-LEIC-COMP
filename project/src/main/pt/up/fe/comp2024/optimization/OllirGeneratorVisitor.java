@@ -102,6 +102,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append(rhs.getComputation().replace(rhs.getCode(), lhs + typeString));
             return code.toString();
         }
+        code.append(rhs.getComputation());
         // code to compute self
         // statement has type of lhs
         code.append(lhs);
