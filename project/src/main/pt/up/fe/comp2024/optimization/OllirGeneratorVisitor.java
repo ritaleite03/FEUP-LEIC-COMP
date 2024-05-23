@@ -173,11 +173,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             return code.toString();
         }
 
-        code.append(rhs.getComputation());
         if (rhs.getComputation().contains(rhs.getCode())) {
             code.append(rhs.getComputation().replace(rhs.getCode(), lhsName + "[" + lhs.getCode() + "]"));
             return code.toString();
         }
+        code.append(rhs.getComputation());
+
         // code to compute self
         // statement has type of lhs
         code.append(lhsName);
