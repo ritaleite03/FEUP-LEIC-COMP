@@ -162,13 +162,13 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             lhsName = tmp;
         }
 
-        code.append(rhs.getComputation());
         if (rhs.getComputation().contains(rhs.getCode())) {
             code.append(rhs.getComputation().replace(rhs.getCode(), lhsName + "[" + lhs.getCode() + "]"));
             return code.toString();
         }
         // code to compute self
         // statement has type of lhs
+        code.append(rhs.getComputation());
         code.append(lhsName);
         code.append("[");
         code.append(lhs.getCode());
