@@ -144,6 +144,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
 
             String tmp = OptUtils.getTemp();
+            code.append(rhs.getComputation());
 
             code.append(tmp);
             code.append(ollirArrayType);
@@ -158,7 +159,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append(ollirArrayType);
             code.append(END_STMT);
 
-            code.append(rhs.getComputation());
             code.append(tmp);
             code.append("[");
             code.append(lhs.getCode());
