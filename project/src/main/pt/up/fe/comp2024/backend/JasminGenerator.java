@@ -199,7 +199,9 @@ public class JasminGenerator {
         }
 
         code.append(TAB).append(".limit stack ").append(stackMax.getMax()).append(NL);
-        code.append(TAB).append(".limit locals ").append(method.getVarTable().values().stream().map(Descriptor::getVirtualReg).max(Comparator.naturalOrder()).get()+1)
+        var maxVirtualReg = method.getVarTable().values().stream().mapToInt(Descriptor::getVirtualReg).max();
+        int number = maxVirtualReg.orElse(0); //method.getVarTable().values().stream().map(Descriptor::getVirtualReg).max(Comparator.naturalOrder()).get()
+        code.append(TAB).append(".limit locals ").append(number+1)
                 .append(NL);
 
         code.append(codeTemp);
