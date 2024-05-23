@@ -64,7 +64,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
 
         // code to compute the children
-        code.append(rhs.getComputation());
 
         var isLocalList = table.getLocalVariables(currentMethod).stream().filter(local -> local.getName().equals(
                 lhs))
@@ -76,58 +75,33 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
 
-            String tmp = OptUtils.getTemp();
+            code.append(rhs.getComputation());
 
-            code.append(tmp);
-            code.append(typeString);
-            code.append(SPACE);
-            code.append(ASSIGN);
-            code.append(typeString);
-            code.append(SPACE);
-            code.append(rhs.getCode());
-            code.append(END_STMT);
+            // String tmp = OptUtils.getTemp();
 
+            // code.append(tmp);
+            // code.append(typeString);
+            // code.append(SPACE);
+            // code.append(ASSIGN);
+            // code.append(typeString);
+            // code.append(SPACE);
+            // code.append(rhs.getCode());
+            // code.append(END_STMT);
 
             code.append("putfield(this, ");
             code.append(lhs);
             code.append(typeString);
             code.append(", ");
-            code.append(tmp);
-            code.append(typeString);
+            code.append(rhs.getCode());
+            // code.append(typeString);
             code.append(").V;\n");
             return code.toString();
         }
 
-
-        // see if last line in computation is an assign
-        String[] rhsComputationLines = rhs.getComputation().split("\n");
-        String lastLine = rhsComputationLines[rhsComputationLines.length-1].strip();
-        String[] lastLineRightSide = lastLine.split(":=");
-
-        // if expression on the right is of type binary and is of type int
-        if(node.getJmmChild(0).getKind().equals("BinaryExpr") &&
-                lastLineRightSide.length > 1 &&
-                typeString.equals(".i32")){
-
-            int lastLineIndex = code.lastIndexOf("\n");
-            int lastLastLineIndex = code.lastIndexOf("\n", lastLineIndex - 1);
-
-            if (lastLastLineIndex != -1) {
-                code = new StringBuilder(code.substring(0, lastLastLineIndex) + code.substring(lastLineIndex));
-            } else {
-                code = new StringBuilder();
-            }
-
-            code.append(lhs);
-            code.append(typeString);
-            code.append(SPACE);
-            code.append(ASSIGN);
-            code.append(lastLineRightSide[1]);
-            code.append(NL);
+        if (rhs.getComputation().contains(rhs.getCode())) {
+            code.append(rhs.getComputation().replace(rhs.getCode(), lhs + typeString));
             return code.toString();
         }
-
-
         // code to compute self
         // statement has type of lhs
         code.append(lhs);
@@ -147,29 +121,31 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         String lhsName = node.get("name");
         Type arrayType = TypeUtils.visitVariableReferenceExpression(lhsName, table, node);
         Type itemType = new Type(arrayType.getName(), false);
-        String ollirArrayType= OptUtils.toOllirType(arrayType);
-        String ollirItemType= OptUtils.toOllirType(itemType);
+        String ollirArrayType = OptUtils.toOllirType(arrayType);
+        String ollirItemType = OptUtils.toOllirType(itemType);
 
-        var lhs = exprVisitor.visit(node.getJmmChild(0),new InferType(new Type("int",false)));
+        var lhs = exprVisitor.visit(node.getJmmChild(0), new InferType(new Type("int", false)));
         var rhs = exprVisitor.visit(node.getJmmChild(1), new InferType(itemType));
 
         StringBuilder code = new StringBuilder();
 
         // code to compute the children
         code.append(lhs.getComputation());
-        code.append(rhs.getComputation());
 
         var isLocalList = table.getLocalVariables(currentMethod).stream().filter(local -> local.getName().equals(
-                lhsName))
+                node.get(
+                        "name")))
                 .toList();
         var isParamList = table.getParameters(currentMethod).stream().filter(param -> param.getName().equals(
-                lhsName))
+                node.get(
+                        "name")))
                 .toList();
-        var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(lhsName)).toList();
+        var isFieldList = table.getFields().stream().filter(field -> field.getName().equals(node.get("name"))).toList();
 
         if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
 
             String tmp = OptUtils.getTemp();
+
             code.append(tmp);
             code.append(ollirArrayType);
             code.append(SPACE);
@@ -183,23 +159,14 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append(ollirArrayType);
             code.append(END_STMT);
 
-
-            code.append(tmp);
-            code.append("[");
-            code.append(lhs.getCode());
-            code.append("]");
-            code.append(ollirItemType);
-            code.append(SPACE);
-            code.append(ASSIGN);
-            code.append(ollirItemType);
-            code.append(SPACE);
-            code.append(rhs.getCode());
-            code.append(END_STMT);
-
-
-            return code.toString();
+            lhsName = tmp;
         }
 
+        code.append(rhs.getComputation());
+        if (rhs.getComputation().contains(rhs.getCode())) {
+            code.append(rhs.getComputation().replace(rhs.getCode(), lhsName + "[" + lhs.getCode() + "]"));
+            return code.toString();
+        }
         // code to compute self
         // statement has type of lhs
         code.append(lhsName);
