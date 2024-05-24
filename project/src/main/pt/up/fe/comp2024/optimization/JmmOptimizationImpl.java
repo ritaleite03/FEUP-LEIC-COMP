@@ -149,7 +149,7 @@ public class JmmOptimizationImpl implements JmmOptimization {
                 Map.Entry<String, Descriptor> entry = var1.next();
                 String key = (String) entry.getKey();
                 Descriptor d1 = (Descriptor) entry.getValue();
-                System.out.println("\t\tVar name: " + key + " scope: " + String.valueOf(d1.getScope()) + " virtual register: " + d1.getVirtualReg());
+                //System.out.println("\t\t" + method.getMethodName() + ": Var name: " + key + " scope: " + String.valueOf(d1.getScope()) + " virtual register: " + d1.getVirtualReg());
                 message.append("Var name: ");
                 message.append(key);
                 message.append(" scope: ");
@@ -158,6 +158,8 @@ public class JmmOptimizationImpl implements JmmOptimization {
                 message.append(d1.getVirtualReg());
                 message.append("\n");
             }
+
+            message.append("\n");
 
             ollirResult.getReports().add(Report.newLog(
                     Stage.OPTIMIZATION,

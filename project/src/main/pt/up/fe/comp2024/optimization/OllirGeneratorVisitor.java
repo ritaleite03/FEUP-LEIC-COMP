@@ -26,6 +26,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final String L_BRACKET = " {\n";
     private final String R_BRACKET = "}\n";
 
+    private final String TAB = "    ";
+
     private final SymbolTable table;
 
     private final OllirExprGeneratorVisitor exprVisitor;
@@ -88,6 +90,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             // code.append(rhs.getCode());
             // code.append(END_STMT);
 
+            code.append(TAB);
             code.append("putfield(this, ");
             code.append(lhs);
             code.append(typeString);
@@ -105,6 +108,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(rhs.getComputation());
         // code to compute self
         // statement has type of lhs
+        code.append(TAB);
         code.append(lhs);
         code.append(typeString);
         code.append(SPACE);
@@ -147,7 +151,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
             tmp = OptUtils.getTemp();
             code.append(rhs.getComputation());
-
+            code.append(TAB);
             code.append(tmp);
             code.append(ollirArrayType);
             code.append(SPACE);
@@ -184,6 +188,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // code to compute self
         // statement has type of lhs
+        code.append(TAB);
         code.append(tmp);
         code.append("[");
         code.append(lhs.getCode());
@@ -213,7 +218,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(condLabel);
         code.append(":\n");
         code.append(expression.getComputation());
-
+        code.append(TAB);
         code.append("if");
         code.append(SPACE);
         code.append("(");
@@ -224,6 +229,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(SPACE);
         code.append(loopLabel);
         code.append(END_STMT);
+
+        code.append(TAB);
         code.append("goto");
         code.append(SPACE);
         code.append(endLabel);
@@ -232,6 +239,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(loopLabel);
         code.append(":\n");
         code.append(body);
+        code.append(TAB);
         code.append("goto");
         code.append(SPACE);
         code.append(condLabel);
@@ -254,6 +262,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         StringBuilder code = new StringBuilder();
         code.append(expression.getComputation());
+        code.append(TAB);
         code.append("if");
         code.append(SPACE);
         code.append("(");
@@ -266,6 +275,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(END_STMT);
 
         code.append(ifFalse);
+        code.append(TAB);
         code.append("goto");
         code.append(SPACE);
         code.append(endLabel);
@@ -294,6 +304,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var expression = exprVisitor.visit(node.getJmmChild(0), new InferType(null, false));
 
         // code to compute the children
+        code.append(TAB);
         code.append(expression.getComputation());
         code.append(NL);
         return code.toString();
@@ -311,7 +322,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         if (node.getNumChildren() > 0) {
             expr = exprVisitor.visit(node.getJmmChild(0), new InferType(retType));
         }
-
+        code.append(TAB);
         code.append(expr.getComputation());
         code.append("ret");
         code.append(OptUtils.toOllirType(retType));

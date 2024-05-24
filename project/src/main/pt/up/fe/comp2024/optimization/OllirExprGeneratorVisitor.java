@@ -65,6 +65,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         var tmp = OptUtils.getTemp();
         var code = tmp + "." + name;
         var computation = new StringBuilder();
+        computation.append(TAB);
         computation.append(code);
         computation.append(" :=.");
         computation.append(name);
@@ -72,7 +73,9 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         computation.append(name);
         computation.append(").");
         computation.append(name);
-        computation.append(";\ninvokespecial(");
+        computation.append(";\n");
+        computation.append(TAB);
+        computation.append("invokespecial(");
         computation.append(code);
         computation.append(",\"<init>\").V;\n");
         return new OllirExprResult(code, computation);
@@ -84,6 +87,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         var tmp = OptUtils.getTemp();
         var code = tmp + resOllirType;
         var computation = new StringBuilder();
+        computation.append(TAB);
         computation.append(code);
         computation.append(SPACE);
         computation.append(ASSIGN);
@@ -114,6 +118,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             // computation of left side
             computation.append(lhs.getComputation());
             // see if left side is true
+            computation.append(TAB);
             computation.append("if");
             computation.append(SPACE);
             computation.append("(");
@@ -126,10 +131,12 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             computation.append(initIf);
             computation.append(END_STMT);
             // else is false
+            computation.append(TAB);
             computation.append(code);
             computation.append(SPACE);
             computation.append(":=.bool 0.bool");
             computation.append(END_STMT);
+            computation.append(TAB);
             computation.append("goto");
             computation.append(SPACE);
             computation.append(endIf);
@@ -138,6 +145,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             computation.append(initIf);
             computation.append(":\n");
             computation.append(rhs.getComputation());
+            computation.append(TAB);
             computation.append(code);
             computation.append(SPACE);
             computation.append(ASSIGN);
@@ -162,6 +170,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         String resOllirType = OptUtils.toOllirType(resType);
         String code = OptUtils.getTemp() + resOllirType;
 
+        computation.append(TAB);
         computation.append(code).append(SPACE)
                 .append(ASSIGN).append(resOllirType).append(SPACE)
                 .append(lhs.getCode()).append(SPACE);
@@ -187,6 +196,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         String resOllirType = OptUtils.toOllirType(resType);
         String code = OptUtils.getTemp() + resOllirType;
 
+        computation.append(TAB);
         computation.append(code).append(SPACE)
                 .append(ASSIGN).append(resOllirType).append(SPACE);
 
@@ -221,6 +231,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         if (isLocalList.isEmpty() && isParamList.isEmpty() && !isFieldList.isEmpty()) {
             var code = OptUtils.getTemp() + ollirType;
             var computation = new StringBuilder();
+            computation.append(TAB);
             computation.append(code);
             computation.append(SPACE)
                     .append(ASSIGN)
@@ -260,6 +271,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         var code = OptUtils.getTemp() + ollirType;
         var computation = new StringBuilder();
         computation.append(lhs.getComputation());
+        computation.append(TAB);
         computation.append(code);
         computation.append(SPACE)
                 .append(ASSIGN)
@@ -364,6 +376,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
 
         computation.append(var.getComputation());
         computation.append(pos.getComputation());
+        computation.append(TAB);
         computation.append(code);
         computation.append(SPACE)
                 .append(ASSIGN)
@@ -430,16 +443,19 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
                     var elements = args.subList(paramsSize - 1, argsSize);
                     if (elements.size() == 1 && TypeUtils.getExprType(elements.get(0), table).isArray()) {
                         var computed = visit(elements.get(0));
+                        computation.append(TAB);
                         computedArgs.add(computed);
                         computation.append(computed.getComputation());
                         computation.append("\n");
                     } else {
                         var computed = generateVararg(elements, params.get(i).getType());
+                        computation.append(TAB);
                         computedArgs.add(computed);
                         computation.append(computed.getComputation());
                     }
                 } else {
                     var computed = visit(args.get(i), new InferType(params.get(i).getType()));
+                    computation.append(TAB);
                     computedArgs.add(computed);
                     computation.append(computed.getComputation());
                     computation.append("\n");
@@ -448,6 +464,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         } else {
             for (var arg : args) {
                 var computed = visit(arg);
+                computation.append(TAB);
                 computedArgs.add(computed);
                 computation.append(computed.getComputation());
                 computation.append("\n");
@@ -457,6 +474,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             res = "";
         } else {
             res = OptUtils.getTemp() + OptUtils.toOllirType(type);
+            computation.append(TAB);
             computation.append(res);
             computation.append(SPACE)
                     .append(ASSIGN)
@@ -492,7 +510,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         var computation = new StringBuilder();
 
         String temp = (OptUtils.getTemp() + ollirArrayType);
-
+        computation.append(TAB);
         computation.append(temp);
         computation.append(SPACE)
                 .append(ASSIGN)
@@ -504,6 +522,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
         computation.append(ollirArrayType);
         computation.append(END_STMT);
 
+        computation.append(TAB);
         String array = OptUtils.getTempArray("__varargs_array_");
         String code = (array + ollirArrayType);
         computation.append(code);
@@ -518,6 +537,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
 
         for (var child : nodes) {
             var element = visit(child);
+            computation.append(TAB);
             computation.append(element.getComputation());
             computation.append(code);
             computation.append("[");
