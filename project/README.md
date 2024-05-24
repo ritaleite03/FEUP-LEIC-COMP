@@ -16,6 +16,11 @@
 
 - We think our project deserves a 19.5 out of 20.
 
+## Optimizations
+
+- Register allocation
+- Constant propagation and constant folding
+
 ## Extra Elements
 
 Our project also supports some extra AST optimizations:
