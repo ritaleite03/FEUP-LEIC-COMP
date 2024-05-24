@@ -43,10 +43,11 @@ public class JmmOptimizationImpl implements JmmOptimization {
         if (CompilerConfig.getRegisterAllocation(ollirResult.getConfig()) == -1) {
             return ollirResult;
         }
-        List<Report> reports = ollirResult.getReports();
+
         int n = CompilerConfig.getRegisterAllocation(ollirResult.getConfig());
         ClassUnit classUnit = ollirResult.getOllirClass();
         classUnit.buildCFGs();
+
         for(Method method : classUnit.getMethods()) {
             method.buildVarTable();
             int size = method.getInstructions().size() + 1;
@@ -117,7 +118,7 @@ public class JmmOptimizationImpl implements JmmOptimization {
                     int register = entry.getValue() + method.getParams().size() + (method.isStaticMethod() ? 0 : 1);
                     method.getVarTable().get(entry.getKey()).setVirtualReg(register);
                     if(register > minRegisterNumber){
-                        minRegisterNumber = register;
+                        minRegisterNumber = register + 1;
                     }
                 }
                 String message =  "Minimum number of local variables require for the method " + method.getMethodName() + " is "+minRegisterNumber + ", available " + n;

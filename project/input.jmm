@@ -1,20 +1,20 @@
-import ioPlus;
-import test.popo;
 class ComplexArrayAccess {
-    int[] field1;
-    field1 = [1,2,3,4];
+
+    int a;
 
     public int func(int a) {
         int i;
-        int[] b;
-        field1[0] = a;
-        field1 = b;
-        i = field1[a];
+        int j;
+        i = 2;
+        j = 0;
 
-        return 0;
+        while (j < 4){
+            j = j + 1;
+        }
+
+        i = 3 + a;
+
+        return i;
     }
 
-    public static void main(String[] args) {
-
-    }
 }
