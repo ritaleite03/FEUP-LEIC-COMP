@@ -108,8 +108,8 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             var lhs = visit(node.getJmmChild(0), new InferType(new Type("boolean", false)));
             var rhs = visit(node.getJmmChild(1), new InferType(new Type("boolean", false)));
 
-            String initIf = OptUtils.getNextTempLabel();
-            String endIf = OptUtils.getNextTempLabel();
+            String initIf = "true_" + OptUtils.getNextTempLabel();
+            String endIf = "end_" + OptUtils.getNextTempLabel();
 
             // computation of left side
             computation.append(lhs.getComputation());
@@ -128,7 +128,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             // else is false
             computation.append(code);
             computation.append(SPACE);
-            computation.append(":=.bool false.bool");
+            computation.append(":=.bool 0.bool");
             computation.append(END_STMT);
             computation.append("goto");
             computation.append(SPACE);
@@ -137,6 +137,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             // assign the right side
             computation.append(initIf);
             computation.append(":\n");
+            computation.append(rhs.getComputation());
             computation.append(code);
             computation.append(SPACE);
             computation.append(ASSIGN);
@@ -199,11 +200,11 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
 
         var id = node.get("name");
         // Ver melhor depois
-        if(id.equals("true")){
-            return  new OllirExprResult("1.bool");
+        if (id.equals("true")) {
+            return new OllirExprResult("1.bool");
         }
-        if(id.equals("false")){
-            return  new OllirExprResult("0.bool");
+        if (id.equals("false")) {
+            return new OllirExprResult("0.bool");
         }
 
         Type type = typeOrExpected(TypeUtils.getExprType(node, table), expected);

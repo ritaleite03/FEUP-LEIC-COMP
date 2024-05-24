@@ -1,3 +1,4 @@
+
 class ComplexArrayAccess {
 
     int a;
@@ -17,4 +18,31 @@ class ComplexArrayAccess {
         return i;
     }
 
+    public static void main(String[] args){
+    }
 }
+
+/*
+class A{
+
+    boolean b1(){
+        return true;
+    }
+    boolean b2(){
+        return true;
+    }
+    boolean b3(){
+        return true;
+    }
+    public int testAnd(){
+        int res;
+        if (b1() && b2() && b3()){
+            res = 1;
+        }else{
+            res = 0;
+        }
+
+        return res;
+    }
+}
+*/
