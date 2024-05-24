@@ -19,6 +19,8 @@
 ## Extra Elements
 
 Our project also supports some extra AST optimizations:
+
+
 For a variable `a`:
 - `a` + 0 -> `a`
 - 0 + `a` -> `a`
