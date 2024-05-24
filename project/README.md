@@ -18,5 +18,17 @@
 
 ## Extra Elements
 
-(Optional)
-- Our project supports...
+Our project also supports some extra AST optimizations:
+For a variable `a`:
+- `a` + 0 -> `a`
+- 0 + `a` -> `a`
+- `a` - 0 -> `a`
+- `a` - `a` -> 0
+- `a` * 1 -> `a`
+- 1 * `a` -> `a`
+- `a` / 1 -> `a`
+- `a` / `a` -> 1
+- `a` < `a` -> false
+- `a` && `a` -> `a`
+- true && `a` -> `a`
+- `a` && true -> `a`
