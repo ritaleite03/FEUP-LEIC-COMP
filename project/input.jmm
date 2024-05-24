@@ -1,20 +1,23 @@
-import ioPlus;
-import test.popo;
-class ComplexArrayAccess {
-    int[] field1;
-    field1 = [1,2,3,4];
+class A{
 
-    public int func(int a) {
-        int i;
-        int[] b;
-        field1[0] = a;
-        field1 = b;
-        i = field1[a];
-
-        return 0;
+    boolean b1(){
+        return true;
     }
+    boolean b2(){
+        return true;
+    }
+    boolean b3(){
+        return true;
+    }
+    public int testAnd(){
+        int res;
 
-    public static void main(String[] args) {
+        if (b1() && b2() && b3()){
+            res = 1;
+        }else{
+            res = 0;
+        }
 
+        return res;
     }
 }
