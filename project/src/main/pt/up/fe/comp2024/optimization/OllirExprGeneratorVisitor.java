@@ -128,7 +128,7 @@ public class OllirExprGeneratorVisitor extends AJmmVisitor<InferType, OllirExprR
             // else is false
             computation.append(code);
             computation.append(SPACE);
-            computation.append(":=.bool false.bool");
+            computation.append(":=.bool 0.bool");
             computation.append(END_STMT);
             computation.append("goto");
             computation.append(SPACE);
