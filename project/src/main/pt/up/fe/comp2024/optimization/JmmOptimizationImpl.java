@@ -4,8 +4,11 @@ import org.specs.comp.ollir.*;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.CompilerConfig;
 
+import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.optimization.GraphColoring;
 
 import java.util.*;
@@ -37,11 +40,11 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
     @Override
     public OllirResult optimize(OllirResult ollirResult) {
-
         if (CompilerConfig.getRegisterAllocation(ollirResult.getConfig()) == -1) {
             return ollirResult;
         }
-        int k = CompilerConfig.getRegisterAllocation(ollirResult.getConfig());
+        List<Report> reports = ollirResult.getReports();
+        int n = CompilerConfig.getRegisterAllocation(ollirResult.getConfig());
         ClassUnit classUnit = ollirResult.getOllirClass();
         classUnit.buildCFGs();
         for(Method method : classUnit.getMethods()) {
@@ -49,9 +52,9 @@ public class JmmOptimizationImpl implements JmmOptimization {
             int size = method.getInstructions().size() + 1;
             Node begin = method.getBeginNode();
 
-            System.out.println("\n \n Test \n");
-            method.show();
-            System.out.println("\n \n End \n");
+            //System.out.println("\n \n Test \n");
+            //method.show();
+            //System.out.println("\n \n End \n");
 
             Set<Integer> visit = new HashSet<>();
             List<Set<String>> use = new ArrayList<>();
@@ -65,7 +68,7 @@ public class JmmOptimizationImpl implements JmmOptimization {
                 liveOut.add(new HashSet<>());
             }
             dfs(begin, visit, use, def);
-            //def.get(0).addAll(method.getParams().stream().map(param -> ((Operand) param).getName()).toList());
+
             change = true;
             while (change) {
                 change = false;
@@ -96,25 +99,72 @@ public class JmmOptimizationImpl implements JmmOptimization {
                     }
                 }
             }
-            int lowerRegNum = params.size() + 1;
 
             for (String var : vars) {
                 graphColoring.addColor(var);
             }
-            /*
-            System.out.println("\n Test");
-            System.out.println(def);
-            System.out.println(use);
-            System.out.println(liveIn);
-            System.out.println(liveOut);
-            System.out.println(defJoinLiveOut);
-            System.out.println(graphColoring.getGraphColors());
-            graphColoring.printGraphColoring();
-            System.out.println("end \n");
-            */
-            for (var entry : graphColoring.getGraphColors().entrySet()){
-                method.getVarTable().get(entry.getKey()).setVirtualReg(entry.getValue() + method.getParams().size()+(method.isStaticMethod() ? 0 : 1));
+
+            if(n == 0) {
+
+                for (var entry : graphColoring.getGraphColors().entrySet()) {
+                    method.getVarTable().get(entry.getKey()).setVirtualReg(entry.getValue() + method.getParams().size() + (method.isStaticMethod() ? 0 : 1));
+                }
+
             }
+            else if (n >= 1){
+                int minRegisterNumber = method.getParams().size() + (method.isStaticMethod() ? 0 : 1);
+                for (var entry : graphColoring.getGraphColors().entrySet()) {
+                    int register = entry.getValue() + method.getParams().size() + (method.isStaticMethod() ? 0 : 1);
+                    method.getVarTable().get(entry.getKey()).setVirtualReg(register);
+                    if(register > minRegisterNumber){
+                        minRegisterNumber = register;
+                    }
+                }
+                String message =  "Minimum number of local variables require for the method " + method.getMethodName() + " is "+minRegisterNumber + ", available " + n;
+
+                if(minRegisterNumber > n){
+                    System.out.println("\n \n" + message + "\n \n");
+                    Report report = Report.newError(
+                            Stage.OPTIMIZATION,
+                            -1,
+                            -1,
+                            message,
+                            null);
+                    ollirResult.getReports().add(report);
+                    return ollirResult;
+                }
+            }
+
+            HashMap<String, Descriptor> varTable = method.getVarTable();
+            StringBuilder message = new StringBuilder();
+
+            var var1 = varTable.entrySet().iterator();
+
+            message.append("Method name:");
+            message.append(method.getMethodName());
+            message.append("\n");
+
+            while(var1.hasNext()) {
+                Map.Entry<String, Descriptor> entry = var1.next();
+                String key = (String) entry.getKey();
+                Descriptor d1 = (Descriptor) entry.getValue();
+                System.out.println("\t\tVar name: " + key + " scope: " + String.valueOf(d1.getScope()) + " virtual register: " + d1.getVirtualReg());
+                message.append("Var name: ");
+                message.append(key);
+                message.append(" scope: ");
+                message.append(String.valueOf(d1.getScope()));
+                message.append(" virtual register: ");
+                message.append(d1.getVirtualReg());
+                message.append("\n");
+            }
+
+            ollirResult.getReports().add(Report.newLog(
+                    Stage.OPTIMIZATION,
+                    -1,
+                    -1,
+                    message.toString(),
+                    null));
+
         }
 
         return ollirResult;

@@ -49,13 +49,17 @@ public class Launcher {
         System.out.println(semanticsResult.getRootNode().toTree());
         System.out.println("====END=======================");
         // System.exit(0);
+
         OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
         TestUtils.noErrors(ollirResult.getReports());
+        ollirResult = ollirGen.optimize(ollirResult);
 
         System.out.println("====OLIR======================");
         // Print OLLIR code
         System.out.println(ollirResult.getOllirCode());
+        TestUtils.noErrors(ollirResult.getReports());
         System.out.println("====END=======================");
+
 
         // Code generation stage
         JasminBackendImpl jasminGen = new JasminBackendImpl();
