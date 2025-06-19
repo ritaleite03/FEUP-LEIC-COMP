@@ -1,0 +1,17 @@
+CompileAssignment extends Object {
+
+
+.method public static main(args.array.String).V {
+ret.V ;
+}
+
+.method public foo().i32 {
+b.i32 :=.i32 2.i32;
+a.i32 :=.i32 b.i32;
+ret.i32 0.i32;
+}
+
+.construct CompileAssignment().V {
+invokespecial(this, "").V;
+}
+}

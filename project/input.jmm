@@ -1,0 +1,48 @@
+
+class ComplexArrayAccess {
+
+    int a;
+
+    public int func(int a) {
+        int i;
+        int j;
+        i = 2;
+        j = 0;
+
+        while (j < 4){
+            j = j + 1;
+        }
+
+        i = 3 + a;
+
+        return i;
+    }
+
+    public static void main(String[] args){
+    }
+}
+
+/*
+class A{
+
+    boolean b1(){
+        return true;
+    }
+    boolean b2(){
+        return true;
+    }
+    boolean b3(){
+        return true;
+    }
+    public int testAnd(){
+        int res;
+        if (b1() && b2() && b3()){
+            res = 1;
+        }else{
+            res = 0;
+        }
+
+        return res;
+    }
+}
+*/
